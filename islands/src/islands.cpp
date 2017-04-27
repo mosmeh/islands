@@ -125,6 +125,7 @@ int main() {
 		throw;
 	}
 
+#ifdef _DEBUG
 	glad_set_post_callback([](const char* name, void*, int, ...) {
 		const GLenum errorCode = glad_glGetError();
 		if (errorCode == GL_NO_ERROR) {
@@ -153,6 +154,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 #undef GL_STACK_UNDERFLOW
 #undef LOG_GL_ERROR
 	});
+#endif
 
 	printGLInfo();
 
