@@ -32,11 +32,11 @@ Mesh::Mesh(const aiMesh* mesh, const aiMaterial* material) :
 		}
 	}
 
-	for (unsigned int face_i = 0; face_i < mesh->mNumFaces; ++face_i) {
-		const auto face = mesh->mFaces[face_i];
+	for (unsigned int iFace = 0; iFace < mesh->mNumFaces; ++iFace) {
+		const auto face = mesh->mFaces[iFace];
 		assert(face.mNumIndices == 3);
-		for (unsigned int index_i = 0; index_i < face.mNumIndices; ++index_i) {
-			indices_[3 * face_i + index_i] = face.mIndices[index_i];
+		for (unsigned int iIndex = 0; iIndex < face.mNumIndices; ++iIndex) {
+			indices_[3 * iFace + iIndex] = face.mIndices[iIndex];
 		}
 	}
 
@@ -116,12 +116,12 @@ void Mesh::uploadImpl() {
 
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, normalBuffer_);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 	if (hasUV_) {
 		glEnableVertexAttribArray(2);
 		glBindBuffer(GL_ARRAY_BUFFER, uvBuffer_);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 	}
 
 	glBindVertexArray(0);
