@@ -4,6 +4,8 @@
 #include "PhysicalBody.h"
 #include "Log.h"
 
+namespace islands {
+
 class Profiler {
 public:
 	Profiler() :
@@ -91,13 +93,15 @@ void printGLInfo() {
 #undef GL_PRINT_INTEGER
 }
 
-// 画面サイズが2のべき乗でないときうまく動かない
 void saveScreenShot(GLFWwindow* window) {
 	const int numComponents = 3;
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
 	size_t size = numComponents * width * height;
 
+	// TODO: 次を調べる
+	// 画面サイズが2のべき乗でないときうまく動かない
+	// size だけ確保するとアクセス違反を起こす
 	const auto pixels = std::make_unique<char[]>(size * 2);
 	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels.get());
 	for (int y = 0; y < height / 2; ++y) {
@@ -126,6 +130,8 @@ void saveScreenShot(GLFWwindow* window) {
 		<< width << " " << height << std::endl
 		<< 255 << std::endl;
 	ofs.write(pixels.get(), size);
+}
+
 }
 
 int main() {
