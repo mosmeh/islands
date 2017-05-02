@@ -14,12 +14,12 @@ public:
 	static ResourceSystem& getInstance();
 	void pushToLoadQueue(std::shared_ptr<Resource> resource);
 
-	template <class Real, class... Args>
-	std::enable_if_t<std::is_base_of<Resource, Real>::value, std::shared_ptr<Real>>
-	create(const std::string& name, Args... args);
+	template <class T, class... Args>
+	std::enable_if_t<std::is_base_of<Resource, T>::value, std::shared_ptr<T>>
+	createOrGet(const std::string& name, Args... args);
 
-	template <class Real>
-	std::enable_if_t<std::is_base_of<Resource, Real>::value, std::shared_ptr<Real>>
+	template <class T>
+	std::enable_if_t<std::is_base_of<Resource, T>::value, std::shared_ptr<T>>
 	get(const std::string& name) const;
 
 	void setDefaultProgram(const std::string& name);
@@ -39,22 +39,22 @@ private:
 	void consumeLoadQueue();
 };
 
-template<class Real, class... Args>
-inline std::enable_if_t<std::is_base_of<Resource, Real>::value, std::shared_ptr<Real>>
-ResourceSystem::create(const std::string& name, Args... args) {
+template<class T, class... Args>
+inline std::enable_if_t<std::is_base_of<Resource, T>::value, std::shared_ptr<T>>
+ResourceSystem::createOrGet(const std::string& name, Args... args) {
 	if (resources_.find(name) == resources_.end()) {
-		const auto resource = std::make_shared<Real>(name, std::forward<Args>(args)...);
+		const auto resource = std::make_shared<T>(name, std::forward<Args>(args)...);
 		resources_.emplace(name, resource);
 		return resource;
 	} else {
-		return get<Real>(name);
+		return get<T>(name);
 	}
 }
 
-template<class Real>
-inline std::enable_if_t<std::is_base_of<Resource, Real>::value, std::shared_ptr<Real>>
+template<class T>
+inline std::enable_if_t<std::is_base_of<Resource, T>::value, std::shared_ptr<T>>
 ResourceSystem::get(const std::string& name) const {
-	return std::dynamic_pointer_cast<Real>(resources_.at(name));
+	return std::dynamic_pointer_cast<T>(resources_.at(name));
 }
 
 }

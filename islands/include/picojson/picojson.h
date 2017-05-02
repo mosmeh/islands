@@ -164,12 +164,12 @@ public:
   value &operator=(value &&x) throw();
 #endif
   void swap(value &x) throw();
-  template <typename Real> bool is() const;
-  template <typename Real> const Real &get() const;
-  template <typename Real> Real &get();
-  template <typename Real> void set(const Real &);
+  template <typename T> bool is() const;
+  template <typename T> const T &get() const;
+  template <typename T> T &get();
+  template <typename T> void set(const T &);
 #if PICOJSON_USE_RVALUE_REFERENCE
-  template <typename Real> void set(Real &&);
+  template <typename T> void set(T &&);
 #endif
   bool evaluate_as_boolean() const;
   const value &get(const size_t idx) const;
@@ -184,7 +184,7 @@ public:
   std::string serialize(bool prettify = false) const;
 
 private:
-  template <typename Real> value(const Real *); // intentionally defined to block implicit conversion of pointer to bool
+  template <typename T> value(const T *); // intentionally defined to block implicit conversion of pointer to bool
   template <typename Iter> static void _indent(Iter os, int indent);
   template <typename Iter> void _serialize(Iter os, int indent) const;
   std::string _serialize(int indent) const;
@@ -1096,8 +1096,8 @@ inline std::string parse(value &out, std::istream &is) {
   return err;
 }
 
-template <typename Real> struct last_error_t { static std::string s; };
-template <typename Real> std::string last_error_t<Real>::s;
+template <typename T> struct last_error_t { static std::string s; };
+template <typename T> std::string last_error_t<T>::s;
 
 inline void set_last_error(const std::string &s) {
   last_error_t<bool>::s = s;

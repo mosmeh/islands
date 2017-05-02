@@ -29,12 +29,12 @@ public:
 
 	void attachComponent(std::shared_ptr<Component> component);
 
-	template <class Real>
-	std::enable_if_t<std::is_base_of<Component, Real>::value, bool>
+	template <class T>
+	std::enable_if_t<std::is_base_of<Component, T>::value, bool>
 	hasComponent() const;
 
-	template <class Real>
-	std::enable_if_t<std::is_base_of<Component, Real>::value, std::shared_ptr<Real>>
+	template <class T>
+	std::enable_if_t<std::is_base_of<Component, T>::value, std::shared_ptr<T>>
 	getComponent() const;
 
 private:
@@ -49,22 +49,22 @@ private:
 	void updateModelMatrix();
 };
 
-template<class Real>
-inline std::enable_if_t<std::is_base_of<Component, Real>::value, bool>
+template<class T>
+inline std::enable_if_t<std::is_base_of<Component, T>::value, bool>
 Entity::hasComponent() const {
 	for (const auto c : components_) {
-		if (const auto t = std::dynamic_pointer_cast<Real>(c)) {
+		if (const auto t = std::dynamic_pointer_cast<T>(c)) {
 			return true;
 		}
 	}
 	return false;
 }
 
-template<class Real>
-inline std::enable_if_t<std::is_base_of<Component, Real>::value, std::shared_ptr<Real>>
+template<class T>
+inline std::enable_if_t<std::is_base_of<Component, T>::value, std::shared_ptr<T>>
 Entity::getComponent() const {
 	for (const auto c : components_) {
-		if (const auto t = std::dynamic_pointer_cast<Real>(c)) {
+		if (const auto t = std::dynamic_pointer_cast<T>(c)) {
 			return t;
 		}
 	}
