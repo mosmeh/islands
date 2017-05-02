@@ -26,6 +26,14 @@ std::shared_ptr<Program> ResourceSystem::getDefaultProgram() const {
 	return defaultProgram_;
 }
 
+void ResourceSystem::setDefaultSkinningProgram(const std::string& name) {
+	defaultSkinningProgram_ = get<Program>(name);
+}
+
+std::shared_ptr<Program> ResourceSystem::getDefaultSkinningProgram() const {
+	return defaultSkinningProgram_;
+}
+
 void ResourceSystem::pushToLoadQueue(std::shared_ptr<Resource> resource) {
 	assert(resource->getStatus() == Resource::State::UNLOADED);
 	resource->setStatus(Resource::State::LOADING);

@@ -263,6 +263,9 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	ResourceSystem::getInstance().createOrGet<Program>("DefaultProgram", "default.vert", "default.frag");
 	ResourceSystem::getInstance().setDefaultProgram("DefaultProgram");
 
+	ResourceSystem::getInstance().createOrGet<Program>("DefaultSkinningProgram", "skinning.vert", "default.frag");
+	ResourceSystem::getInstance().setDefaultSkinningProgram("DefaultSkinningProgram");
+
 	const auto chunk = std::make_shared<Chunk>("chunk", "forest1.json");
 	const auto body = chunk->getEntity("Player")->getComponent<PhysicalBody>();
 

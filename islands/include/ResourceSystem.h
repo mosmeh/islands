@@ -24,10 +24,12 @@ public:
 
 	void setDefaultProgram(const std::string& name);
 	std::shared_ptr<Program> getDefaultProgram() const;
+	void setDefaultSkinningProgram(const std::string& name);
+	std::shared_ptr<Program> getDefaultSkinningProgram() const;
 
 private:
 	std::unordered_map<std::string, std::shared_ptr<Resource>> resources_;
-	std::shared_ptr<Program> defaultProgram_;
+	std::shared_ptr<Program> defaultProgram_, defaultSkinningProgram_;
 
 	std::queue<std::shared_ptr<Resource>> loadQueue_;
 	std::mutex loadQueueMutex_;

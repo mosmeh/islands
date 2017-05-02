@@ -15,10 +15,12 @@ const std::vector<std::shared_ptr<Mesh>>& Model::getMeshes() const {
 
 void Model::loadImpl() {
 	static Assimp::Importer importer;
+	importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 4);
 	importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
 	const auto scene = importer.ReadFile(filename_,
-		aiProcess_Triangulate |	aiProcess_GenNormals | aiProcess_ImproveCacheLocality |
-		aiProcess_JoinIdenticalVertices | aiProcess_OptimizeMeshes | aiProcess_RemoveComponent);
+		aiProcess_GenNormals | aiProcess_ImproveCacheLocality | aiProcess_JoinIdenticalVertices |
+		aiProcess_LimitBoneWeights | aiProcess_OptimizeMeshes | aiProcess_RemoveComponent |
+		aiProcess_Triangulate);
 	if (!scene) {
 		SLOG << "Assimp: " << importer.GetErrorString() << std::endl;
 		throw;
@@ -27,7 +29,14 @@ void Model::loadImpl() {
 	assert(scene->HasMaterials());
 	for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
 		const auto mesh = scene->mMeshes[i];
-		meshes_.emplace_back(std::make_shared<Mesh>(mesh, scene->mMaterials[mesh->mMaterialIndex]));
+		const auto material = scene->mMaterials[mesh->mMaterialIndex];
+		if (mesh->HasBones()) {
+			assert(scene->HasAnimations());
+			meshes_.emplace_back(std::make_shared<SkinnedMesh>(
+				mesh, material, scene->mRootNode, scene->mAnimations[0]));
+		} else {
+			meshes_.emplace_back(std::make_shared<Mesh>(mesh, material));
+		}
 	}
 	importer.FreeScene();
 }
@@ -40,12 +49,23 @@ ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
 
 void ModelDrawer::draw() {
 	if (visible_) {
+		std::stringstream ss;
 		for (const auto mesh : model_->getMeshes()) {
 			mesh->getMaterial()->setLightmapTexture(lightmap_);
 			const auto program = mesh->getMaterial()->getProgram();
 			program->use();
 			program->setUniform("MVP",
 				SceneManager::getInstance().getProjectionViewMatrix() *	getEntity().getModelMatrix());
+
+			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
+				skinned->applyBoneTransform(float(glfwGetTime()));
+
+				for (size_t i = 0; i < skinned->getNumBones(); ++i) {
+					ss.str("");
+					ss << "bones[" << i << "]";
+					program->setUniform(ss.str().c_str(), skinned->getBoneTransform(i));
+				}
+			}
 			mesh->draw();
 		}
 	}

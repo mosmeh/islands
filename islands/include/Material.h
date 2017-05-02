@@ -20,6 +20,8 @@ public:
 	void use() const;
 
 	void setLightmapTexture(std::shared_ptr<Texture2D> texture);
+
+	void setProgram(std::shared_ptr<Program> program);
 	std::shared_ptr<Program> getProgram() const;
 
 private:
