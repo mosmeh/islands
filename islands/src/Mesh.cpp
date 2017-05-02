@@ -160,7 +160,6 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 
 	assert(mesh->HasBones());
 
-	assert(ResourceSystem::getInstance().getDefaultSkinningProgram());
 	getMaterial()->setProgram(ResourceSystem::getInstance().getDefaultSkinningProgram());
 
 	boneIDs_ = std::make_unique<unsigned int[][NUM_BONES_PER_VERTEX]>(numVertices_);
@@ -196,6 +195,13 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 		}
 	}
 	rootNode_ = constructNodeTree(root, animation);
+}
+
+SkinnedMesh::~SkinnedMesh() {
+	if (isUploaded()) {
+		glDeleteBuffers(1, &boneIDBuffer_);
+		glDeleteBuffers(1, &weightBuffer_);
+	}
 }
 
 void SkinnedMesh::setTicksPerSecond(float tps) {

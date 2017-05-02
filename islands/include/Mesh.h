@@ -50,7 +50,7 @@ constexpr size_t NUM_BONES_PER_VERTEX = 4;
 class SkinnedMesh : public Mesh {
 public:
 	SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const aiNode* root, const aiAnimation* animation);
-	virtual ~SkinnedMesh() = default;
+	virtual ~SkinnedMesh();
 
 	void setTicksPerSecond(float tps);
 	void applyBoneTransform(float time_s);
