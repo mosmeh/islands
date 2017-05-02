@@ -17,7 +17,7 @@ Material::Material(const std::string& name, const aiMaterial* material) :
 		material->GetTexture(aiTextureType_DIFFUSE, 0, &path);
 
 		diffuseTextures_.emplace_back(
-			ResourceSystem::getInstance().create<Texture2D>(path.C_Str(), path.C_Str()));
+			ResourceSystem::getInstance().createOrGet<Texture2D>(path.C_Str(), path.C_Str()));
 	}
 }
 

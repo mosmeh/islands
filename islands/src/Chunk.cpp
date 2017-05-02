@@ -48,7 +48,7 @@ Chunk::Chunk(const std::string& name, const std::string& filename) :
 			const auto& modelProp = properties.at("model").get<picojson::object>();
 
 			const auto& meshName = modelProp.at("mesh").get<std::string>();
-			const auto model = ResourceSystem::getInstance().create<Model>(meshName, meshName + ".obj");
+			const auto model = ResourceSystem::getInstance().createOrGet<Model>(meshName, meshName);
 			const auto drawer = std::make_shared<ModelDrawer>(model);
 
 			if (modelProp.find("visible") != modelProp.end()) {
@@ -60,7 +60,7 @@ Chunk::Chunk(const std::string& name, const std::string& filename) :
 			if (modelProp.find("receive_shadow") != modelProp.end()) {
 				drawer->setReceiveShadow(modelProp.at("receive_shadow").get<bool>());
 			}
-			drawer->setLightmapTexture(ResourceSystem::getInstance().create<Texture2D>(
+			drawer->setLightmapTexture(ResourceSystem::getInstance().createOrGet<Texture2D>(
 				entity->getName() + "-baked", entity->getName() + "-baked.png"));
 
 			entity->attachComponent(drawer);

@@ -52,8 +52,8 @@ void Shader::uploadImpl() {
 
 Program::Program(const std::string& name, const std::string& vertex, const std::string& fragment) :
 	Resource(name),
-	vertex_(ResourceSystem::getInstance().create<Shader>(vertex, vertex.c_str(), GL_VERTEX_SHADER)),
-	fragment_(ResourceSystem::getInstance().create<Shader>(fragment, fragment.c_str(), GL_FRAGMENT_SHADER)) {}
+	vertex_(ResourceSystem::getInstance().createOrGet<Shader>(vertex, vertex.c_str(), GL_VERTEX_SHADER)),
+	fragment_(ResourceSystem::getInstance().createOrGet<Shader>(fragment, fragment.c_str(), GL_FRAGMENT_SHADER)) {}
 
 Program::~Program() {
 	if (isUploaded()) {

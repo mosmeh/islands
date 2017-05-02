@@ -260,7 +260,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	SceneManager::getInstance().setCameraPosition({-15.f, -15.f, 15});
 	SceneManager::getInstance().lookAt({0, 0, 0});
 
-	ResourceSystem::getInstance().create<Program>("DefaultProgram", "default.vert", "default.frag");
+	ResourceSystem::getInstance().createOrGet<Program>("DefaultProgram", "default.vert", "default.frag");
 	ResourceSystem::getInstance().setDefaultProgram("DefaultProgram");
 
 	const auto chunk = std::make_shared<Chunk>("chunk", "forest1.json");
