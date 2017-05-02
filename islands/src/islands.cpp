@@ -91,8 +91,50 @@ void printGLInfo() {
 #undef GL_PRINT_INTEGER
 }
 
+// 画面サイズが2のべき乗でないときうまく動かない
+void saveScreenShot(GLFWwindow* window) {
+	const int numComponents = 3;
+	int width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+	size_t size = numComponents * width * height;
+
+	const auto pixels = std::make_unique<char[]>(size * 2);
+	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels.get());
+	for (int y = 0; y < height / 2; ++y) {
+		// swap_ranges を使うと unsafe だと怒られる
+		for (int x = 0; x < width * numComponents; ++x) {
+			std::swap(pixels[x + y * width * numComponents],
+				pixels[x + (height - y - 1) * width * numComponents]);
+		}
+	}
+
+	time_t t;
+	std::time(&t);
+#ifdef _MSC_VER
+	struct tm time;
+	localtime_s(&time, &t);
+#else
+	const auto time = *std::localtime(&t);
+#endif
+
+	char buf[32];
+	strftime(buf, sizeof(buf), "screenshot%Y%m%d%I%M%S.pbm", &time);
+
+	SLOG << "Screen shot: Saving to " << buf << std::endl;
+	std::ofstream ofs(buf, std::ios::binary);
+	ofs << "P6" << std::endl
+		<< width << " " << height << std::endl
+		<< 255 << std::endl;
+	ofs.write(pixels.get(), size);
+}
+
 int main() {
 	using namespace islands;
+
+	glfwSetErrorCallback([](int code, const char* msg) {
+		SLOG << "GLFW: " << code << " " << msg << std::endl;
+		throw;
+	});
 
 	SLOG << "GLFW: Initializing" << std::endl;
 	if (!glfwInit()) {
@@ -103,17 +145,14 @@ int main() {
 		SLOG << "GLFW: Terminating" << std::endl;
 		glfwTerminate();
 	});
-
-	glfwSetErrorCallback([](int code, const char* msg) {
-		SLOG << "GLFW: " << code << " " << msg << std::endl;
-		throw;
-	});
 	
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
+#ifdef _DEBUG
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif
 
 	SLOG << "GLFW: Creating window" << std::endl;
 	const auto window = glfwCreateWindow(1280, 720, "test", nullptr, nullptr);
@@ -182,6 +221,11 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		case GLFW_KEY_ESCAPE:
 			if (action == GLFW_PRESS) {
 				glfwSetWindowShouldClose(window, true);
+			}
+			break;
+		case GLFW_KEY_PRINT_SCREEN:
+			if (action == GLFW_PRESS) {
+				saveScreenShot(window);
 			}
 			break;
 		/*case GLFW_KEY_K:
