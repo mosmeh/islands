@@ -234,7 +234,7 @@ void SkinnedMesh::uploadImpl() {
 	boneData_.reset();
 
 	glEnableVertexAttribArray(SkinningLocation::BONE);
-	glVertexAttribIPointer(SkinningLocation::BONE, NUM_BONES_PER_VERTEX, GL_INT,
+	glVertexAttribIPointer(SkinningLocation::BONE, NUM_BONES_PER_VERTEX, GL_UNSIGNED_INT,
 		sizeof(BoneDataPerVertex), nullptr);
 
 	glEnableVertexAttribArray(SkinningLocation::WEIGHT);

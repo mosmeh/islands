@@ -91,7 +91,7 @@ private:
 
 	struct BoneDataPerVertex {
 		unsigned int boneIDs[NUM_BONES_PER_VERTEX];
-		float weights[NUM_BONES_PER_VERTEX];
+		float weights[NUM_BONES_PER_VERTEX] = {};
 	};
 
 	enum SkinningLocation : GLuint {
