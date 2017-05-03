@@ -102,7 +102,7 @@ void saveScreenShot(GLFWwindow* window) {
 	// TODO: 次を調べる
 	// 画面サイズが2のべき乗でないときうまく動かない
 	// size だけ確保するとアクセス違反を起こす
-	const auto pixels = std::make_unique<char[]>(size * 2);
+	const auto pixels = std::make_unique<char[]>(4 * width * height);
 	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels.get());
 	for (int y = 0; y < height / 2; ++y) {
 		// swap_ranges を使うと unsafe だと怒られる
