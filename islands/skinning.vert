@@ -1,8 +1,10 @@
 #version 330 core
 
+#define NUM_MAX_BONES 128
+
 uniform mat4 MVP;
 uniform vec4 diffuse;
-uniform mat4 bones[100];
+uniform mat4 bones[NUM_MAX_BONES];
 
 layout(location = 0) in vec3 pos;
 layout(location = 1) in vec3 in_normal;
@@ -15,10 +17,11 @@ out vec3 normal;
 out vec4 diffuseColor;
 
 void main() {
-    mat4 boneTransform = bones[boneIDs[0]] * weights[0]
-        + bones[boneIDs[1]] * weights[1]
-        + bones[boneIDs[2]] * weights[2]
-        + bones[boneIDs[3]] * weights[3];
+    mat4 boneTransform =
+        bones[boneIDs[0]] * weights[0] +
+        bones[boneIDs[1]] * weights[1] +
+        bones[boneIDs[2]] * weights[2] +
+        bones[boneIDs[3]] * weights[3];
 
     gl_Position = MVP * boneTransform * vec4(pos, 1);
     uv = in_uv;
