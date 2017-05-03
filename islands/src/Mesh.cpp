@@ -3,6 +3,8 @@
 #include "Mesh.h"
 #include "ResourceSystem.h"
 
+#define FOREACH(var, ary, num) for (auto var = ary; var < ary + num; ++var)
+
 namespace islands {
 
 Mesh::Mesh(const aiMesh* mesh, const aiMaterial* material) :
@@ -33,11 +35,11 @@ Mesh::Mesh(const aiMesh* mesh, const aiMaterial* material) :
 		}
 	}
 
-	for (unsigned int iFace = 0; iFace < mesh->mNumFaces; ++iFace) {
-		const auto face = mesh->mFaces[iFace];
-		assert(face.mNumIndices == 3);
-		for (unsigned int iIndex = 0; iIndex < face.mNumIndices; ++iIndex) {
-			indices_[3 * iFace + iIndex] = face.mIndices[iIndex];
+	size_t idx = 0;
+	FOREACH (face, mesh->mFaces, mesh->mNumFaces) {
+		assert(face->mNumIndices == 3);
+		FOREACH (index, face->mIndices, face->mNumIndices) {
+			indices_[idx++] = *index;
 		}
 	}
 
@@ -91,12 +93,16 @@ void Mesh::uploadImpl() {
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
 	glBufferData(GL_ARRAY_BUFFER, numVertices_ * sizeof(glm::vec3),
 		vertices_.get(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(Location::POSITION);
+	glVertexAttribPointer(Location::POSITION, glm::vec3::length(), GL_FLOAT, GL_FALSE, 0, nullptr);
 
 	glGenBuffers(1, &normalBuffer_);
 	glBindBuffer(GL_ARRAY_BUFFER, normalBuffer_);
 	glBufferData(GL_ARRAY_BUFFER, numVertices_ * sizeof(glm::vec3),
 		normals_.get(), GL_STATIC_DRAW);
 	normals_.reset();
+	glEnableVertexAttribArray(Location::NORMAL);
+	glVertexAttribPointer(Location::NORMAL, glm::vec3::length(), GL_FLOAT, GL_FALSE, 0, nullptr);
 
 	if (hasUV_) {
 		glGenBuffers(1, &uvBuffer_);
@@ -104,26 +110,14 @@ void Mesh::uploadImpl() {
 		glBufferData(GL_ARRAY_BUFFER, numVertices_ * sizeof(glm::vec2),
 			uvs_.get(), GL_STATIC_DRAW);
 		uvs_.reset();
+		glEnableVertexAttribArray(Location::UV);
+		glVertexAttribPointer(Location::UV, glm::vec2::length(), GL_FLOAT, GL_FALSE, 0, nullptr);
 	}
 
 	glGenBuffers(1, &indexBuffer_);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer_);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices_ * sizeof(unsigned int),
 		indices_.get(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, normalBuffer_);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	if (hasUV_) {
-		glEnableVertexAttribArray(2);
-		glBindBuffer(GL_ARRAY_BUFFER, uvBuffer_);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-	}
 
 	glBindVertexArray(0);
 }
@@ -132,7 +126,7 @@ glm::mat4 aiMatrix4ToGlmMat4(const aiMatrix4x4& mat) {
 	glm::mat4 ret;
 	for (size_t i = 0; i < 4; ++i) {
 		for (size_t j = 0; j < 4; ++j) {
-			ret[i][j] = mat[i][j];
+			ret[i][j] = mat[j][i];
 		}
 	}
 	return ret;
@@ -146,14 +140,18 @@ glm::quat aiQuaternionToGlmQuat(const aiQuaternion& quat) {
 	return{quat.w, quat.x, quat.y, quat.z};
 }
 
-void p(const aiNode* n) {
-	std::cout << n->mName.C_Str() << std::endl;
-	for (size_t i = 0; i < n->mNumChildren; ++i) {
-		p(n->mChildren[i]);
+void printNodes(const aiNode* node, unsigned int depth) {
+	for (unsigned int i = 0; i < depth; ++i) {
+		std::cout << "  ";
+	}
+	std::cout << node->mName.C_Str() << std::endl;
+	for (size_t i = 0; i < node->mNumChildren; ++i) {
+		printNodes(node->mChildren[i], depth + 1);
 	}
 }
 
-SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const aiNode* root, const aiAnimation* animation) :
+SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const aiNode* root,
+	const aiAnimation* animation) :
 	Mesh(mesh, material),
 	ticksPerSecond_(float(animation->mTicksPerSecond == 0 ? 24.f : animation->mTicksPerSecond)),
 	duration_(float(animation->mDuration)) {
@@ -162,45 +160,48 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 
 	getMaterial()->setProgram(ResourceSystem::getInstance().getDefaultSkinningProgram());
 
-	boneIDs_ = std::make_unique<unsigned int[][NUM_BONES_PER_VERTEX]>(numVertices_);
-	weights_ = std::make_unique<float[][NUM_BONES_PER_VERTEX]>(numVertices_);
+	assert(numVertices_ > 0);
+	boneData_ = std::make_unique<BoneDataPerVertex[]>(numVertices_);
 
+	std::cout << "[" << getName() << "]" << std::endl;
 	std::cout << "bones:" << std::endl;
-	for (size_t iBone = 0; iBone < mesh->mNumBones; ++iBone) {
-		std::cout << mesh->mBones[iBone]->mName.C_Str() << std::endl;
+	FOREACH (bone, mesh->mBones, mesh->mNumBones) {
+		std::cout << "  " << (*bone)->mName.C_Str() << std::endl;
 	}
 	std::cout << "channels: " << std::endl;
-	for (size_t i = 0; i < animation->mNumChannels; ++i) {
-		std::cout << animation->mChannels[i]->mNodeName.C_Str() << std::endl;
+	FOREACH (channel, animation->mChannels, animation->mNumChannels) {
+		std::cout << "  " << (*channel)->mNodeName.C_Str() << std::endl;
 	}
 	std::cout << "nodes:" << std::endl;
-	p(root);
+	printNodes(root, 0);
 
+	std::unordered_map<std::string, std::shared_ptr<Bone>> nameToBone;
 	const auto numAddedBones = std::make_unique<size_t[]>(numVertices_);
-	for (size_t iBone = 0; iBone < mesh->mNumBones; ++iBone) {
-		const auto bone = mesh->mBones[iBone];
+	for (size_t i = 0; i < mesh->mNumBones; ++i) {
+		const auto bone = mesh->mBones[i];
 
 		const auto b = std::make_shared<Bone>();
 		b->offset = aiMatrix4ToGlmMat4(bone->mOffsetMatrix);
 		bones_.emplace_back(b);
-		nameToBone_.emplace(bone->mName.C_Str(), b);
+		nameToBone.emplace(bone->mName.C_Str(), b);
 
-		for (size_t iWeight = 0; iWeight < bone->mNumWeights; ++iWeight) {
-			const auto& weight = bone->mWeights[iWeight];
-			auto& num = numAddedBones[weight.mVertexId];
+		FOREACH (weight, bone->mWeights, bone->mNumWeights) {
+			auto& num = numAddedBones[weight->mVertexId];
+			assert(num < NUM_BONES_PER_VERTEX);
 
-			boneIDs_[weight.mVertexId][num] = iBone;
-			weights_[weight.mVertexId][num] = weight.mWeight;
+			boneData_[weight->mVertexId].boneIDs[num] = i;
+			boneData_[weight->mVertexId].weights[num] = weight->mWeight;
 			++num;
 		}
 	}
-	rootNode_ = constructNodeTree(root, animation);
+	assert(bones_.size() <= NUM_MAX_BONES);
+	rootNode_ = constructNodeTree(root, animation, nameToBone);
+	globalInverse_ = glm::inverse(rootNode_->transform);
 }
 
 SkinnedMesh::~SkinnedMesh() {
 	if (isUploaded()) {
-		glDeleteBuffers(1, &boneIDBuffer_);
-		glDeleteBuffers(1, &weightBuffer_);
+		glDeleteBuffers(1, &boneBuffer_);
 	}
 }
 
@@ -214,7 +215,7 @@ void SkinnedMesh::applyBoneTransform(float time_s) {
 }
 
 const glm::mat4& SkinnedMesh::getBoneTransform(size_t index) const {
-	return bones_.at(index)->globalTransform;
+	return bones_.at(index)->transform;
 }
 
 const size_t SkinnedMesh::getNumBones() const {
@@ -226,139 +227,79 @@ void SkinnedMesh::uploadImpl() {
 
 	glBindVertexArray(vertexArray_);
 
-	glGenBuffers(1, &boneIDBuffer_);
-	glBindBuffer(GL_ARRAY_BUFFER, boneIDBuffer_);
-	glBufferData(GL_ARRAY_BUFFER, numVertices_ * sizeof(unsigned int[NUM_BONES_PER_VERTEX]),
-		boneIDs_.get(), GL_STATIC_DRAW);
-	boneIDs_.reset();
+	glGenBuffers(1, &boneBuffer_);
+	glBindBuffer(GL_ARRAY_BUFFER, boneBuffer_);
+	glBufferData(GL_ARRAY_BUFFER, numVertices_ * sizeof(BoneDataPerVertex),
+		boneData_.get(), GL_STATIC_DRAW);
+	boneData_.reset();
 
-	glGenBuffers(1, &weightBuffer_);
-	glBindBuffer(GL_ARRAY_BUFFER, weightBuffer_);
-	glBufferData(GL_ARRAY_BUFFER, numVertices_ * sizeof(float[NUM_BONES_PER_VERTEX]),
-		weights_.get(), GL_STATIC_DRAW);
-	weights_.reset();
+	glEnableVertexAttribArray(SkinningLocation::BONE);
+	glVertexAttribIPointer(SkinningLocation::BONE, NUM_BONES_PER_VERTEX, GL_INT,
+		sizeof(BoneDataPerVertex), nullptr);
 
-	glEnableVertexAttribArray(3);
-	glBindBuffer(GL_ARRAY_BUFFER, boneIDBuffer_);
-	glVertexAttribPointer(3, 4, GL_UNSIGNED_INT, GL_FALSE, 0, nullptr);
-
-	glEnableVertexAttribArray(4);
-	glBindBuffer(GL_ARRAY_BUFFER, weightBuffer_);
-	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+	glEnableVertexAttribArray(SkinningLocation::WEIGHT);
+	glVertexAttribPointer(SkinningLocation::WEIGHT, NUM_BONES_PER_VERTEX, GL_FLOAT, GL_FALSE,
+		sizeof(BoneDataPerVertex), reinterpret_cast<GLvoid*>(sizeof(float) * NUM_BONES_PER_VERTEX));
 
 	glBindVertexArray(0);
 }
 
-std::shared_ptr<SkinnedMesh::Node> SkinnedMesh::constructNodeTree(const aiNode* aNode, const aiAnimation* animation) {
+std::shared_ptr<SkinnedMesh::Node> SkinnedMesh::constructNodeTree(const aiNode* aNode,
+	const aiAnimation* animation,
+	const std::unordered_map<std::string, std::shared_ptr<Bone>>& nameToBone) {
+
 	const auto node = std::make_shared<Node>();
-	nameToNode_.emplace(aNode->mName.C_Str(), node.get());
 
 	const auto name = aNode->mName.C_Str();
-	if (nameToBone_.find(name) != nameToBone_.end()) {
-		node->bone = nameToBone_.at(name);
+	if (nameToBone.find(name) != nameToBone.end()) {
+		node->bone = nameToBone.at(name);
 	}
-	node->globalTransform = aiMatrix4ToGlmMat4(aNode->mTransformation);
+	node->transform = aiMatrix4ToGlmMat4(aNode->mTransformation);
 
-	for (size_t iChannel = 0; iChannel < animation->mNumChannels; ++iChannel) {
-		const auto channel = animation->mChannels[iChannel];
-		if (channel->mNodeName == aNode->mName) {
-			for (size_t iPos = 0; iPos < channel->mNumPositionKeys; ++iPos) {
-				const auto posKey = channel->mPositionKeys[iPos];
+	FOREACH (pChannel, animation->mChannels, animation->mNumChannels) {
+		const auto& channel = **pChannel;
+		if (channel.mNodeName == aNode->mName) {
+			node->hasKeys = true;
+			FOREACH (key, channel.mPositionKeys, channel.mNumPositionKeys) {
 				node->positionKeys.emplace_back(
-					float(posKey.mTime), aiVector3DToGlmVec3(posKey.mValue));
+					float(key->mTime), aiVector3DToGlmVec3(key->mValue));
 			}
-			for (size_t iScale = 0; iScale < channel->mNumScalingKeys; ++iScale) {
-				const auto scaleKey = channel->mScalingKeys[iScale];
+			FOREACH (key, channel.mScalingKeys, channel.mNumScalingKeys) {
 				node->scaleKeys.emplace_back(
-					float(scaleKey.mTime), aiVector3DToGlmVec3(scaleKey.mValue));
+					float(key->mTime), aiVector3DToGlmVec3(key->mValue));
 			}
-			for (size_t iRot = 0; iRot < channel->mNumRotationKeys; ++iRot) {
-				const auto rotKey = channel->mRotationKeys[iRot];
+			FOREACH (key, channel.mRotationKeys, channel.mNumRotationKeys) {
 				node->rotationKeys.emplace_back(
-					float(rotKey.mTime), aiQuaternionToGlmQuat(rotKey.mValue));
+					float(key->mTime), aiQuaternionToGlmQuat(key->mValue));
 			}
 			break;
 		}
 	}
 
-	for (size_t i = 0; i < aNode->mNumChildren; ++i) {
-		node->children.emplace_back(constructNodeTree(aNode->mChildren[i], animation));
+	FOREACH (child, aNode->mChildren, aNode->mNumChildren) {
+		node->children.emplace_back(constructNodeTree(*child, animation, nameToBone));
 	}
 
 	return node;
 }
 
 void SkinnedMesh::processNodeTree(float time, std::shared_ptr<Node> node, const glm::mat4& parentTranform) {
-	if (node->bone) {
-		const auto& pos = calcInterpolatedPosition(time, node);
-		const auto& scale = calcInterpolatedScale(time, node);
-		const auto& rotation = calcInterpolatedRotation(time, node);
-		const auto local = glm::scale(
+	auto local = node->transform;
+	if (node->hasKeys) {
+		const auto& pos = getValueAt(time, node->positionKeys);
+		const auto& scale = getValueAt(time, node->scaleKeys);
+		const auto& rotation = getValueAt(time, node->rotationKeys);
+		local = glm::scale(
 			glm::translate(glm::mat4(1.f), pos) * glm::mat4_cast(rotation), scale);
-
-		const auto global = parentTranform * local * node->bone->offset;
-		node->bone->globalTransform = global;
-
-		for (const auto child : node->children) {
-			processNodeTree(time, child, global);
-		}
-	} else {
-		for (const auto child : node->children) {
-			processNodeTree(time, child, glm::mat4(1.f));
-		}
 	}
-}
-
-glm::vec3 SkinnedMesh::calcInterpolatedPosition(float time, std::shared_ptr<Node> node) const {
-	if (node->positionKeys.size() == 1) {
-		return node->positionKeys.front().value;
-	}
-            
-	Key<glm::vec3> startKey, endKey;
-	for (size_t i = 0; i < node->positionKeys.size() - 1; ++i) {
-		if (time < node->positionKeys.at(i).time) {
-			endKey = node->positionKeys.at(i + 1);
-			startKey = node->positionKeys.at(i);
-		}
-	}
-	const float delta = endKey.time - startKey.time;
-	const float factor = (time - startKey.time / delta);
-	return startKey.value + factor * (endKey.value - startKey.value);
-}
-
-glm::vec3 SkinnedMesh::calcInterpolatedScale(float time, std::shared_ptr<Node> node) const {
-	if (node->scaleKeys.size() == 1) {
-		return node->scaleKeys.front().value;
+	const auto global = parentTranform * local;
+	if (node->bone) {
+		node->bone->transform = globalInverse_ * global * node->bone->offset;
 	}
 
-	Key<glm::vec3> startKey, endKey;
-	for (size_t i = 0; i < node->scaleKeys.size() - 1; ++i) {
-		if (time < node->scaleKeys.at(i).time) {
-			endKey = node->scaleKeys.at(i + 1);
-			startKey = node->scaleKeys.at(i);
-		}
+	for (const auto child : node->children) {
+		processNodeTree(time, child, global);
 	}
-	const float delta = endKey.time - startKey.time;
-	const float factor = (time - startKey.time / delta);
-	return startKey.value + factor * (endKey.value - startKey.value);
-}
-
-glm::quat SkinnedMesh::calcInterpolatedRotation(float time, std::shared_ptr<Node> node) const {
-	if (node->rotationKeys.size() == 1) {
-		return node->rotationKeys.front().value;
-	}
-    
-	Key<glm::quat> startKey, endKey;
-	for (size_t i = 0; i < node->rotationKeys.size() - 1; ++i) {
-		if (time < node->rotationKeys.at(i).time) {
-			endKey = node->rotationKeys.at(i + 1);
-			startKey = node->rotationKeys.at(i);
-		}
-	}
-	const auto delta = endKey.time - startKey.time;
-	const auto factor = (time - startKey.time / delta);
-
-	return glm::normalize(glm::slerp(startKey.value, endKey.value, factor));
 }
 
 }
