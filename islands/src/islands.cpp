@@ -4,6 +4,10 @@
 #include "PhysicalBody.h"
 #include "Log.h"
 
+#ifdef _WIN32
+#include <VersionHelpers.h>
+#endif
+
 namespace islands {
 
 class Profiler {
@@ -62,7 +66,49 @@ private:
 	std::unordered_map<std::string, Sample> samples_;
 };
 
-void printGLInfo() {
+#ifdef _WIN32
+std::string getWindowsVersionString() {
+	std::string str;
+
+	if (IsWindowsVersionOrGreater(10, 0, 0)) {
+		str = "Windows 10";
+	} else if (IsWindows8Point1OrGreater()) {
+		str = "Windows 8.1";
+	} else if (IsWindows8OrGreater()) {
+		str = "Windows 8";
+	} else if (IsWindows7SP1OrGreater()) {
+		str = "Windows 7 SP1";
+	} else if (IsWindows7OrGreater()) {
+		str = "Windows 7";
+	} else if (IsWindowsVistaSP2OrGreater()) {
+		str = "Windows Vista SP2";
+	} else if (IsWindowsVistaSP1OrGreater()) {
+		str = "Windows Vista SP1";
+	} else if (IsWindowsXPSP3OrGreater()) {
+		str = "Windows XP SP3";
+	} else if (IsWindowsXPSP2OrGreater()) {
+		str = "Windows XP SP2";
+	} else if (IsWindowsXPSP1OrGreater()) {
+		str = "Windows XP SP1";
+	} else if (IsWindowsXPOrGreater()) {
+		str = "Windows XP";
+	} else {
+		str = "Unknown";
+	}
+
+	if (IsWindowsServer()) {
+		str += " Server";
+	}
+
+	return str;
+}
+#endif
+
+void printSystemInformation() {
+#ifdef _WIN32
+	SLOG << "OS: " << getWindowsVersionString() << std::endl;
+#endif
+
 #define GL_PRINT_STRING(name) SLOG << #name << ": " << glGetString(name) << std::endl;
 
 	GL_PRINT_STRING(GL_VENDOR);
@@ -201,7 +247,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	});
 #endif
 
-	printGLInfo();
+	printSystemInformation();
 
 	glfwSetWindowAspectRatio(window, 16, 9);
 	glfwSwapInterval(1);

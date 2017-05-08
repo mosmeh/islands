@@ -277,6 +277,9 @@
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\Texture.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="app.manifest" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
