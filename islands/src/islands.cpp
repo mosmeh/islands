@@ -342,6 +342,15 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		}
 		body->setVelocity(v);
 
+		const auto u = glm::normalize(glm::vec3(v.xy, 0));
+		if (glm::length(u) > glm::epsilon<float>()) {
+			if (glm::dot(u, glm::vec3(-1.f, 0, 0)) < 1.f - glm::epsilon<float>()) {
+				entity->setQuaternion(glm::rotation(glm::vec3(1.f, 0, 0), u));
+			} else {
+				entity->setQuaternion(glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1.f)));
+			}
+		}
+
 		chunk->update();
 		SceneManager::getInstance().lookAt(entity->getPosition());
 		profiler.leaveSection("update");
