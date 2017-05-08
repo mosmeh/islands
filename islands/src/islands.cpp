@@ -6,6 +6,8 @@
 
 #ifdef _WIN32
 #include <VersionHelpers.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <glfw3native.h>
 #endif
 
 namespace islands {
@@ -248,6 +250,10 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 #endif
 
 	printSystemInformation();
+
+#ifdef _WIN32
+	ImmAssociateContext(glfwGetWin32Window(window), NULL);
+#endif
 
 	glfwSetWindowAspectRatio(window, 16, 9);
 	glfwSwapInterval(1);
