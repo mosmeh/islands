@@ -23,10 +23,10 @@ public:
 
 private:
 	enum class State {
-		UNLOADED,
-		LOADING,
-		LOADED,
-		UPLOADED
+		Unloaded,
+		Loading,
+		Loaded,
+		Uploaded
 	};
 
 	const std::string name_;

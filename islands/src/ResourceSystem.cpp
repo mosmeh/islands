@@ -51,9 +51,9 @@ void ResourceSystem::consumeLoadQueue() {
 		loadQueue_.pop();
 		loadQueueMutex_.unlock();
 
-		assert(resource->getStatus() == Resource::State::LOADING);
+		assert(resource->getStatus() == Resource::State::Loading);
 		resource->loadImpl();
-		resource->setStatus(Resource::State::LOADED);
+		resource->setStatus(Resource::State::Loaded);
 	}
 }
 
