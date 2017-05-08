@@ -17,7 +17,8 @@ public:
 	const glm::mat4& getProjectionViewMatrix() const;
 
 private:
-	glm::mat4 proj_, view_, projView_;
+	const glm::mat4 PROJECTION;
+	glm::mat4 view_, projView_;
 	glm::vec3 cameraPos_, targetPos_;
 
 	SceneManager();

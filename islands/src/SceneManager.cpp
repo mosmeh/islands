@@ -3,7 +3,7 @@
 namespace islands {
 
 SceneManager::SceneManager() :
-	proj_(glm::perspective(glm::quarter_pi<float>(), 16.f / 9, 0.1f, 100.f)) {}
+	PROJECTION(glm::perspective(glm::quarter_pi<float>(), 16.f / 9, 0.1f, 100.f)) {}
 
 SceneManager& SceneManager::getInstance() {
 	static SceneManager instance;
@@ -21,7 +21,7 @@ void SceneManager::lookAt(const glm::vec3& position) {
 }
 
 const glm::mat4& SceneManager::getProjectionMatrix() const {
-	return proj_;
+	return PROJECTION;
 }
 
 const glm::mat4& SceneManager::getViewMatrix() const {
@@ -34,7 +34,7 @@ const glm::mat4& SceneManager::getProjectionViewMatrix() const {
 
 void SceneManager::updateProjectionViewMatrix() {
 	view_ = glm::lookAt(cameraPos_, targetPos_, glm::vec3(0, 0, 1));
-	projView_ = proj_ * view_;
+	projView_ = PROJECTION * view_;
 }
 
 }
