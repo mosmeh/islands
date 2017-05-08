@@ -16,7 +16,8 @@ const std::string& Resource::getName() const {
 }
 
 void Resource::loadAsync() {
-	if (status_ == State::UNLOADED) {
+	auto unloaded = State::UNLOADED;
+	if (status_.compare_exchange_strong(unloaded, State::LOADING)) {
 		SLOG << "Loading " << getName() << std::endl;
 		ResourceSystem::getInstance().pushToLoadQueue(shared_from_this());
 	}

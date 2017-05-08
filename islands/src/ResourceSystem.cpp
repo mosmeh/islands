@@ -35,9 +35,6 @@ std::shared_ptr<Program> ResourceSystem::getDefaultSkinningProgram() const {
 }
 
 void ResourceSystem::pushToLoadQueue(std::shared_ptr<Resource> resource) {
-	assert(resource->getStatus() == Resource::State::UNLOADED);
-	resource->setStatus(Resource::State::LOADING);
-
 	loadQueueMutex_.lock();
 	loadQueue_.push(resource);
 	loadQueueMutex_.unlock();
@@ -51,10 +48,10 @@ void ResourceSystem::consumeLoadQueue() {
 			continue;
 		}
 		const auto resource = loadQueue_.front();
-		assert(resource->getStatus() == Resource::State::LOADING);
 		loadQueue_.pop();
 		loadQueueMutex_.unlock();
 
+		assert(resource->getStatus() == Resource::State::LOADING);
 		resource->loadImpl();
 		resource->setStatus(Resource::State::LOADED);
 	}

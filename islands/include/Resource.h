@@ -30,7 +30,7 @@ private:
 	};
 
 	const std::string name_;
-	State status_;
+	std::atomic<State> status_;
 
 	State getStatus() const;
 	void setStatus(State status);
