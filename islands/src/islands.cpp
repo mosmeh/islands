@@ -253,12 +253,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 			pos.z -= 1.f;
 			break;*/
 		}
-		//SceneManager::getInstance().setCameraPosition(pos);
 	});
-
-	//SceneManager::getInstance().setCameraPosition(glm::vec3(30.f));
-	SceneManager::getInstance().setCameraPosition({-15.f, -15.f, 15});
-	SceneManager::getInstance().lookAt({0, 0, 0});
 
 	ResourceSystem::getInstance().createOrGet<Program>("DefaultProgram", "default.vert", "default.frag");
 	ResourceSystem::getInstance().setDefaultProgram("DefaultProgram");
@@ -267,7 +262,8 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	ResourceSystem::getInstance().setDefaultSkinningProgram("DefaultSkinningProgram");
 
 	const auto chunk = std::make_shared<Chunk>("chunk", "forest1.json");
-	const auto body = chunk->getEntity("Player")->getComponent<PhysicalBody>();
+	const auto entity = chunk->getEntity("Player");
+	const auto body = entity->getComponent<PhysicalBody>();
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
 
@@ -295,6 +291,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		body->setVelocity(v);
 
 		chunk->update();
+		SceneManager::getInstance().lookAt(entity->getPosition());
 		profiler.leaveSection("update");
 
 		profiler.enterSection("draw");

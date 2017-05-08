@@ -3,16 +3,12 @@
 namespace islands {
 
 SceneManager::SceneManager() :
-	PROJECTION(glm::perspective(glm::quarter_pi<float>(), 16.f / 9, 0.1f, 100.f)) {}
+	PROJECTION(glm::perspective(glm::quarter_pi<float>(), 16.f / 9, 0.1f, 100.f)),
+	CAMERA_OFFSET(15.f * glm::vec3(-1.f, -1.f, 1.f)) {}
 
 SceneManager& SceneManager::getInstance() {
 	static SceneManager instance;
 	return instance;
-}
-
-void SceneManager::setCameraPosition(const glm::vec3& position) {
-	cameraPos_ = position;
-	updateProjectionViewMatrix();
 }
 
 void SceneManager::lookAt(const glm::vec3& position) {
@@ -33,7 +29,7 @@ const glm::mat4& SceneManager::getProjectionViewMatrix() const {
 }
 
 void SceneManager::updateProjectionViewMatrix() {
-	view_ = glm::lookAt(cameraPos_, targetPos_, glm::vec3(0, 0, 1));
+	view_ = glm::lookAt(targetPos_ + CAMERA_OFFSET, targetPos_, glm::vec3(0, 0, 1));
 	projView_ = PROJECTION * view_;
 }
 
