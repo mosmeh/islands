@@ -118,6 +118,13 @@ std::string getWindowsVersionString() {
 void printSystemInformation() {
 #ifdef _WIN32
 	SLOG << "OS: " << getWindowsVersionString() << std::endl;
+
+	MEMORYSTATUSEX stat;
+	stat.dwLength = sizeof(stat);
+	if (GlobalMemoryStatusEx(&stat)) {
+		SLOG << "Available physical memory: " << stat.ullAvailPhys << " / "
+			<< stat.ullTotalPhys << "bytes" << std::endl;
+	}
 #endif
 
 #define GL_PRINT_STRING(name) SLOG << #name << ": " << glGetString(name) << std::endl;
