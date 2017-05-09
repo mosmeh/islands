@@ -102,6 +102,15 @@ std::string getWindowsVersionString() {
 		str += " Server";
 	}
 
+	BOOL isWow64Process;
+	if (IsWow64Process(GetCurrentProcess(), &isWow64Process)) {
+		if (isWow64Process) {
+			str += " 64bit";
+		} else {
+			str += " 32bit";
+		}
+	}
+
 	return str;
 }
 #endif
