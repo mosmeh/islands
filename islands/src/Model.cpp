@@ -33,7 +33,7 @@ void Model::loadImpl() {
 		if (mesh->HasBones()) {
 			assert(scene->HasAnimations());
 			meshes_.emplace_back(std::make_shared<SkinnedMesh>(
-				mesh, material, scene->mRootNode, scene->mAnimations[0]));
+				mesh, material, scene->mRootNode, scene->mAnimations, scene->mNumAnimations));
 		} else {
 			meshes_.emplace_back(std::make_shared<Mesh>(mesh, material));
 		}
@@ -45,9 +45,13 @@ ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
 	model_(model),
 	visible_(true),
 	castShadow_(true),
-	receiveShadow_(true) {}
+	receiveShadow_(true),
+	animPlaying_(false),
+	animStartTime_(0.f) {}
 
 void ModelDrawer::draw() {
+	upload();
+
 	if (visible_) {
 		std::stringstream ss;
 		for (const auto mesh : model_->getMeshes()) {
@@ -57,13 +61,15 @@ void ModelDrawer::draw() {
 			program->setUniform("MVP",
 				SceneManager::getInstance().getProjectionViewMatrix() *	getEntity().getModelMatrix());
 
-			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
-				skinned->applyBoneTransform(float(glfwGetTime()));
+			if (animPlaying_) {
+				if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
+					skinned->applyBoneTransform(float(glfwGetTime()) - animStartTime_);
 
-				for (size_t i = 0; i < skinned->getNumBones(); ++i) {
-					ss.str("");
-					ss << "bones[" << i << "]";
-					program->setUniform(ss.str().c_str(), skinned->getBoneTransform(i));
+					for (size_t i = 0; i < skinned->getNumBones(); ++i) {
+						ss.str("");
+						ss << "bones[" << i << "]";
+						program->setUniform(ss.str().c_str(), skinned->getBoneTransform(i));
+					}
 				}
 			}
 			mesh->draw();
@@ -89,6 +95,21 @@ void ModelDrawer::setReceiveShadow(bool receiveShadow) {
 
 void ModelDrawer::setLightmapTexture(std::shared_ptr<Texture2D> texture) {
 	lightmap_ = texture;
+}
+
+void ModelDrawer::startAnimation(const std::string& name) {
+	waitUntilLoaded();
+	for (const auto mesh : model_->getMeshes()) {
+		if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
+			skinned->playAnimation(name);
+		}
+	}
+	animPlaying_ = true;
+	animStartTime_ = float(glfwGetTime());
+}
+
+void ModelDrawer::stopAnimation() {
+	animPlaying_ = false;
 }
 
 void ModelDrawer::loadImpl() {

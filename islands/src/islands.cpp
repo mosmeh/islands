@@ -332,6 +332,8 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	const auto chunk = std::make_shared<Chunk>("chunk", "forest1.json");
 	const auto entity = chunk->getEntity("Player");
 	const auto body = entity->getComponent<PhysicalBody>();
+	const auto drawer = entity->getComponent<ModelDrawer>();
+	drawer->startAnimation("Armature|Attack");
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
 

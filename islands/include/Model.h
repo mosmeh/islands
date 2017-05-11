@@ -41,10 +41,15 @@ public:
 	void setReceiveShadow(bool receiveShadow);
 	void setLightmapTexture(std::shared_ptr<Texture2D> texture);
 
+	void startAnimation(const std::string& name);
+	void stopAnimation();
+
 private:
 	std::shared_ptr<Model> model_;
 	bool visible_, castShadow_, receiveShadow_;
 	std::shared_ptr<Texture2D> lightmap_;
+	bool animPlaying_;
+	float animStartTime_;
 
 	void loadImpl() override;
 };

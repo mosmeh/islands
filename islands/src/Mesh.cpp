@@ -151,10 +151,9 @@ void printNodes(const aiNode* node, unsigned int depth) {
 }
 
 SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const aiNode* root,
-	const aiAnimation* animation) :
+	aiAnimation** animations, size_t numAnimations) :
 	Mesh(mesh, material),
-	ticksPerSecond_(float(animation->mTicksPerSecond == 0 ? 24.f : animation->mTicksPerSecond)),
-	duration_(float(animation->mDuration)) {
+	playingAnim_(nullptr) {
 
 	assert(mesh->HasBones());
 
@@ -167,10 +166,6 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 	std::cout << "bones:" << std::endl;
 	FOREACH (bone, mesh->mBones, mesh->mNumBones) {
 		std::cout << "  " << (*bone)->mName.C_Str() << std::endl;
-	}
-	std::cout << "channels: " << std::endl;
-	FOREACH (channel, animation->mChannels, animation->mNumChannels) {
-		std::cout << "  " << (*channel)->mNodeName.C_Str() << std::endl;
 	}
 	std::cout << "nodes:" << std::endl;
 	printNodes(root, 0);
@@ -195,8 +190,18 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 		}
 	}
 	assert(bones_.size() <= NUM_MAX_BONES);
-	rootNode_ = constructNodeTree(root, animation, nameToBone);
-	globalInverse_ = glm::inverse(rootNode_->transform);
+
+	for (unsigned int i = 0; i < numAnimations; ++i) {
+		const auto animation = animations[i];
+		const auto anim = std::make_shared <Animation>();
+		anim->ticksPerSecond = float(animation->mTicksPerSecond == 0 ?
+			24.f : animation->mTicksPerSecond);
+		anim->duration = float(animation->mDuration);
+		anim->rootNode = constructNodeTree(root, animation, nameToBone);
+		animations_.emplace(animation->mName.C_Str(), anim);
+		std::cout << animation->mName.C_Str() << std::endl;
+	}
+	globalInverse_ = glm::inverse(animations_.begin()->second->rootNode->transform);
 }
 
 SkinnedMesh::~SkinnedMesh() {
@@ -205,13 +210,15 @@ SkinnedMesh::~SkinnedMesh() {
 	}
 }
 
-void SkinnedMesh::setTicksPerSecond(float tps) {
-	ticksPerSecond_ = tps;
+void SkinnedMesh::playAnimation(const std::string& name) {
+	assert(animations_.find(name) != animations_.end());
+	playingAnim_ = animations_.at(name);
 }
 
 void SkinnedMesh::applyBoneTransform(float time_s) {
-	const auto time = std::fmod(time_s * ticksPerSecond_, duration_);
-	processNodeTree(time, rootNode_, glm::mat4(1.f));
+	assert(playingAnim_);
+	const auto time = std::fmod(time_s * playingAnim_->ticksPerSecond, playingAnim_->duration);
+	processNodeTree(time, playingAnim_->rootNode, glm::mat4(1.f));
 }
 
 const glm::mat4& SkinnedMesh::getBoneTransform(size_t index) const {

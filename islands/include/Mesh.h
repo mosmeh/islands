@@ -54,10 +54,10 @@ private:
 
 class SkinnedMesh : public Mesh {
 public:
-	SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const aiNode* root, const aiAnimation* animation);
+	SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const aiNode* root, aiAnimation** animations, size_t numAnimations);
 	virtual ~SkinnedMesh();
 
-	void setTicksPerSecond(float tps);
+	void playAnimation(const std::string& name);
 	void applyBoneTransform(float time_s);
 	const glm::mat4& getBoneTransform(size_t index) const;
 	const size_t getNumBones() const;
@@ -99,13 +99,18 @@ private:
 		WEIGHT = 4
 	};
 
-	float ticksPerSecond_;
-	const float duration_;
+	struct Animation {
+		float ticksPerSecond;
+		float duration;
+		std::shared_ptr<Node> rootNode;
 
+		Animation() = default;
+	};
+
+	std::unordered_map<std::string, std::shared_ptr<Animation>> animations_;
+	std::shared_ptr<Animation> playingAnim_;
 	glm::mat4 globalInverse_;
-
 	std::vector<std::shared_ptr<Bone>> bones_;
-	std::shared_ptr<Node> rootNode_;
 
 	GLuint boneBuffer_;
 	std::unique_ptr<BoneDataPerVertex[]> boneData_;
