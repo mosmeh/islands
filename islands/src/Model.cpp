@@ -2,6 +2,7 @@
 #include "Entity.h"
 #include "SceneManager.h"
 #include "Log.h"
+#include "NameGenerator.h"
 
 namespace islands {
 
@@ -42,6 +43,7 @@ void Model::loadImpl() {
 }
 
 ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
+	Resource(NameGenerator::generate("ModelDrawer")),
 	model_(model),
 	visible_(true),
 	castShadow_(true),
@@ -50,12 +52,13 @@ ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
 	animStartTime_(0.f) {}
 
 void ModelDrawer::draw() {
-	upload();
-
 	if (visible_) {
 		std::stringstream ss;
 		for (const auto mesh : model_->getMeshes()) {
-			mesh->getMaterial()->setLightmapTexture(lightmap_);
+			if (lightmap_) {
+				mesh->getMaterial()->setLightmapTexture(lightmap_);
+			}
+
 			const auto program = mesh->getMaterial()->getProgram();
 			program->use();
 			program->setUniform("MVP",

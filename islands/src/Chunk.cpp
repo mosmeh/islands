@@ -60,8 +60,11 @@ Chunk::Chunk(const std::string& name, const std::string& filename) :
 			if (modelProp.find("receive_shadow") != modelProp.end()) {
 				drawer->setReceiveShadow(modelProp.at("receive_shadow").get<bool>());
 			}
-			drawer->setLightmapTexture(ResourceSystem::getInstance().createOrGet<Texture2D>(
-				entity->getName() + "-baked", entity->getName() + "-baked.png"));
+			if (modelProp.find("lightmap") != modelProp.end()) {
+				const auto& lightmapName = modelProp.at("lightmap").get<std::string>();
+				drawer->setLightmapTexture(ResourceSystem::getInstance().createOrGet<Texture2D>(
+					lightmapName, lightmapName));
+			}
 
 			entity->attachComponent(drawer);
 

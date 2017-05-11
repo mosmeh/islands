@@ -26,10 +26,12 @@ public:
 	std::shared_ptr<Program> getDefaultProgram() const;
 	void setDefaultSkinningProgram(const std::string& name);
 	std::shared_ptr<Program> getDefaultSkinningProgram() const;
+	void setLightmapProgram(const std::string& name);
+	std::shared_ptr<Program> getLightmapProgram() const;
 
 private:
 	std::unordered_map<std::string, std::shared_ptr<Resource>> resources_;
-	std::shared_ptr<Program> defaultProgram_, defaultSkinningProgram_;
+	std::shared_ptr<Program> defaultProgram_, defaultSkinningProgram_, lightmapProgram_;
 
 	std::queue<std::shared_ptr<Resource>> loadQueue_;
 	std::mutex loadQueueMutex_;
@@ -56,6 +58,7 @@ ResourceSystem::createOrGet(const std::string& name, Args... args) {
 template<class T>
 inline std::enable_if_t<std::is_base_of<Resource, T>::value, std::shared_ptr<T>>
 ResourceSystem::get(const std::string& name) const {
+	assert(resources_.find(name) != resources_.end());
 	return std::dynamic_pointer_cast<T>(resources_.at(name));
 }
 

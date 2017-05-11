@@ -211,11 +211,15 @@ SkinnedMesh::~SkinnedMesh() {
 }
 
 void SkinnedMesh::playAnimation(const std::string& name) {
+	waitUntilLoaded();
+
 	assert(animations_.find(name) != animations_.end());
 	playingAnim_ = animations_.at(name);
 }
 
 void SkinnedMesh::applyBoneTransform(float time_s) {
+	waitUntilLoaded();
+
 	assert(playingAnim_);
 	const auto time = std::fmod(time_s * playingAnim_->ticksPerSecond, playingAnim_->duration);
 	processNodeTree(time, playingAnim_->rootNode, glm::mat4(1.f));

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ResourceSystem.h"
+#include "Log.h"
 
 namespace islands {
 
@@ -32,6 +33,14 @@ void ResourceSystem::setDefaultSkinningProgram(const std::string& name) {
 
 std::shared_ptr<Program> ResourceSystem::getDefaultSkinningProgram() const {
 	return defaultSkinningProgram_;
+}
+
+void ResourceSystem::setLightmapProgram(const std::string& name) {
+	lightmapProgram_ = get<Program>(name);
+}
+
+std::shared_ptr<Program> ResourceSystem::getLightmapProgram() const {
+	return lightmapProgram_;
 }
 
 void ResourceSystem::pushToLoadQueue(std::shared_ptr<Resource> resource) {
