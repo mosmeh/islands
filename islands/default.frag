@@ -6,5 +6,5 @@ in vec4 diffuseColor;
 out vec3 color;
 
 void main() {
-    color = diffuseColor.rgb;
+    color = pow(diffuseColor.rgb, 0.4545 * vec3(1, 1, 1));
 }
