@@ -19,7 +19,8 @@ public:
 	void setVelocity(const glm::vec3& velocity);
 	void addVelocity(const glm::vec3& velocity);
 	const glm::vec3& getVelocity() const;
-	void advanceTime() const;
+	void stepForward() const;
+	void stepBackward() const;
 	void applyImpulse(const glm::vec3& impulse);
 
 private:

@@ -34,8 +34,12 @@ const glm::vec3& PhysicalBody::getVelocity() const {
 	return velocity_;
 }
 
-void PhysicalBody::advanceTime() const {
+void PhysicalBody::stepForward() const {
 	getEntity().setPosition(getEntity().getPosition() + velocity_);
+}
+
+void PhysicalBody::stepBackward() const {
+	getEntity().setPosition(getEntity().getPosition() - velocity_);
 }
 
 void PhysicalBody::applyImpulse(const glm::vec3& impulse) {
