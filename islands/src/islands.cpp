@@ -336,12 +336,12 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	const auto entity = chunk->getEntity("Player");
 	const auto body = entity->getComponent<PhysicalBody>();
 	const auto drawer = entity->getComponent<ModelDrawer>();
-	drawer->startAnimation("Armature|Attack");
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
 
 	std::ostringstream ss;
 	Profiler profiler;
+	bool attacking = false;
 	while (!glfwWindowShouldClose(window)) {
 		profiler.markFrame();
 
@@ -358,17 +358,28 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		} else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 			v.y = -speed;
 		}
-		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-			v.z = speed;
+		if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+			v.z = 0.1f;
 		}
 		body->setVelocity(v);
 
+		if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+			attacking = true;
+			drawer->enableAnimation("Armature|Attack", false);
+		}
+
 		const auto u = glm::normalize(glm::vec3(v.xy, 0));
 		if (glm::length(u) > glm::epsilon<float>()) {
+			drawer->enableAnimation("Walk.002", true, 24 * 3);
 			if (glm::dot(u, glm::vec3(-1.f, 0, 0)) < 1.f - glm::epsilon<float>()) {
 				entity->setQuaternion(glm::rotation(glm::vec3(1.f, 0, 0), u));
 			} else {
 				entity->setQuaternion(glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1.f)));
+			}
+		} else {
+			if (!(attacking && drawer->isPlayingAnimation())) {
+				drawer->stopAnimation();
+				attacking = false;
 			}
 		}
 
