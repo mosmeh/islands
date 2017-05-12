@@ -15,11 +15,11 @@ public:
 	virtual void loadImpl() {}
 	virtual void uploadImpl() {}
 
+	void load();
 	void loadAsync();
 	void upload();
 	virtual bool isLoaded() const;
 	bool isUploaded() const;
-	void waitUntilLoaded();
 
 private:
 	enum class State {

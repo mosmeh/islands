@@ -15,6 +15,15 @@ const std::string& Resource::getName() const {
 	return name_;
 }
 
+void Resource::load() {
+	auto unloaded = State::Unloaded;
+	if (status_.compare_exchange_strong(unloaded, State::Loading)) {
+		SLOG << "Loading " << getName() << std::endl;
+		loadImpl();
+		status_ = State::Loaded;
+	}
+}
+
 void Resource::loadAsync() {
 	auto unloaded = State::Unloaded;
 	if (status_.compare_exchange_strong(unloaded, State::Loading)) {
@@ -31,15 +40,15 @@ bool Resource::isUploaded() const {
 	return status_ == State::Uploaded;
 }
 
-void Resource::waitUntilLoaded() {
-	loadAsync();
-	while (!isLoaded());
-}
-
 void Resource::upload() {
 	if (status_ != State::Uploaded) {
+		if (status_ == State::Loading) {
+			while (!isLoaded());
+		} else {
+			load();
+		}
+
 		SLOG << "Uploading " << getName() << std::endl;
-		waitUntilLoaded();
 		uploadImpl();
 		status_ = State::Uploaded;
 	}

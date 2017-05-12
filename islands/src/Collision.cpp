@@ -95,7 +95,6 @@ Collider::Collider(std::shared_ptr<Model> model) :
 
 void Collider::update() {
 	if (!boundingBoxConstructed_) {
-		model_->waitUntilLoaded();
 		for (const auto mesh : model_->getMeshes()) {
 			for (size_t i = 0; i < mesh->numVertices_; ++i) {
 				boundingBox_.expand(mesh->vertices_[i]);

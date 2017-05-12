@@ -16,7 +16,7 @@ public:
 
 	virtual ~Model() = default;
 
-	const std::vector<std::shared_ptr<Mesh>>& getMeshes() const;
+	const std::vector<std::shared_ptr<Mesh>>& getMeshes();
 
 private:
 	const std::string filename_;

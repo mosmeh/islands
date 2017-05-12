@@ -10,7 +10,8 @@ Model::Model(const std::string& name, const std::string& filename) :
 	Resource(name),
 	filename_(filename) {}
 
-const std::vector<std::shared_ptr<Mesh>>& Model::getMeshes() const {
+const std::vector<std::shared_ptr<Mesh>>& Model::getMeshes() {
+	load();
 	return meshes_;
 }
 
@@ -107,8 +108,6 @@ void ModelDrawer::setLightmapTexture(std::shared_ptr<Texture2D> texture) {
 }
 
 void ModelDrawer::enableAnimation(const std::string& name, bool loop, float tps) {
-	waitUntilLoaded();
-
 	if (!animPlaying_ || name != animName_) {
 		for (const auto mesh : model_->getMeshes()) {
 			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
