@@ -37,11 +37,22 @@ struct Capsule {
 	Capsule applyTransform(const glm::mat4& model, const glm::vec3& scale) const;
 };
 
+struct Plane {
+	glm::vec3 normal;
+	float d;
+
+	bool sphereIntersects(const Sphere& sphere) const;
+};
+
 class CollisionListener {
 public:
 	virtual ~CollisionListener() = default;
 	virtual void onCollision() = 0;
 };
+
+class MeshCollider;
+class SphereCollider;
+class PlaneCollider;
 
 class Collider :
 	public std::enable_shared_from_this<Collider>, 
@@ -70,8 +81,17 @@ protected:
 	GLuint vertexArray_, vertexBuffer_;
 #endif
 
-	virtual bool intersectsImpl(std::shared_ptr<MeshCollider> collider) const = 0;
-	virtual bool intersectsImpl(std::shared_ptr<SphereCollider> collider) const = 0;
+	virtual bool intersectsImpl(std::shared_ptr<MeshCollider> collider) const {
+		throw;
+	}
+
+	virtual bool intersectsImpl(std::shared_ptr<SphereCollider> collider) const {
+		throw;
+	}
+
+	virtual bool intersectsImpl(std::shared_ptr<PlaneCollider> collider) const {
+		throw;
+	}
 };
 
 class SphereCollider : public Collider {
@@ -83,6 +103,7 @@ public:
 
 	bool intersectsImpl(std::shared_ptr<MeshCollider> collider) const override;
 	bool intersectsImpl(std::shared_ptr<SphereCollider> collider) const override;
+	bool intersectsImpl(std::shared_ptr<PlaneCollider> collider) const override;
 
 	std::vector<Triangle> getCollidingTriangles(std::shared_ptr<MeshCollider> collider) const;
 
@@ -108,12 +129,24 @@ public:
 
 	void update();
 	bool intersectsImpl(std::shared_ptr<CapsuleCollider> collider) const;
-	bool intersectsImpl(std::shared_ptr<MeshCollider> collider) const;
 
 	const Capsule& getCapsule() const;
 
 private:
 	Capsule capsule_, transformedCapsule_;
+};
+
+class PlaneCollider : public Collider {
+public:
+	PlaneCollider(std::shared_ptr<Model> model, const Plane& plane);
+	virtual ~PlaneCollider() = default;
+
+	bool intersectsImpl(std::shared_ptr<SphereCollider> collider) const;
+
+	const Plane& getPlane() const;
+
+private:
+	const Plane plane_;
 };
 
 }

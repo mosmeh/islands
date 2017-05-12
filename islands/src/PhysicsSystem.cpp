@@ -11,23 +11,24 @@ void PhysicsSystem::update() {
 	for (const auto body : bodies_) {
 		auto v = body->getVelocity() + GRAVITY;
 
-		const auto sphereCollider = std::dynamic_pointer_cast<SphereCollider>(body->getCollider());
-		if (body->hasCollider() && sphereCollider) {
+		const auto collider = std::dynamic_pointer_cast<SphereCollider>(body->getCollider());
+		if (body->hasCollider() && collider) {
 			body->advanceTime();
-			sphereCollider->update();
+			collider->update();
 
-			const auto& sphere = sphereCollider->getSphere();
+			const auto& sphere = collider->getSphere();
 			bool collide = false;
-			for (int i = 0; i < 2; ++i) {
+			auto prevV = glm::vec3(NAN);
+			for (size_t count = 0; prevV != v && count < 10; ++count) {
+				prevV = v;
 				for (const auto c : colliders_) {
-					if (c == sphereCollider) {
+					if (c == collider) {
 						continue;
 					}
-					if (sphereCollider->intersects(c)) {
+					if (collider->intersects(c)) {
 						collide = true;
-						const auto m = std::dynamic_pointer_cast<MeshCollider>(c);
-						if (m) {
-							for (const auto& tri : sphereCollider->getCollidingTriangles(m)) {
+						if (const auto meshCollider = std::dynamic_pointer_cast<MeshCollider>(c)) {
+							for (const auto& tri : collider->getCollidingTriangles(meshCollider)) {
 								const auto n = glm::cross(tri.v1 - tri.v0, tri.v2 - tri.v0);
 								if (glm::dot(n, v) < 0) {
 									v -= (glm::dot(n, v) / glm::dot(n, n)) * n;
@@ -42,10 +43,13 @@ void PhysicsSystem::update() {
 								body->getEntity().setPosition(body->getEntity().getPosition() +
 									(sphere.radius - glm::abs(d) * glm::inversesqrt(e)) * glm::normalize(n));*/
 							}
-						} else {
-							const auto s = std::dynamic_pointer_cast<SphereCollider>(c);
-							assert(s);
-							const auto n = sphere.center - s->getSphere().center;
+						} else if (const auto sphereCollider = std::dynamic_pointer_cast<SphereCollider>(c)) {
+							const auto n = sphere.center - sphereCollider->getSphere().center;
+							if (glm::dot(n, v) < 0) {
+								v -= (glm::dot(n, v) / glm::dot(n, n)) * n;
+							}
+						} else if (const auto planeCollider = std::dynamic_pointer_cast<PlaneCollider>(c)) {
+							const auto n = planeCollider->getPlane().normal;
 							if (glm::dot(n, v) < 0) {
 								v -= (glm::dot(n, v) / glm::dot(n, n)) * n;
 							}
@@ -63,7 +67,7 @@ void PhysicsSystem::update() {
 						v[i] = 0;
 					}
 				}
-				sphereCollider->notifyCollision();
+				collider->notifyCollision();
 			}
 			body->setVelocity(-body->getVelocity());
 			body->advanceTime();

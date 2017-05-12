@@ -82,7 +82,9 @@ Chunk::Chunk(const std::string& name, const std::string& filename) :
 					physicsSystem_.registerBody(body);
 					entity->attachComponent(body);
 				} else if (entity->getName() == "Plane.001") {
-					const auto collider = std::make_shared<MeshCollider>(model);
+					//const auto collider = std::make_shared<MeshCollider>(model);
+					const auto collider = std::make_shared<PlaneCollider>(model,
+						Plane{glm::vec3(0, 0, 1.f), 2.0f});
 					physicsSystem_.registerCollider(collider);
 					entity->attachComponent(collider);
 				} else {

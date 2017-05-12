@@ -150,6 +150,8 @@ bool Collider::intersects(const std::shared_ptr<Collider> collider) const {
 		return intersectsImpl(meshCollider);
 	} else if (const auto sphereCollider = std::dynamic_pointer_cast<SphereCollider>(collider)) {
 		return intersectsImpl(sphereCollider);
+	} else if (const auto planeCollider = std::dynamic_pointer_cast<PlaneCollider>(collider)) {
+		return intersectsImpl(planeCollider);
 	} else {
 		throw;
 	}
@@ -246,6 +248,10 @@ bool SphereCollider::intersectsImpl(std::shared_ptr<SphereCollider> collider) co
 	return glm::distance(sphere_.center, sphereB.center) <= sphere_.radius + sphereB.radius;
 }
 
+bool SphereCollider::intersectsImpl(std::shared_ptr<PlaneCollider> collider) const {
+	return collider->getPlane().sphereIntersects(sphere_);
+}
+
 std::vector<Triangle> SphereCollider::getCollidingTriangles(std::shared_ptr<MeshCollider> collider) const {
 	std::vector<Triangle> triangles;
 
@@ -278,6 +284,9 @@ void CapsuleCollider::update() {
 }
 
 bool CapsuleCollider::intersectsImpl(std::shared_ptr<CapsuleCollider> collider) const {
+	// TODO
+	throw;
+
 	const auto& capsuleB = collider->getCapsule();
 	const auto a = capsule_.b - capsule_.a;
 	const auto b = capsuleB.b - capsuleB.a;
@@ -288,13 +297,6 @@ bool CapsuleCollider::intersectsImpl(std::shared_ptr<CapsuleCollider> collider) 
 	const auto cross = glm::cross(aa, bb);
 	const auto denom = glm::dot(cross, cross);
 
-	if (denom == 0) {
-
-	}
-	return false;
-}
-
-bool CapsuleCollider::intersectsImpl(std::shared_ptr<MeshCollider> collider) const {
 	return false;
 }
 
@@ -308,6 +310,22 @@ Capsule Capsule::applyTransform(const glm::mat4& model, const glm::vec3& scale) 
 		model * glm::vec4(a, 1),
 		model * glm::vec4(b, 1)
 	};
+}
+
+bool Plane::sphereIntersects(const Sphere& sphere) const {
+	return glm::dot(normal, sphere.center) + d <= glm::length(normal) * sphere.radius;
+}
+
+PlaneCollider::PlaneCollider(std::shared_ptr<Model> model, const Plane& plane) :
+	Collider(model),
+	plane_(plane) {}
+
+bool PlaneCollider::intersectsImpl(std::shared_ptr<SphereCollider> collider) const {
+	return plane_.sphereIntersects(collider->getSphere());
+}
+
+const Plane& PlaneCollider::getPlane() const {
+	return plane_;
 }
 
 }
