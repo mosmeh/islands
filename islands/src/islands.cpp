@@ -272,7 +272,6 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 #endif
 
 	glfwSetWindowAspectRatio(window, 16, 9);
-	glfwSwapInterval(1);
 	glfwSetFramebufferSizeCallback(window, [](GLFWwindow*, int width, int height) {
 		glViewport(0, 0, width, height);
 	});
@@ -346,6 +345,8 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		profiler.markFrame();
 
 		profiler.enterSection("update");
+		const auto beforeTime = glfwGetTime();
+
 		const float speed = 0.2f;
 		glm::vec3 v = body->getVelocity();
 		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
@@ -399,6 +400,15 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 			", draw: " << profiler.getElapsedTime("draw") << std::endl;
 		glfwSetWindowTitle(window, ss.str().c_str());
 		profiler.clearSamples();
+
+		if (!isnan(profiler.getLastDeltaTime())) {
+			const auto sleepDuration = 1000.f * (1.f / 60 - glfwGetTime() + beforeTime);
+			if (sleepDuration > 0) {
+				Sleep(DWORD(sleepDuration));
+			} else {
+				Sleep(5);
+			}
+		}
 
 		glfwPollEvents();
 	}
