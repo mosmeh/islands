@@ -57,8 +57,10 @@ public:
 	SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const aiNode* root, aiAnimation** animations, size_t numAnimations);
 	virtual ~SkinnedMesh();
 
-	void playAnimation(const std::string& name);
-	void applyBoneTransform(float time_s);
+	void setPlayingAnimation(const std::string& name);
+	void setPlayingAnimationTicksPerSecond(float tps);
+	float getPlayingAnimationDurationInSeconds() const;
+	void updateBoneTransform(float time_s);
 	const glm::mat4& getBoneTransform(size_t index) const;
 	const size_t getNumBones() const;
 

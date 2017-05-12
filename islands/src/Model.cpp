@@ -52,6 +52,12 @@ ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
 	animStartTime_(0.f) {}
 
 void ModelDrawer::draw() {
+	if (animPlaying_) {
+		if (!animLoop_ && (glfwGetTime() - animStartTime_) > animDuration_) {
+			animPlaying_ = false;
+		}
+	}
+
 	if (visible_) {
 		std::stringstream ss;
 		for (const auto mesh : model_->getMeshes()) {
@@ -64,15 +70,15 @@ void ModelDrawer::draw() {
 			program->setUniform("MVP",
 				SceneManager::getInstance().getProjectionViewMatrix() *	getEntity().getModelMatrix());
 
-			if (animPlaying_) {
-				if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
-					skinned->applyBoneTransform(float(glfwGetTime()) - animStartTime_);
+			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
+				if (animPlaying_) {
+					skinned->updateBoneTransform(float(glfwGetTime()) - animStartTime_);
+				}
 
-					for (size_t i = 0; i < skinned->getNumBones(); ++i) {
-						ss.str("");
-						ss << "bones[" << i << "]";
-						program->setUniform(ss.str().c_str(), skinned->getBoneTransform(i));
-					}
+				for (size_t i = 0; i < skinned->getNumBones(); ++i) {
+					ss.str("");
+					ss << "bones[" << i << "]";
+					program->setUniform(ss.str().c_str(), skinned->getBoneTransform(i));
 				}
 			}
 			mesh->draw();
@@ -100,19 +106,32 @@ void ModelDrawer::setLightmapTexture(std::shared_ptr<Texture2D> texture) {
 	lightmap_ = texture;
 }
 
-void ModelDrawer::startAnimation(const std::string& name) {
+void ModelDrawer::enableAnimation(const std::string& name, bool loop, float tps) {
 	waitUntilLoaded();
-	for (const auto mesh : model_->getMeshes()) {
-		if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
-			skinned->playAnimation(name);
+
+	if (!animPlaying_ || name != animName_) {
+		for (const auto mesh : model_->getMeshes()) {
+			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
+				skinned->setPlayingAnimation(name);
+				skinned->setPlayingAnimationTicksPerSecond(tps);
+				animDuration_ = skinned->getPlayingAnimationDurationInSeconds();
+			}
 		}
+		animPlaying_ = true;
+		animName_ = name;
+		animLoop_ = loop;
+		animStartTime_ = float(glfwGetTime());
+	} else if (loop != animLoop_) {
+		animLoop_ = loop;
 	}
-	animPlaying_ = true;
-	animStartTime_ = float(glfwGetTime());
 }
 
 void ModelDrawer::stopAnimation() {
 	animPlaying_ = false;
+}
+
+bool ModelDrawer::isPlayingAnimation() const {
+	return animPlaying_;
 }
 
 void ModelDrawer::loadImpl() {

@@ -210,14 +210,22 @@ SkinnedMesh::~SkinnedMesh() {
 	}
 }
 
-void SkinnedMesh::playAnimation(const std::string& name) {
+void SkinnedMesh::setPlayingAnimation(const std::string& name) {
 	waitUntilLoaded();
 
 	assert(animations_.find(name) != animations_.end());
 	playingAnim_ = animations_.at(name);
 }
 
-void SkinnedMesh::applyBoneTransform(float time_s) {
+void SkinnedMesh::setPlayingAnimationTicksPerSecond(float tps) {
+	playingAnim_->ticksPerSecond = tps;
+}
+
+float SkinnedMesh::getPlayingAnimationDurationInSeconds() const {
+	return playingAnim_->duration / playingAnim_->ticksPerSecond;
+}
+
+void SkinnedMesh::updateBoneTransform(float time_s) {
 	waitUntilLoaded();
 
 	assert(playingAnim_);
