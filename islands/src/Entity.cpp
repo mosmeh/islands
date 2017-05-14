@@ -54,9 +54,7 @@ const glm::mat4& Entity::getModelMatrix() const {
 
 void Entity::update() const {
 	for (const auto c : components_) {
-		if (!c->isAwoke()) {
-			c->awake();
-		}
+		c->startOnce();
 		c->update();
 	}
 }

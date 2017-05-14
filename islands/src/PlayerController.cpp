@@ -6,7 +6,7 @@ namespace islands {
 
 PlayerController::PlayerController() : attacking_(false) {}
 
-void PlayerController::awake() {
+void PlayerController::start() {
 	body_ = getEntity().getComponent<PhysicalBody>();
 	drawer_ = getEntity().getComponent<ModelDrawer>();
 }

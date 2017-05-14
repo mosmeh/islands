@@ -12,13 +12,14 @@ public:
 	PlayerController();
 	virtual ~PlayerController() = default;
 
-	void awake() override;
 	void update() override;
 
 private:
 	std::shared_ptr<PhysicalBody> body_;
 	std::shared_ptr<ModelDrawer> drawer_;
 	bool attacking_;
+
+	void start() override;
 };
 
 }

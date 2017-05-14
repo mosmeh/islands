@@ -22,17 +22,22 @@ public:
 		return *entity_;
 	}
 
-	bool isAwoke() const {
-		return awoke_;
+	void startOnce() {
+		static bool isFirstTime = true;
+		if (isFirstTime) {
+			start();
+			isFirstTime = false;
+		}
 	}
 
-	virtual void awake() {}
 	virtual void update() = 0;
 
 protected:
 	Chunk& getChunk() const {
 		return getEntity().getChunk();
 	}
+
+	virtual void start() {}
 
 private:
 	Entity* entity_;
