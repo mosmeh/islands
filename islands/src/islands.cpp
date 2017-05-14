@@ -1,5 +1,6 @@
 ﻿#include "ResourceSystem.h"
 #include "SceneManager.h"
+#include "InputSystem.h"
 #include "Chunk.h"
 #include "PhysicalBody.h"
 #include "Log.h"
@@ -275,6 +276,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	glfwSetFramebufferSizeCallback(window, [](GLFWwindow*, int width, int height) {
 		glViewport(0, 0, width, height);
 	});
+	glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
 
 	{
 		int width, height;
@@ -288,8 +290,9 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int, int action, int) {
-		static glm::vec3 pos = {-15, -15, 15};
+	InputSystem::getInstance().setWindow(window);
+	InputSystem::getInstance().registerKeyboardCallback(
+		[](GLFWwindow* window, int key, int, int action, int) {
 		switch (key) {
 		case GLFW_KEY_ESCAPE:
 			if (action == GLFW_PRESS) {
@@ -335,8 +338,6 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	const auto entity = chunk->getEntity("Player");
 	const auto body = entity->getComponent<PhysicalBody>();
 	const auto drawer = entity->getComponent<ModelDrawer>();
-
-	glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
 
 	std::ostringstream ss;
 	Profiler profiler;

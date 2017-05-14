@@ -181,6 +181,7 @@
     <ClCompile Include="src\Chunk.cpp" />
     <ClCompile Include="src\Collision.cpp" />
     <ClCompile Include="src\Entity.cpp" />
+    <ClCompile Include="src\InputSystem.cpp" />
     <ClCompile Include="src\islands.cpp" />
     <ClCompile Include="src\Log.cpp" />
     <ClCompile Include="src\Material.cpp" />
@@ -263,6 +264,7 @@
     <ClInclude Include="include\Collision.h" />
     <ClInclude Include="include\Component.h" />
     <ClInclude Include="include\Entity.h" />
+    <ClInclude Include="include\InputSystem.h" />
     <ClInclude Include="include\Log.h" />
     <ClInclude Include="include\Material.h" />
     <ClInclude Include="include\Mesh.h" />
