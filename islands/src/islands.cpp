@@ -7,6 +7,7 @@
 
 #ifdef _WIN32
 #include <VersionHelpers.h>
+#include <mmsystem.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <glfw3native.h>
 #endif
@@ -321,8 +322,8 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	std::ostringstream ss;
 	Profiler profiler;
 	while (!glfwWindowShouldClose(window)) {
-		profiler.markFrame();
 		const auto beforeTime = glfwGetTime();
+		profiler.markFrame();
 
 		profiler.enterSection("update");
 		chunk->update();
@@ -341,16 +342,18 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		glfwSetWindowTitle(window, ss.str().c_str());
 		profiler.clearSamples();
 
-		if (!isnan(profiler.getLastDeltaTime())) {
-			const auto sleepDuration = 1000.f * (1.f / 60 - glfwGetTime() + beforeTime);
-			if (sleepDuration > 0) {
-				Sleep(DWORD(sleepDuration));
-			} else {
-				Sleep(5);
-			}
-		}
-
 		glfwPollEvents();
+
+		const auto sleepDuration = 1000 * (1.0 / 60 - glfwGetTime() + beforeTime);
+		if (sleepDuration > 0) {
+#ifdef _WIN32
+			timeBeginPeriod(1);
+			Sleep(DWORD(sleepDuration));
+			timeEndPeriod(1);
+#else
+#error not implemented
+#endif
+		}
 	}
 
     return EXIT_SUCCESS;
