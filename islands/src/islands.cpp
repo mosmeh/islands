@@ -304,24 +304,6 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 				saveScreenShot(window);
 			}
 			break;
-		/*case GLFW_KEY_K:
-			pos.x -= 1.f;
-			break;
-		case GLFW_KEY_J:
-			pos.x += 1.f;
-			break;
-		case GLFW_KEY_LEFT:
-			pos.y += 1.f;
-			break;
-		case GLFW_KEY_RIGHT:
-			pos.y -= 1.f;
-			break;
-		case GLFW_KEY_UP:
-			pos.z += 1.f;
-			break;
-		case GLFW_KEY_DOWN:
-			pos.z -= 1.f;
-			break;*/
 		}
 	});
 
@@ -335,58 +317,15 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	ResourceSystem::getInstance().setLightmapProgram("LightmapProgram");
 
 	const auto chunk = std::make_shared<Chunk>("chunk", "forest1.json");
-	const auto entity = chunk->getEntity("Player");
-	const auto body = entity->getComponent<PhysicalBody>();
-	const auto drawer = entity->getComponent<ModelDrawer>();
 
 	std::ostringstream ss;
 	Profiler profiler;
-	bool attacking = false;
 	while (!glfwWindowShouldClose(window)) {
 		profiler.markFrame();
-
-		profiler.enterSection("update");
 		const auto beforeTime = glfwGetTime();
 
-		const float speed = 0.2f;
-		glm::vec3 v = body->getVelocity();
-		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-			v.x = -speed;
-		} else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-			v.x = speed;
-		}
-		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-			v.y = speed;
-		} else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-			v.y = -speed;
-		}
-		if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
-			v.z = 0.1f;
-		}
-		body->setVelocity(v);
-
-		if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
-			attacking = true;
-			drawer->enableAnimation("Armature|Attack", false);
-		}
-
-		const auto u = glm::normalize(glm::vec3(v.xy, 0));
-		if (glm::length(u) > glm::epsilon<float>()) {
-			drawer->enableAnimation("Walk.002", true, 24 * 3);
-			if (glm::dot(u, glm::vec3(-1.f, 0, 0)) < 1.f - glm::epsilon<float>()) {
-				entity->setQuaternion(glm::rotation(glm::vec3(1.f, 0, 0), u));
-			} else {
-				entity->setQuaternion(glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1.f)));
-			}
-		} else {
-			if (!(attacking && drawer->isPlayingAnimation())) {
-				drawer->stopAnimation();
-				attacking = false;
-			}
-		}
-
+		profiler.enterSection("update");
 		chunk->update();
-		SceneManager::getInstance().lookAt(entity->getPosition());
 		profiler.leaveSection("update");
 
 		profiler.enterSection("draw");

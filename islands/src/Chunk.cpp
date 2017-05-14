@@ -1,6 +1,7 @@
 #include "Chunk.h"
 #include "ResourceSystem.h"
 #include "PhysicalBody.h"
+#include "PlayerController.h"
 #include "picojson/picojson.h"
 
 glm::vec3 toVec3(const picojson::value& v) {
@@ -37,6 +38,31 @@ Chunk::Chunk(const std::string& name, const std::string& filename) :
 	const auto& env = json.get("environment").get<picojson::object>();
 	UNUSED(env);
 
+	{
+		// player
+		const auto entity = std::make_shared<Entity>("Player", this);
+		entity->setPosition({0, 0, 3.f});
+		entity->setScale({0.00485f, 0.00485f, 0.006525f});
+
+		entity->attachComponent(std::make_shared<PlayerController>());
+
+		constexpr auto meshName = "character6a.fbx";
+		const auto model = ResourceSystem::getInstance().createOrGet<Model>(meshName, meshName);
+		const auto drawer = std::make_shared<ModelDrawer>(model);
+		entity->attachComponent(drawer);
+
+		const auto collider = std::make_shared<SphereCollider>(model, 1.f);
+		physicsSystem_.registerCollider(collider);
+		entity->attachComponent(collider);
+
+		const auto body = std::make_shared<PhysicalBody>(1.f);
+		body->setCollider(collider);
+		physicsSystem_.registerBody(body);
+		entity->attachComponent(body);
+
+		entities_.push_back(entity);
+	}
+
 	for (const auto& ent : json.get("entities").get<picojson::object>()) {
 		const auto entity = std::make_shared<Entity>(ent.first, this);
 		const auto& properties = ent.second.get<picojson::object>();
@@ -72,16 +98,7 @@ Chunk::Chunk(const std::string& name, const std::string& filename) :
 			{
 				//const auto& type = modelProp.at("collision").get<std::string>();
 
-				if (entity->getName() == "Player") {
-					const auto collider = std::make_shared<SphereCollider>(model, 1.f);
-					physicsSystem_.registerCollider(collider);
-					entity->attachComponent(collider);
-
-					const auto body = std::make_shared<PhysicalBody>(1.f);
-					body->setCollider(collider);
-					physicsSystem_.registerBody(body);
-					entity->attachComponent(body);
-				} else if (entity->getName() == "Plane.001") {
+				if (entity->getName() == "Plane.001") {
 					//const auto collider = std::make_shared<MeshCollider>(model);
 					const auto collider = std::make_shared<PlaneCollider>(model,
 						Plane{glm::vec3(0, 0, 1.f), 2.0f});
