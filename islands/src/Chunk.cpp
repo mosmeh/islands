@@ -16,10 +16,10 @@ glm::vec3 toVec3(const picojson::value& v) {
 glm::quat toQuat(const picojson::value& v) {
 	const auto& obj = v.get<picojson::object>();
 	return{
-		float(obj.at("w").get<double>()),
-		float(obj.at("x").get<double>()),
-		float(obj.at("y").get<double>()),
-		float(obj.at("z").get<double>())
+		static_cast<float>(obj.at("w").get<double>()),
+		static_cast<float>(obj.at("x").get<double>()),
+		static_cast<float>(obj.at("y").get<double>()),
+		static_cast<float>(obj.at("z").get<double>())
 	};
 }
 

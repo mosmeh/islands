@@ -38,7 +38,7 @@ void Material::use() const {
 	program_->setUniform("diffuse", diffuseColor_);
 	if (lightmap_) {
 		lightmap_->bind(0);
-		program_->setUniform("lightmap", GLuint(0));
+		program_->setUniform("lightmap", static_cast<GLuint>(0));
 	}
 	for (size_t i = 0; i < diffuseTextures_.size(); ++i) {
 		diffuseTextures_.at(i)->bind(i + 1);

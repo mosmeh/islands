@@ -194,9 +194,9 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 	for (unsigned int i = 0; i < numAnimations; ++i) {
 		const auto animation = animations[i];
 		const auto anim = std::make_shared <Animation>();
-		anim->ticksPerSecond = float(animation->mTicksPerSecond == 0 ?
+		anim->ticksPerSecond = static_cast<float>(animation->mTicksPerSecond == 0 ?
 			24.f : animation->mTicksPerSecond);
-		anim->duration = float(animation->mDuration);
+		anim->duration = static_cast<float>(animation->mDuration);
 		anim->rootNode = constructNodeTree(root, animation, nameToBone);
 		animations_.emplace(animation->mName.C_Str(), anim);
 		std::cout << animation->mName.C_Str() << std::endl;
@@ -281,15 +281,15 @@ std::shared_ptr<SkinnedMesh::Node> SkinnedMesh::constructNodeTree(const aiNode* 
 			node->hasKeys = true;
 			FOREACH (key, channel.mPositionKeys, channel.mNumPositionKeys) {
 				node->positionKeys.emplace_back(
-					float(key->mTime), aiVector3DToGlmVec3(key->mValue));
+					static_cast<float>(key->mTime), aiVector3DToGlmVec3(key->mValue));
 			}
 			FOREACH (key, channel.mScalingKeys, channel.mNumScalingKeys) {
 				node->scaleKeys.emplace_back(
-					float(key->mTime), aiVector3DToGlmVec3(key->mValue));
+					static_cast<float>(key->mTime), aiVector3DToGlmVec3(key->mValue));
 			}
 			FOREACH (key, channel.mRotationKeys, channel.mNumRotationKeys) {
 				node->rotationKeys.emplace_back(
-					float(key->mTime), aiQuaternionToGlmQuat(key->mValue));
+					static_cast<float>(key->mTime), aiQuaternionToGlmQuat(key->mValue));
 			}
 			break;
 		}

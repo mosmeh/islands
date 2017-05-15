@@ -24,7 +24,7 @@ public:
 	using Real = float;
 
 	void markFrame() {
-		const auto time = Real(glfwGetTime());
+		const auto time = static_cast<Real>(glfwGetTime());
 		if (prevTime_ >= 0) {
 			lastDeltaTime_ = time - prevTime_;
 		}
@@ -41,14 +41,14 @@ public:
 
 	void enterSection(const std::string& name) {
 		if (samples_.find(name) == samples_.end()) {
-			samples_.emplace(name, Sample{Real(glfwGetTime()), 0});
+			samples_.emplace(name, Sample{static_cast<Real>(glfwGetTime()), 0});
 		} else {
-			samples_.at(name).startTime = Real(glfwGetTime());
+			samples_.at(name).startTime = static_cast<Real>(glfwGetTime());
 		}
 	}
 
 	void leaveSection(const std::string& name) {
-		samples_.at(name).elapsedTime += Real(glfwGetTime()) - samples_.at(name).startTime;
+		samples_.at(name).elapsedTime += static_cast<Real>(glfwGetTime()) - samples_.at(name).startTime;
 	}
 
 	Real getElapsedTime(const std::string& name) const {
@@ -231,7 +231,7 @@ int main() {
 	glfwMakeContextCurrent(window);
 
 	SLOG << "glad: Loading" << std::endl;
-	if (!gladLoadGLLoader(GLADloadproc(glfwGetProcAddress))) {
+	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
 		SLOG << "glad: Failed to load" << std::endl;
 		throw;
 	}
@@ -348,7 +348,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		if (sleepDuration > 0) {
 #ifdef _WIN32
 			timeBeginPeriod(1);
-			Sleep(DWORD(sleepDuration));
+			Sleep(static_cast<DWORD>(sleepDuration));
 			timeEndPeriod(1);
 #else
 #error not implemented
