@@ -280,7 +280,6 @@
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\Texture.h" />
-    <ClInclude Include="PlayerController.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="app.manifest" />
