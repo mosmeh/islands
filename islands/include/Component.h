@@ -9,8 +9,7 @@ class Chunk;
 class Component {
 public:
 	Component() :
-		entity_(nullptr),
-		awoke_(false) {}
+		entity_(nullptr) {}
 	virtual ~Component() = default;
 
 	void setEntity(Entity* entity) {
@@ -41,7 +40,6 @@ protected:
 
 private:
 	Entity* entity_;
-	bool awoke_;
 };
 
 class Drawable : public Component {
