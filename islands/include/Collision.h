@@ -44,12 +44,6 @@ struct Plane {
 	bool sphereIntersects(const Sphere& sphere) const;
 };
 
-class CollisionListener {
-public:
-	virtual ~CollisionListener() = default;
-	virtual void onCollision() = 0;
-};
-
 class MeshCollider;
 class SphereCollider;
 class PlaneCollider;
@@ -63,7 +57,7 @@ public:
 
 	void update() override;
 
-	void registerListener(std::shared_ptr<CollisionListener> listener);
+	void registerCallback(std::function<void(void)> callback);
 	void notifyCollision() const;
 
 	bool intersects(const std::shared_ptr<Collider> collider) const;
@@ -74,7 +68,7 @@ protected:
 	std::shared_ptr<Model> model_;
 	bool boundingBoxConstructed_;
 	BoundingBox boundingBox_, aabb_;
-	std::vector<std::shared_ptr<CollisionListener>> listeners_;
+	std::vector<std::function<void(void)>> callbacks_;
 
 #ifdef SHOW_BOX
 	std::shared_ptr<Program> program_;

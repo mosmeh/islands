@@ -130,13 +130,13 @@ void Collider::update() {
 #endif
 }
 
-void Collider::registerListener(std::shared_ptr<CollisionListener> listener) {
-	listeners_.emplace_back(listener);
+void Collider::registerCallback(std::function<void(void)> callback) {
+	callbacks_.emplace_back(callback);
 }
 
 void Collider::notifyCollision() const {
-	for (const auto listener : listeners_) {
-		listener->onCollision();
+	for (const auto callback : callbacks_) {
+		callback();
 	}
 }
 
