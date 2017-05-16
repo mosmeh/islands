@@ -14,24 +14,25 @@ void PlayerController::start() {
 void PlayerController::update() {
 	Camera::getInstance().lookAt(getEntity().getPosition());
 
-	const float speed = 0.2f;
+	static const float SPEED = 0.2f;
+	static const auto THETA = 5 * glm::quarter_pi<float>();
+	static const auto ROTATION = glm::mat2(glm::cos(THETA), glm::sin(-THETA),
+		glm::sin(THETA), glm::cos(THETA)) * glm::mat2(-1, 0, 0, 1);
+
 	glm::vec3 v = body_->getVelocity();
-	if (InputSystem::getInstance().isKeyPressed(GLFW_KEY_LEFT)) {
-		v.x = -speed;
-	} else if (InputSystem::getInstance().isKeyPressed(GLFW_KEY_RIGHT)) {
-		v.x = speed;
+	const auto dir = ROTATION * InputSystem::getInstance().getDirection();
+	if (dir.x != 0) {
+		v.x = SPEED * dir.x;
 	}
-	if (InputSystem::getInstance().isKeyPressed(GLFW_KEY_UP)) {
-		v.y = speed;
-	} else if (InputSystem::getInstance().isKeyPressed(GLFW_KEY_DOWN)) {
-		v.y = -speed;
+	if (dir.y != 0) {
+		v.y = SPEED * dir.y;
 	}
-	if (InputSystem::getInstance().isKeyPressed(GLFW_KEY_X)) {
+	if (InputSystem::getInstance().isCommandActive(InputSystem::Command::Jump)) {
 		v.z = 0.1f;
 	}
 	body_->setVelocity(v);
 
-	if (InputSystem::getInstance().isKeyPressed(GLFW_KEY_Z)) {
+	if (InputSystem::getInstance().isCommandActive(InputSystem::Command::Attack)) {
 		attacking_ = true;
 		drawer_->enableAnimation("Armature|Attack", false);
 	}

@@ -324,6 +324,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		profiler.markFrame();
 
 		profiler.enterSection("update");
+		InputSystem::getInstance().update();
 		chunk->update();
 		profiler.leaveSection("update");
 
