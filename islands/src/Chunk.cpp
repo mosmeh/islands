@@ -113,7 +113,7 @@ Chunk::Chunk(const std::string& name, const std::string& filename) :
 			}
 		}
 
-		entities_.push_back(entity);
+		addEntity(entity);
 	}
 }
 
@@ -124,6 +124,10 @@ bool Chunk::isLoaded() const {
 		}
 	}
 	return true;
+}
+
+void Chunk::addEntity(std::shared_ptr<Entity> entity) {
+	entities_.emplace_back(entity);
 }
 
 std::shared_ptr<Entity> Chunk::getEntity(const std::string& name) {

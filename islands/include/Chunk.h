@@ -16,6 +16,7 @@ public:
 
 	bool isLoaded() const override;
 
+	void addEntity(std::shared_ptr<Entity> entity);
 	std::shared_ptr<Entity> getEntity(const std::string& name);
 	void update();
 	void draw();
