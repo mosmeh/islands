@@ -7,6 +7,12 @@ namespace islands {
 
 class ResourceSystem {
 public:
+	enum class ProgramType {
+		Default,
+		Skinning,
+		Lightmap
+	};
+
 	ResourceSystem(const ResourceSystem&) = delete;
 	ResourceSystem& operator=(const ResourceSystem&) = delete;
 	virtual ~ResourceSystem();
@@ -22,16 +28,12 @@ public:
 	std::enable_if_t<std::is_base_of<Resource, T>::value, std::shared_ptr<T>>
 	get(const std::string& name) const;
 
-	void setDefaultProgram(const std::string& name);
-	std::shared_ptr<Program> getDefaultProgram() const;
-	void setDefaultSkinningProgram(const std::string& name);
-	std::shared_ptr<Program> getDefaultSkinningProgram() const;
-	void setLightmapProgram(const std::string& name);
-	std::shared_ptr<Program> getLightmapProgram() const;
+	void setDefaultProgram(ProgramType type, std::shared_ptr<Program> program);
+	std::shared_ptr<Program> getDefaultProgram(ProgramType type = ProgramType::Default) const;
 
 private:
 	std::unordered_map<std::string, std::shared_ptr<Resource>> resources_;
-	std::shared_ptr<Program> defaultProgram_, defaultSkinningProgram_, lightmapProgram_;
+	std::unordered_map<ProgramType, std::shared_ptr<Program>> defaultPrograms_;
 
 	std::queue<std::shared_ptr<Resource>> loadQueue_;
 	std::mutex loadQueueMutex_;

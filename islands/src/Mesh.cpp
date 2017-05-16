@@ -157,7 +157,8 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 
 	assert(mesh->HasBones());
 
-	getMaterial()->setProgram(ResourceSystem::getInstance().getDefaultSkinningProgram());
+	getMaterial()->setProgram(
+		ResourceSystem::getInstance().getDefaultProgram(ResourceSystem::ProgramType::Skinning));
 
 	assert(numVertices_ > 0);
 	boneData_ = std::make_unique<BoneDataPerVertex[]>(numVertices_);

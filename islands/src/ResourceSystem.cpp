@@ -19,34 +19,23 @@ ResourceSystem::~ResourceSystem() {
 	loader_.join();
 }
 
-void ResourceSystem::setDefaultProgram(const std::string& name) {
-	defaultProgram_ = get<Program>(name);
-}
-
-std::shared_ptr<Program> ResourceSystem::getDefaultProgram() const {
-	return defaultProgram_;
-}
-
-void ResourceSystem::setDefaultSkinningProgram(const std::string& name) {
-	defaultSkinningProgram_ = get<Program>(name);
-}
-
-std::shared_ptr<Program> ResourceSystem::getDefaultSkinningProgram() const {
-	return defaultSkinningProgram_;
-}
-
-void ResourceSystem::setLightmapProgram(const std::string& name) {
-	lightmapProgram_ = get<Program>(name);
-}
-
-std::shared_ptr<Program> ResourceSystem::getLightmapProgram() const {
-	return lightmapProgram_;
-}
-
 void ResourceSystem::pushToLoadQueue(std::shared_ptr<Resource> resource) {
 	loadQueueMutex_.lock();
 	loadQueue_.push(resource);
 	loadQueueMutex_.unlock();
+}
+
+void ResourceSystem::setDefaultProgram(ProgramType type, std::shared_ptr<Program> program) {
+	if (defaultPrograms_.find(type) == defaultPrograms_.end()) {
+		defaultPrograms_.emplace(type, program);
+	} else {
+		defaultPrograms_.at(type) = program;
+	}
+}
+
+std::shared_ptr<Program> ResourceSystem::getDefaultProgram(ProgramType type) const {
+	assert(defaultPrograms_.find(type) != defaultPrograms_.end());
+	return defaultPrograms_.at(type);
 }
 
 void ResourceSystem::consumeLoadQueue() {

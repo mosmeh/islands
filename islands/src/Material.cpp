@@ -47,7 +47,7 @@ void Material::use() const {
 
 void Material::setLightmapTexture(std::shared_ptr<Texture2D> texture) {
 	lightmap_ = texture;
-	program_ = ResourceSystem::getInstance().getLightmapProgram();
+	program_ = ResourceSystem::getInstance().getDefaultProgram(ResourceSystem::ProgramType::Lightmap);
 }
 
 void Material::setProgram(std::shared_ptr<Program> program) {
