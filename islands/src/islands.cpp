@@ -1,5 +1,5 @@
 ﻿#include "ResourceSystem.h"
-#include "SceneManager.h"
+#include "Camera.h"
 #include "InputSystem.h"
 #include "Chunk.h"
 #include "PhysicalBody.h"

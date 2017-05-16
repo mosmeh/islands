@@ -1,6 +1,6 @@
 #include "Model.h"
 #include "Entity.h"
-#include "SceneManager.h"
+#include "Camera.h"
 #include "Log.h"
 #include "NameGenerator.h"
 
@@ -69,7 +69,7 @@ void ModelDrawer::draw() {
 			const auto program = mesh->getMaterial()->getProgram();
 			program->use();
 			program->setUniform("MVP",
-				SceneManager::getInstance().getProjectionViewMatrix() *	getEntity().getModelMatrix());
+				Camera::getInstance().getProjectionViewMatrix() * getEntity().getModelMatrix());
 
 			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
 				if (animPlaying_) {

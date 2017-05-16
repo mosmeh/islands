@@ -1,6 +1,6 @@
 #include "Collision.h"
 #include "Entity.h"
-#include "SceneManager.h"
+#include "Camera.h"
 #include "Chunk.h"
 
 namespace islands {
@@ -118,7 +118,7 @@ void Collider::update() {
 		{aabb_.min.x, aabb_.max.y, aabb_.min.z}
 	};
 	program_->use();
-	program_->setUniform("VP", SceneManager::getInstance().getProjectionViewMatrix());
+	program_->setUniform("VP", Camera::getInstance().getProjectionViewMatrix());
 	glBindVertexArray(vertexArray_);
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);

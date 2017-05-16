@@ -2,13 +2,13 @@
 
 namespace islands {
 
-class SceneManager {
+class Camera {
 public:
-	SceneManager(const SceneManager&) = delete;
-	SceneManager& operator=(const SceneManager&) = delete;
-	virtual ~SceneManager() = default;
+	Camera(const Camera&) = delete;
+	Camera& operator=(const Camera&) = delete;
+	virtual ~Camera() = default;
 
-	static SceneManager& getInstance();
+	static Camera& getInstance();
 
 	void lookAt(const glm::vec3& position);
 	const glm::mat4& getProjectionMatrix() const;
@@ -21,7 +21,7 @@ private:
 	glm::mat4 view_, projView_;
 	glm::vec3 targetPos_;
 
-	SceneManager();
+	Camera();
 
 	void updateProjectionViewMatrix();
 };

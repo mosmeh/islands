@@ -1,5 +1,5 @@
 #include "PlayerController.h"
-#include "SceneManager.h"
+#include "Camera.h"
 #include "InputSystem.h"
 
 namespace islands {
@@ -12,7 +12,7 @@ void PlayerController::start() {
 }
 
 void PlayerController::update() {
-	SceneManager::getInstance().lookAt(getEntity().getPosition());
+	Camera::getInstance().lookAt(getEntity().getPosition());
 
 	const float speed = 0.2f;
 	glm::vec3 v = body_->getVelocity();
