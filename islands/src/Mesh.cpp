@@ -141,16 +141,6 @@ glm::quat aiQuaternionToGlmQuat(const aiQuaternion& quat) {
 	return{quat.w, quat.x, quat.y, quat.z};
 }
 
-void printNodes(const aiNode* node, unsigned int depth) {
-	for (unsigned int i = 0; i < depth; ++i) {
-		std::cout << "  ";
-	}
-	std::cout << node->mName.C_Str() << std::endl;
-	for (size_t i = 0; i < node->mNumChildren; ++i) {
-		printNodes(node->mChildren[i], depth + 1);
-	}
-}
-
 SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const aiNode* root,
 	aiAnimation** animations, size_t numAnimations) :
 	Mesh(mesh, material),
@@ -163,14 +153,6 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 
 	assert(numVertices_ > 0);
 	boneData_ = std::make_unique<BoneDataPerVertex[]>(numVertices_);
-
-	std::cout << "[" << getName() << "]" << std::endl;
-	std::cout << "bones:" << std::endl;
-	FOREACH (bone, mesh->mBones, mesh->mNumBones) {
-		std::cout << "  " << (*bone)->mName.C_Str() << std::endl;
-	}
-	std::cout << "nodes:" << std::endl;
-	printNodes(root, 0);
 
 	std::unordered_map<std::string, std::shared_ptr<Bone>> nameToBone;
 	const auto numAddedBones = std::make_unique<size_t[]>(numVertices_);
@@ -201,7 +183,6 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 		anim->duration = static_cast<float>(animation->mDuration);
 		anim->rootNode = constructNodeTree(root, animation, nameToBone);
 		animations_.emplace(animation->mName.C_Str(), anim);
-		std::cout << animation->mName.C_Str() << std::endl;
 	}
 	globalInverse_ = glm::inverse(animations_.begin()->second->rootNode->transform);
 }
