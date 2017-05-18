@@ -24,6 +24,7 @@ public:
 private:
 	const std::string filename_;
 	std::vector<std::shared_ptr<Entity>> entities_;
+	std::vector<std::shared_ptr<Entity>> entitiesToBeAdded_;
 	PhysicsSystem physicsSystem_;
 
 	void loadImpl() override;

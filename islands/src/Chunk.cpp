@@ -127,7 +127,7 @@ bool Chunk::isLoaded() const {
 }
 
 void Chunk::addEntity(std::shared_ptr<Entity> entity) {
-	entities_.emplace_back(entity);
+	entitiesToBeAdded_.emplace_back(entity);
 }
 
 std::shared_ptr<Entity> Chunk::getEntity(const std::string& name) {
@@ -146,6 +146,11 @@ void Chunk::update() {
 	for (const auto entity : entities_) {
 		entity->update();
 	}
+
+	std::copy(entitiesToBeAdded_.begin(), entitiesToBeAdded_.end(), std::back_inserter(entities_));
+	entitiesToBeAdded_.clear();
+	entitiesToBeAdded_.shrink_to_fit();
+
 	physicsSystem_.update();
 }
 
