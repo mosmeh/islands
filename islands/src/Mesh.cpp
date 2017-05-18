@@ -37,9 +37,10 @@ Mesh::Mesh(const aiMesh* mesh, const aiMaterial* material) :
 
 	size_t idx = 0;
 	FOREACH (face, mesh->mFaces, mesh->mNumFaces) {
-		assert(face->mNumIndices == 3);
-		FOREACH (index, face->mIndices, face->mNumIndices) {
-			indices_[idx++] = *index;
+		if (face->mNumIndices == 3) {
+			FOREACH(index, face->mIndices, face->mNumIndices) {
+				indices_[idx++] = *index;
+			}
 		}
 	}
 
