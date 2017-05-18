@@ -44,7 +44,7 @@ private:
 	GLuint vertexBuffer_, indexBuffer_, normalBuffer_, uvBuffer_;
 	std::unique_ptr<glm::vec3[]> vertices_, normals_;
 	std::unique_ptr<glm::vec2[]> uvs_;
-	std::unique_ptr<unsigned int[]> indices_;
+	std::unique_ptr<GLuint[]> indices_;
 	const size_t numIndices_;
 	const bool hasUV_;
 	std::shared_ptr<Material> material_;
@@ -92,8 +92,8 @@ private:
 	static const size_t NUM_MAX_BONES = 128;
 
 	struct BoneDataPerVertex {
-		unsigned int boneIDs[NUM_BONES_PER_VERTEX];
-		float weights[NUM_BONES_PER_VERTEX] = {};
+		GLuint boneIDs[NUM_BONES_PER_VERTEX];
+		GLfloat weights[NUM_BONES_PER_VERTEX] = {};
 	};
 
 	enum SkinningLocation : GLuint {

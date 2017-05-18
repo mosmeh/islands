@@ -13,7 +13,7 @@ Mesh::Mesh(const aiMesh* mesh, const aiMaterial* material) :
 	numIndices_(3 * mesh->mNumFaces),
 	vertices_(std::make_unique<glm::vec3[]>(mesh->mNumVertices)),
 	normals_(std::make_unique<glm::vec3[]>(mesh->mNumVertices)),
-	indices_(std::make_unique<unsigned int[]>(3 * mesh->mNumFaces)),
+	indices_(std::make_unique<GLuint[]>(3 * mesh->mNumFaces)),
 	hasUV_(mesh->HasTextureCoords(0)) {
 
 	assert(mesh->HasNormals());
@@ -116,7 +116,7 @@ void Mesh::uploadImpl() {
 
 	glGenBuffers(1, &indexBuffer_);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer_);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices_ * sizeof(unsigned int),
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices_ * sizeof(GLuint),
 		indices_.get(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
@@ -259,7 +259,7 @@ void SkinnedMesh::uploadImpl() {
 
 	glEnableVertexAttribArray(SkinningLocation::WEIGHT);
 	glVertexAttribPointer(SkinningLocation::WEIGHT, NUM_BONES_PER_VERTEX, GL_FLOAT, GL_FALSE,
-		sizeof(BoneDataPerVertex), reinterpret_cast<GLvoid*>(sizeof(float) * NUM_BONES_PER_VERTEX));
+		sizeof(BoneDataPerVertex), reinterpret_cast<GLvoid*>(sizeof(GLfloat) * NUM_BONES_PER_VERTEX));
 
 	glBindVertexArray(0);
 }

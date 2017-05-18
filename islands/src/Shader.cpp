@@ -32,9 +32,10 @@ void Shader::loadImpl() {
 
 void Shader::uploadImpl() {
 	const auto s = source_.c_str();
+	GLint length = source_.size();
 
 	id_ = glCreateShader(type_);
-	glShaderSource(id_, 1, &s, nullptr);
+	glShaderSource(id_, 1, &s, &length);
 	source_.clear();
 	glCompileShader(id_);
 
