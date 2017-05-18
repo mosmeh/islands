@@ -73,7 +73,7 @@ void ModelDrawer::draw() {
 
 			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
 				if (animPlaying_) {
-					skinned->updateBoneTransform(float(glfwGetTime()) - animStartTime_);
+					skinned->updateBoneTransform(static_cast<float>(glfwGetTime()) - animStartTime_);
 				}
 
 				for (size_t i = 0; i < skinned->getNumBones(); ++i) {

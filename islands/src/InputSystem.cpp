@@ -135,9 +135,9 @@ void InputSystem::Joystick::update() {
 
 	int numAxes, numButtons;
 	const auto axes = glfwGetJoystickAxes(id_, &numAxes);
-	assert(numAxes >= NUM_AXES);
+	assert(numAxes >= static_cast<size_t>(Axis::Count));
 	buttons_ = glfwGetJoystickButtons(id_, &numButtons);
-	assert(numButtons >= Button::Count);
+	assert(numButtons >= static_cast<size_t>(Button::Count));
 
 	if (isButtonPressed(Button::Up) == GLFW_RELEASE &&
 		isButtonPressed(Button::Right) == GLFW_RELEASE &&
