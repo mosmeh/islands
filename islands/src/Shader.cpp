@@ -45,7 +45,7 @@ void Shader::uploadImpl() {
 		const auto infoLog = std::make_unique<GLchar[]>(infoLogLength);
 		glGetShaderInfoLog(id_, infoLogLength, nullptr, infoLog.get());
 
-		std::cerr << "Shader: " << infoLog.get() << std::endl;
+		SLOG << "Shader: " << infoLog.get() << std::endl;
 		throw;
 	}
 }

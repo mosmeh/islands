@@ -6,6 +6,7 @@
 #pragma warning(pop)
 
 #include "Texture.h"
+#include "Log.h"
 
 namespace islands {
 
@@ -34,7 +35,7 @@ void Texture2D::loadImpl() {
 	stbi_set_flip_vertically_on_load(true);
 	data_ = stbi_load(filename_.c_str(), &width_, &height_, &numComponents, STBI_rgb_alpha);
 	if (!data_) {
-		std::cerr << "stbi: " << stbi_failure_reason() << std::endl;
+		SLOG << "stbi: " << stbi_failure_reason() << std::endl;
 		throw;
 	}
 	assert(numComponents == 4);
