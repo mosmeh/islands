@@ -5,13 +5,6 @@
 #include "PhysicalBody.h"
 #include "Log.h"
 
-#ifdef _WIN32
-#include <VersionHelpers.h>
-#include <mmsystem.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <glfw3native.h>
-#endif
-
 namespace islands {
 
 class Profiler {
@@ -70,64 +63,11 @@ private:
 	std::unordered_map<std::string, Sample> samples_;
 };
 
-#ifdef _WIN32
-std::string getWindowsVersionString() {
-	std::string str;
-
-	if (IsWindowsVersionOrGreater(10, 0, 0)) {
-		str = "Windows 10";
-	} else if (IsWindows8Point1OrGreater()) {
-		str = "Windows 8.1";
-	} else if (IsWindows8OrGreater()) {
-		str = "Windows 8";
-	} else if (IsWindows7SP1OrGreater()) {
-		str = "Windows 7 SP1";
-	} else if (IsWindows7OrGreater()) {
-		str = "Windows 7";
-	} else if (IsWindowsVistaSP2OrGreater()) {
-		str = "Windows Vista SP2";
-	} else if (IsWindowsVistaSP1OrGreater()) {
-		str = "Windows Vista SP1";
-	} else if (IsWindowsXPSP3OrGreater()) {
-		str = "Windows XP SP3";
-	} else if (IsWindowsXPSP2OrGreater()) {
-		str = "Windows XP SP2";
-	} else if (IsWindowsXPSP1OrGreater()) {
-		str = "Windows XP SP1";
-	} else if (IsWindowsXPOrGreater()) {
-		str = "Windows XP";
-	} else {
-		str = "Unknown";
-	}
-
-	if (IsWindowsServer()) {
-		str += " Server";
-	}
-
-	BOOL isWow64Process;
-	if (IsWow64Process(GetCurrentProcess(), &isWow64Process)) {
-		if (isWow64Process) {
-			str += " 64bit";
-		} else {
-			str += " 32bit";
-		}
-	}
-
-	return str;
-}
-#endif
-
 void printSystemInformation() {
-#ifdef _WIN32
-	SLOG << "OS: " << getWindowsVersionString() << std::endl;
-
-	MEMORYSTATUSEX stat;
-	stat.dwLength = sizeof(stat);
-	if (GlobalMemoryStatusEx(&stat)) {
-		SLOG << "Available physical memory: " << stat.ullAvailPhys << " / "
-			<< stat.ullTotalPhys << "bytes" << std::endl;
-	}
-#endif
+	SLOG << "OS: " << sys::getVersionString() << std::endl;
+	const auto memStat = sys::getPhysicalMemoryStatus();
+	SLOG << "Available physical memory: " << memStat.available_bytes << " / "
+		<< memStat.total_bytes << "bytes" << std::endl;
 
 #define GL_PRINT_STRING(name) SLOG << #name << ": " << glGetString(name) << std::endl;
 
@@ -269,9 +209,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 
 	printSystemInformation();
 
-#ifdef _WIN32
-	ImmAssociateContext(glfwGetWin32Window(window), NULL);
-#endif
+	sys::disableIME(window);
 
 	glfwSetWindowAspectRatio(window, 16, 9);
 	glfwSetFramebufferSizeCallback(window, [](GLFWwindow*, int width, int height) {
@@ -345,13 +283,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 
 		const auto sleepDuration = 1000 * (1.0 / 60 - glfwGetTime() + beforeTime);
 		if (sleepDuration > 0) {
-#ifdef _WIN32
-			timeBeginPeriod(1);
-			Sleep(static_cast<DWORD>(sleepDuration));
-			timeEndPeriod(1);
-#else
-#error not implemented
-#endif
+			sys::sleep(std::chrono::milliseconds(static_cast<unsigned long>(sleepDuration)));
 		}
 	}
 
