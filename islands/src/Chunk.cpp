@@ -27,11 +27,60 @@ namespace islands {
 
 Chunk::Chunk(const std::string& name, const std::string& filename) :
 	Resource(name),
-	filename_(filename) {
+	filename_(filename) {}
 
+bool Chunk::isLoaded() const {
+	for (const auto entity : entities_) {
+		if (!entity->isLoaded()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+void Chunk::addEntity(std::shared_ptr<Entity> entity) {
+	entitiesToBeAdded_.emplace_back(entity);
+}
+
+std::shared_ptr<Entity> Chunk::getEntity(const std::string& name) const {
+	assert(isLoaded());
+
+	const auto iter = std::find_if(entities_.begin(), entities_.end(),
+		[&name](std::shared_ptr<Entity> e) {
+		return e->getName() == name;
+	});
+	if (iter != entities_.end()) {
+		return *iter;
+	} else {
+		throw std::invalid_argument("not found");
+	}
+}
+
+void Chunk::update() {
+	load();
+	for (const auto entity : entities_) {
+		entity->update();
+	}
+
+	std::copy(entitiesToBeAdded_.begin(), entitiesToBeAdded_.end(), std::back_inserter(entities_));
+	entitiesToBeAdded_.clear();
+	entitiesToBeAdded_.shrink_to_fit();
+
+	physicsSystem_.update();
+}
+
+void Chunk::draw() {
+	assert(isLoaded());
+
+	for (const auto entity : entities_) {
+		entity->draw();
+	}
+}
+
+void Chunk::loadImpl() {
 	picojson::value json;
 	{
-		std::ifstream ifs(filename);
+		std::ifstream ifs(filename_);
 		ifs >> json;
 	}
 
@@ -114,55 +163,6 @@ Chunk::Chunk(const std::string& name, const std::string& filename) :
 		}
 
 		addEntity(entity);
-	}
-}
-
-bool Chunk::isLoaded() const {
-	for (const auto entity : entities_) {
-		if (!entity->isLoaded()) {
-			return false;
-		}
-	}
-	return true;
-}
-
-void Chunk::addEntity(std::shared_ptr<Entity> entity) {
-	entitiesToBeAdded_.emplace_back(entity);
-}
-
-std::shared_ptr<Entity> Chunk::getEntity(const std::string& name) {
-	const auto iter = std::find_if(entities_.begin(), entities_.end(),
-		[&name](std::shared_ptr<Entity> e) {
-		return e->getName() == name;
-	});
-	if (iter != entities_.end()) {
-		return *iter;
-	} else {
-		throw std::invalid_argument("not found");
-	}
-}
-
-void Chunk::update() {
-	for (const auto entity : entities_) {
-		entity->update();
-	}
-
-	std::copy(entitiesToBeAdded_.begin(), entitiesToBeAdded_.end(), std::back_inserter(entities_));
-	entitiesToBeAdded_.clear();
-	entitiesToBeAdded_.shrink_to_fit();
-
-	physicsSystem_.update();
-}
-
-void Chunk::draw() {
-	for (const auto entity : entities_) {
-		entity->draw();
-	}
-}
-
-void Chunk::loadImpl() {
-	for (const auto entity : entities_) {
-		entity->loadAsync();
 	}
 }
 

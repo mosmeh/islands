@@ -23,7 +23,7 @@ public:
 
 	const glm::mat4& getModelMatrix() const;
 
-	void update() const;
+	void update();
 	void draw() const;
 	Chunk& getChunk() const;
 

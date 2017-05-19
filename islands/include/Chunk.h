@@ -7,9 +7,7 @@
 
 namespace islands {
 
-class Chunk :
-	public std::enable_shared_from_this<Chunk>,
-	public Resource {
+class Chunk : public Resource {
 public:
 	Chunk(const std::string& name, const std::string& filename);
 	virtual ~Chunk() = default;
@@ -17,7 +15,7 @@ public:
 	bool isLoaded() const override;
 
 	void addEntity(std::shared_ptr<Entity> entity);
-	std::shared_ptr<Entity> getEntity(const std::string& name);
+	std::shared_ptr<Entity> getEntity(const std::string& name) const;
 	void update();
 	void draw();
 

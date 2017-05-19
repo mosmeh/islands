@@ -52,7 +52,7 @@ const glm::mat4& Entity::getModelMatrix() const {
 	return modelMatrix_;
 }
 
-void Entity::update() const {
+void Entity::update() {
 	for (const auto c : components_) {
 		c->startOnce();
 		c->update();

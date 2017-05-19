@@ -199,6 +199,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	ResourceSystem::getInstance().createOrGet<Program>("LightmapProgram", "default.vert", "lightmap.frag"));
 
 	const auto chunk = std::make_shared<Chunk>("chunk", "forest1.json");
+	chunk->loadAsync();
 
 	std::ostringstream ss;
 	while (!glfwWindowShouldClose(window)) {
