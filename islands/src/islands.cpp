@@ -229,7 +229,8 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 
 		glfwPollEvents();
 
-		const auto sleepDuration = 1000 * (1.0 / 60 - glfwGetTime() + beforeTime);
+		static constexpr auto TARGET_FPS = 60;
+		const auto sleepDuration = 1000 * (1.0 / TARGET_FPS - glfwGetTime() + beforeTime);
 		if (sleepDuration > 0) {
 			sys::sleep(std::chrono::milliseconds(static_cast<unsigned long>(sleepDuration)));
 		}
