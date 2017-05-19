@@ -275,6 +275,7 @@
     <ClInclude Include="include\PhysicalBody.h" />
     <ClInclude Include="include\PhysicsSystem.h" />
     <ClInclude Include="include\PlayerController.h" />
+    <ClInclude Include="include\Profiler.h" />
     <ClInclude Include="include\Resource.h" />
     <ClInclude Include="include\ResourceSystem.h" />
     <ClInclude Include="include\Camera.h" />

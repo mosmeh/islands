@@ -4,64 +4,9 @@
 #include "Chunk.h"
 #include "PhysicalBody.h"
 #include "Log.h"
+#include "Profiler.h"
 
 namespace islands {
-
-class Profiler {
-public:
-	Profiler() :
-		prevTime_(-INFINITY),
-		lastDeltaTime_(NAN) {}
-	virtual ~Profiler() = default;
-
-	using Real = float;
-
-	void markFrame() {
-		const auto time = static_cast<Real>(glfwGetTime());
-		if (prevTime_ >= 0) {
-			lastDeltaTime_ = time - prevTime_;
-		}
-		prevTime_ = time;
-	}
-
-	Real getLastFPS() const {
-		return 1.f / lastDeltaTime_;
-	}
-
-	Real getLastDeltaTime() const {
-		return lastDeltaTime_;
-	}
-
-	void enterSection(const std::string& name) {
-		if (samples_.find(name) == samples_.end()) {
-			samples_.emplace(name, Sample{static_cast<Real>(glfwGetTime()), 0});
-		} else {
-			samples_.at(name).startTime = static_cast<Real>(glfwGetTime());
-		}
-	}
-
-	void leaveSection(const std::string& name) {
-		samples_.at(name).elapsedTime += static_cast<Real>(glfwGetTime()) - samples_.at(name).startTime;
-	}
-
-	Real getElapsedTime(const std::string& name) const {
-		return samples_.at(name).elapsedTime;
-	}
-
-	void clearSamples() {
-		samples_.clear();
-	}
-
-private:
-	struct Sample {
-		Real startTime;
-		Real elapsedTime;
-	};
-
-	Real prevTime_;
-	Real lastDeltaTime_;
-	std::unordered_map<std::string, Sample> samples_;
-};
 
 void printSystemInformation() {
 	SLOG << "OS: " << sys::getVersionString() << std::endl;
@@ -256,28 +201,30 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	const auto chunk = std::make_shared<Chunk>("chunk", "forest1.json");
 
 	std::ostringstream ss;
-	Profiler profiler;
 	while (!glfwWindowShouldClose(window)) {
 		const auto beforeTime = glfwGetTime();
-		profiler.markFrame();
+		Profiler::getInstance().markFrame();
 
-		profiler.enterSection("update");
+		Profiler::getInstance().enterSection("update");
 		InputSystem::getInstance().update();
 		chunk->update();
-		profiler.leaveSection("update");
+		Profiler::getInstance().leaveSection("update");
 
-		profiler.enterSection("draw");
+		Profiler::getInstance().enterSection("draw");
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		chunk->draw();
 		glfwSwapBuffers(window);
-		profiler.leaveSection("draw");
+		Profiler::getInstance().leaveSection("draw");
 
+#ifdef _DEBUG
 		ss.str("");
-		ss << "FPS: " << profiler.getLastFPS() << ", delta: " << profiler.getLastDeltaTime()
-			<< ", update: " << profiler.getElapsedTime("update") <<
-			", draw: " << profiler.getElapsedTime("draw") << std::endl;
+		ss << "FPS: " << Profiler::getInstance().getLastFPS() <<
+			", delta: " << Profiler::getInstance().getLastDeltaTime() <<
+			", update: " << Profiler::getInstance().getElapsedTime("update") <<
+			", draw: " << Profiler::getInstance().getElapsedTime("draw") << std::endl;
 		glfwSetWindowTitle(window, ss.str().c_str());
-		profiler.clearSamples();
+#endif
+		Profiler::getInstance().clearSamples();
 
 		glfwPollEvents();
 
