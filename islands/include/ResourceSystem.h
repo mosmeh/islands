@@ -61,7 +61,9 @@ template<class T>
 inline std::enable_if_t<std::is_base_of<Resource, T>::value, std::shared_ptr<T>>
 ResourceSystem::get(const std::string& name) const {
 	assert(resources_.find(name) != resources_.end());
-	return std::dynamic_pointer_cast<T>(resources_.at(name));
+	const auto resource = std::dynamic_pointer_cast<T>(resources_.at(name));
+	assert(resource);
+	return resource;
 }
 
 }
