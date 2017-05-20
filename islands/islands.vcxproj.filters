@@ -33,9 +33,6 @@
     <ClCompile Include="src\islands.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\Log.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="src\Material.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
