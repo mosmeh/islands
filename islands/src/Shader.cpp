@@ -31,11 +31,11 @@ void Shader::loadImpl() {
 }
 
 void Shader::uploadImpl() {
-	const auto s = source_.c_str();
-	GLint length = source_.size();
+	const auto str = source_.c_str();
+	const GLint length = source_.size();
 
 	id_ = glCreateShader(type_);
-	glShaderSource(id_, 1, &s, &length);
+	glShaderSource(id_, 1, &str, &length);
 	source_.clear();
 	glCompileShader(id_);
 
@@ -47,14 +47,17 @@ void Shader::uploadImpl() {
 		glGetShaderInfoLog(id_, infoLogLength, nullptr, infoLog.get());
 
 		SLOG << "Shader: " << infoLog.get() << std::endl;
-		throw;
 	}
+
+	GLint compileStatus;
+	glGetShaderiv(id_, GL_COMPILE_STATUS, &compileStatus);
+	assert(compileStatus == GL_TRUE);
 }
 
 Program::Program(const std::string& name, const std::string& vertex, const std::string& fragment) :
 	Resource(name),
-	vertex_(ResourceSystem::getInstance().createOrGet<Shader>(vertex, vertex.c_str(), GL_VERTEX_SHADER)),
-	fragment_(ResourceSystem::getInstance().createOrGet<Shader>(fragment, fragment.c_str(), GL_FRAGMENT_SHADER)) {}
+	vertex_(ResourceSystem::getInstance().createOrGet<Shader>(vertex, vertex, GL_VERTEX_SHADER)),
+	fragment_(ResourceSystem::getInstance().createOrGet<Shader>(fragment, fragment, GL_FRAGMENT_SHADER)) {}
 
 Program::~Program() {
 	if (isUploaded()) {
@@ -111,6 +114,8 @@ void Program::uploadImpl() {
 	glAttachShader(id_, vertex_->getId());
 	glAttachShader(id_, fragment_->getId());
 	glLinkProgram(id_);
+	glDetachShader(id_, vertex_->getId());
+	glDetachShader(id_, fragment_->getId());
 
 	GLint infoLogLength;
 	glGetProgramiv(id_, GL_INFO_LOG_LENGTH, &infoLogLength);
@@ -120,11 +125,11 @@ void Program::uploadImpl() {
 		glGetProgramInfoLog(id_, infoLogLength, nullptr, infoLog.get());
 
 		SLOG << "Program: " << infoLog.get() << std::endl;
-		throw;
 	}
 
-	glDetachShader(id_, vertex_->getId());
-	glDetachShader(id_, fragment_->getId());
+	GLint linkStatus;
+	glGetProgramiv(id_, GL_LINK_STATUS, &linkStatus);
+	assert(linkStatus == GL_TRUE);
 }
 
 }
