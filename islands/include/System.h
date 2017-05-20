@@ -18,7 +18,7 @@ constexpr char getFilePathSeperator() {
 }
 
 constexpr const char* basenameImpl(const char* dp, const char* p) {
-	return *p == '\0' ? dp : *p == sys::getFilePathSeperator() ?
+	return *p == '\0' ? dp : *p == getFilePathSeperator() ?
 		basenameImpl(p + 1, p + 1) : basenameImpl(dp, p + 1);
 }
 
@@ -28,6 +28,7 @@ constexpr const char* basename(const char* s) {
 	return basenameImpl(s, s);
 }
 
+tm getTime();
 std::string getVersionString();
 void disableIME(GLFWwindow* window);
 void sleep(std::chrono::milliseconds duration);

@@ -10,6 +10,18 @@
 namespace islands {
 namespace sys {
 
+tm getTime() {
+	time_t t;
+	std::time(&t);
+#ifdef _MSC_VER
+	tm time;
+	localtime_s(&time, &t);
+	return time;
+#else
+	return *std::localtime(&t);
+#endif
+}
+
 std::string getVersionString() {
 #ifdef _WIN32
 	std::string str;
@@ -37,7 +49,7 @@ std::string getVersionString() {
 	} else if (IsWindowsXPOrGreater()) {
 		str = "Windows XP";
 	} else {
-		str = "Unknown";
+		str = "Unknown Windows";
 	}
 
 	if (IsWindowsServer()) {
