@@ -9,7 +9,7 @@ class Chunk;
 
 class Entity : public Resource {
 public:
-	Entity(const std::string& name, Chunk* chunk);
+	Entity(const std::string& name);
 	virtual ~Entity() = default;
 
 	bool isLoaded() const override;
@@ -25,6 +25,8 @@ public:
 
 	void update();
 	void draw() const;
+
+	void setChunk(Chunk* chunk);
 	Chunk& getChunk() const;
 
 	void attachComponent(std::shared_ptr<Component> component);

@@ -3,10 +3,10 @@
 
 namespace islands {
 
-Entity::Entity(const std::string& name, Chunk* chunk) :
+Entity::Entity(const std::string& name) :
 	Resource(name),
 	name_(name),
-	chunk_(chunk),
+	chunk_(nullptr),
 	position_(0),
 	quaternion_(1, 0, 0, 0),
 	scale_(1) {}
@@ -67,7 +67,12 @@ void Entity::draw() const {
 	}
 }
 
+void Entity::setChunk(Chunk* chunk) {
+	chunk_ = chunk;
+}
+
 Chunk& Entity::getChunk() const {
+	assert(chunk_);
 	return *chunk_;
 }
 

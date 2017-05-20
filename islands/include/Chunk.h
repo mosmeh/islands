@@ -19,6 +19,8 @@ public:
 	void update();
 	void draw();
 
+	PhysicsSystem& getPhysicsSystem();
+
 private:
 	const std::string filename_;
 	std::vector<std::shared_ptr<Entity>> entities_;
