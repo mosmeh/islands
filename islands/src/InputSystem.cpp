@@ -82,9 +82,7 @@ void InputSystem::Keyboard::update() {
 		direction_ += glm::vec2(-1, 0);
 	}
 
-	const bool x = isKeyPressed(GLFW_KEY_LEFT) ^ isKeyPressed(GLFW_KEY_RIGHT);
-	const bool y = isKeyPressed(GLFW_KEY_UP) ^ isKeyPressed(GLFW_KEY_DOWN);
-	if (x && y) {
+	if (direction_.x != 0 && direction_.y != 0) {
 		direction_ = glm::normalize(direction_);
 	}
 }
@@ -139,11 +137,8 @@ void InputSystem::Joystick::update() {
 	buttons_ = glfwGetJoystickButtons(id_, &numButtons);
 	assert(numButtons >= static_cast<size_t>(Button::Count));
 
-	if (isButtonPressed(Button::Up) == GLFW_RELEASE &&
-		isButtonPressed(Button::Right) == GLFW_RELEASE &&
-		isButtonPressed(Button::Down) == GLFW_RELEASE &&
-		isButtonPressed(Button::Left) == GLFW_RELEASE) {
-
+	if (!isButtonPressed(Button::Up) && !isButtonPressed(Button::Right) &&
+		!isButtonPressed(Button::Down) && !isButtonPressed(Button::Left)) {
 		const auto dir = glm::vec2(
 			axes[static_cast<size_t>(Axis::LeftHorizontal)],
 			axes[static_cast<size_t>(Axis::LeftVertical)]);
@@ -153,14 +148,14 @@ void InputSystem::Joystick::update() {
 			direction_ = glm::zero<glm::vec2>();
 		}
 	} else {
-		if (isButtonPressed(Button::Up) == GLFW_PRESS) {
+		if (isButtonPressed(Button::Up)) {
 			direction_ = {0, -1};
-		} else if (isButtonPressed(Button::Down) == GLFW_PRESS) {
+		} else if (isButtonPressed(Button::Down)) {
 			direction_ = {0, 1};
 		}
-		if (isButtonPressed(Button::Right) == GLFW_PRESS) {
+		if (isButtonPressed(Button::Right)) {
 			direction_ = {1, 0};
-		} else if (isButtonPressed(Button::Left) == GLFW_PRESS) {
+		} else if (isButtonPressed(Button::Left)) {
 			direction_ = {-1, 0};
 		}
 	}
@@ -184,7 +179,7 @@ bool InputSystem::Joystick::isButtonPressed(Button button) const {
 	if (!buttons_) {
 		return false;
 	}
-	return buttons_[static_cast<size_t>(button)];
+	return buttons_[static_cast<size_t>(button)] == GLFW_PRESS;
 }
 
 }
