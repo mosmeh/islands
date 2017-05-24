@@ -6,6 +6,9 @@ namespace islands {
 
 class Logger : public std::ostream {
 public:
+	Logger(const Logger&) = delete;
+	Logger& operator=(const Logger&) = delete;
+
 	virtual ~Logger() = default;
 
 	static std::unique_lock<std::mutex> lock() {
