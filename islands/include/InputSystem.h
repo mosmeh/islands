@@ -16,7 +16,6 @@ public:
 	static InputSystem& getInstance();
 
 	void update();
-	void setWindow(GLFWwindow* window);
 	void registerKeyboardCallback(GLFWkeyfun callback);
 	const glm::vec2 getDirection() const;
 	bool isCommandActive(Command command) const;
@@ -35,7 +34,6 @@ private:
 
 	class Keyboard : public InputDevice {
 	public:
-		Keyboard();
 		virtual ~Keyboard() = default;
 
 		bool isPresent() const override;
@@ -43,10 +41,7 @@ private:
 		glm::vec2 getDirection() const override;
 		bool isCommandActive(Command command) const override;
 
-		void setWindow(GLFWwindow* window);
-
 	private:
-		GLFWwindow* window_;
 		glm::vec2 direction_;
 
 		bool isKeyPressed(int key) const;

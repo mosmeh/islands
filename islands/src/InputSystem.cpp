@@ -1,11 +1,14 @@
 #include "InputSystem.h"
+#include "Window.h"
 
 namespace islands {
 
-InputSystem::InputSystem() : window_(nullptr) {}
+InputSystem::InputSystem() {
+	glfwSetKeyCallback(Window::getInstance().getHandle(), keyboardCallback);
+}
 
 InputSystem::~InputSystem() {
-	glfwSetKeyCallback(window_, nullptr);
+	glfwSetKeyCallback(Window::getInstance().getHandle(), nullptr);
 }
 
 InputSystem& InputSystem::getInstance() {
@@ -28,13 +31,6 @@ void InputSystem::update() {
 	} else {
 		direction_ = glm::zero<glm::vec2>();
 	}
-}
-
-void InputSystem::setWindow(GLFWwindow* window) {
-	assert(window);
-	window_ = window;
-	glfwSetKeyCallback(window, keyboardCallback);
-	keyboard_.setWindow(window);
 }
 
 void InputSystem::registerKeyboardCallback(GLFWkeyfun callback) {
@@ -61,10 +57,8 @@ void InputSystem::keyboardCallback(GLFWwindow* window, int key, int scancode, in
 	}
 }
 
-InputSystem::Keyboard::Keyboard() : window_(nullptr) {}
-
 bool InputSystem::Keyboard::isPresent() const {
-	return window_;
+	return true;
 }
 
 void InputSystem::Keyboard::update() {
@@ -87,11 +81,6 @@ void InputSystem::Keyboard::update() {
 	}
 }
 
-void InputSystem::Keyboard::setWindow(GLFWwindow* window) {
-	assert(window);
-	window_ = window;
-}
-
 glm::vec2 InputSystem::Keyboard::getDirection() const {
 	return direction_;
 }
@@ -107,9 +96,8 @@ bool InputSystem::Keyboard::isCommandActive(Command command) const {
 }
 
 bool InputSystem::Keyboard::isKeyPressed(int key) const {
-	assert(window_);
 	assert(GLFW_KEY_SPACE <= key && key <= GLFW_KEY_LAST);
-	return glfwGetKey(window_, key) == GLFW_PRESS;
+	return glfwGetKey(Window::getInstance().getHandle(), key) == GLFW_PRESS;
 }
 
 InputSystem::Joystick::Joystick() :

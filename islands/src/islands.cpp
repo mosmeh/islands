@@ -1,4 +1,5 @@
-﻿#include "ResourceSystem.h"
+﻿#include "Window.h"
+#include "ResourceSystem.h"
 #include "Camera.h"
 #include "InputSystem.h"
 #include "Chunk.h"
@@ -102,19 +103,7 @@ int main() {
 	glfwWindowHint(GLFW_SAMPLES, 4);
 #ifdef _DEBUG
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-#endif
 
-	SLOG << "GLFW: Creating window" << std::endl;
-	const auto window = glfwCreateWindow(1280, 720, "test", nullptr, nullptr);
-	glfwMakeContextCurrent(window);
-
-	SLOG << "glad: Loading" << std::endl;
-	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
-		SLOG << "glad: Failed to load" << std::endl;
-		throw;
-	}
-
-#ifdef _DEBUG
 	glad_set_post_callback([](const char* name, void*, int, ...) {
 		const GLenum errorCode = glad_glGetError();
 		if (errorCode == GL_NO_ERROR) {
@@ -145,21 +134,9 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	});
 #endif
 
+	Window::getInstance().update();
 	printSystemInformation();
 
-	sys::disableIME(window);
-
-	glfwSetWindowAspectRatio(window, 16, 9);
-	glfwSetFramebufferSizeCallback(window, [](GLFWwindow*, int width, int height) {
-		glViewport(0, 0, width, height);
-	});
-	glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
-
-	{
-		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
-		glViewport(0, 0, width, height);
-	}
 	glClearColor(0.f, 0.f, 0.5f, 1.f);
 	glClearDepth(1.0);
 	glEnable(GL_DEPTH_TEST);
@@ -167,7 +144,6 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	InputSystem::getInstance().setWindow(window);
 	InputSystem::getInstance().registerKeyboardCallback(
 		[](GLFWwindow* window, int key, int, int action, int) {
 		switch (key) {
@@ -218,7 +194,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	chunk->loadAsync();
 
 	std::ostringstream ss;
-	while (!glfwWindowShouldClose(window)) {
+	while (Window::getInstance().update()) {
 		const auto beforeTime = glfwGetTime();
 		Profiler::getInstance().markFrame();
 
@@ -230,7 +206,6 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		Profiler::getInstance().enterSection("draw");
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		chunk->draw();
-		glfwSwapBuffers(window);
 		Profiler::getInstance().leaveSection("draw");
 
 #ifdef _DEBUG
@@ -239,17 +214,9 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 			", delta: " << Profiler::getInstance().getLastDeltaTime() <<
 			", update: " << Profiler::getInstance().getElapsedTime("update") <<
 			", draw: " << Profiler::getInstance().getElapsedTime("draw") << std::endl;
-		glfwSetWindowTitle(window, ss.str().c_str());
+		glfwSetWindowTitle(Window::getInstance().getHandle(), ss.str().c_str());
 #endif
 		Profiler::getInstance().clearSamples();
-
-		glfwPollEvents();
-
-		static constexpr auto TARGET_FPS = 60;
-		const auto sleepDuration = 1000 * (1.0 / TARGET_FPS - glfwGetTime() + beforeTime);
-		if (sleepDuration > 0) {
-			sys::sleep(std::chrono::milliseconds(static_cast<unsigned long>(sleepDuration)));
-		}
 	}
 
     return EXIT_SUCCESS;
