@@ -77,10 +77,7 @@ bool Sphere::triangleIntersects(const glm::vec3& v0, const glm::vec3& v1, const 
 		((glm::dot(q3, q3) > rr * e3 * e3) & (glm::dot(q3, qb) > 0)));
 }
 
-Collider::Collider(std::shared_ptr<Model> model) :
-	model_(model),
-	boundingBoxConstructed_(false) {
-
+Collider::Collider(std::shared_ptr<Model> model) : model_(model) {
 #ifdef SHOW_BOX
 	program_ = std::make_shared<Program>("boxProg", "box.vert", "box.frag");
 	program_->loadAsync();
@@ -94,15 +91,8 @@ Collider::Collider(std::shared_ptr<Model> model) :
 }
 
 void Collider::update() {
-	if (!boundingBoxConstructed_) {
-		for (const auto mesh : model_->getMeshes()) {
-			for (size_t i = 0; i < mesh->numVertices_; ++i) {
-				boundingBox_.expand(mesh->vertices_[i]);
-			}
-		}
-		boundingBoxConstructed_ = true;
-	}
-	aabb_ = boundingBox_.calculateAABB(getEntity().getModelMatrix());
+	model_->load();
+	aabb_ = model_->getBoundingBox().calculateAABB(getEntity().getModelMatrix());
 
 #ifdef SHOW_BOX
 	const glm::vec3 vertices[10] = {
@@ -158,6 +148,10 @@ bool Collider::intersects(const std::shared_ptr<Collider> collider) const {
 
 std::shared_ptr<Model> Collider::getModel() const {
 	return model_;
+}
+
+const BoundingBox& Collider::getAABB() const {
+	return aabb_;
 }
 
 bool MeshCollider::intersectsImpl(std::shared_ptr<MeshCollider> collider) const {
@@ -221,10 +215,10 @@ SphereCollider::SphereCollider(std::shared_ptr<Model> model, const float radius)
 
 void SphereCollider::update() {
 	Collider::update();
-	const auto p = (boundingBox_.max - boundingBox_.min);
+	const auto& boundingBox = model_->getBoundingBox();
+	const auto p = boundingBox.max - boundingBox.min;
 	sphere_.radius = std::min({p.x, p.y, p.z}) / 2;
 	sphere_.center = (aabb_.max + aabb_.min) / 2.f;
-	//sphere_.center = getEntity().getPosition();
 }
 
 bool SphereCollider::intersectsImpl(std::shared_ptr<MeshCollider> collider) const {

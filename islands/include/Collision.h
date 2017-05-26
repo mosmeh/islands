@@ -7,18 +7,6 @@
 
 namespace islands {
 
-struct BoundingBox {
-	glm::vec3 min, max;
-
-	BoundingBox() :
-		min(INFINITY),
-		max(-INFINITY) {}
-
-	void expand(const glm::vec3& vertex);
-	BoundingBox calculateAABB(const glm::mat4& model) const;
-	bool intersects(const BoundingBox& box) const;
-};
-
 struct Sphere {
 	glm::vec3 center;
 	float radius;
@@ -63,11 +51,11 @@ public:
 	bool intersects(const std::shared_ptr<Collider> collider) const;
 
 	std::shared_ptr<Model> getModel() const;
+	const BoundingBox& getAABB() const;
 
 protected:
 	std::shared_ptr<Model> model_;
-	bool boundingBoxConstructed_;
-	BoundingBox boundingBox_, aabb_;
+	BoundingBox aabb_;
 	std::vector<std::function<void(void)>> callbacks_;
 
 #ifdef SHOW_BOX

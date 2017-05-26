@@ -15,6 +15,10 @@ const std::vector<std::shared_ptr<Mesh>>& Model::getMeshes() {
 	return meshes_;
 }
 
+const BoundingBox& Model::getBoundingBox() const {
+	return boundingBox_;
+}
+
 void Model::loadImpl() {
 	static Assimp::Importer importer;
 	importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 4);
@@ -29,15 +33,22 @@ void Model::loadImpl() {
 	}
 
 	assert(scene->HasMaterials());
-	for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
-		const auto mesh = scene->mMeshes[i];
-		const auto material = scene->mMaterials[mesh->mMaterialIndex];
-		if (mesh->HasBones()) {
+	for (unsigned int iMesh = 0; iMesh < scene->mNumMeshes; ++iMesh) {
+		const auto aMesh = scene->mMeshes[iMesh];
+		const auto material = scene->mMaterials[aMesh->mMaterialIndex];
+
+		std::shared_ptr<Mesh> mesh;
+		if (aMesh->HasBones()) {
 			assert(scene->HasAnimations());
-			meshes_.emplace_back(std::make_shared<SkinnedMesh>(
-				mesh, material, scene->mRootNode, scene->mAnimations, scene->mNumAnimations));
+			mesh = std::make_shared<SkinnedMesh>(
+				aMesh, material, scene->mRootNode, scene->mAnimations, scene->mNumAnimations);
 		} else {
-			meshes_.emplace_back(std::make_shared<Mesh>(mesh, material));
+			mesh = std::make_shared<Mesh>(aMesh, material);
+		}
+		meshes_.emplace_back(mesh);
+
+		for (size_t iVert = 0; iVert < mesh->numVertices_; ++iVert) {
+			boundingBox_.expand(mesh->vertices_[iVert]);
 		}
 	}
 	importer.FreeScene();

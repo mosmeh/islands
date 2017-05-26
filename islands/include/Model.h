@@ -6,6 +6,18 @@
 
 namespace islands {
 
+struct BoundingBox {
+	glm::vec3 min, max;
+
+	BoundingBox() :
+		min(INFINITY),
+		max(-INFINITY) {}
+
+	void expand(const glm::vec3& vertex);
+	BoundingBox calculateAABB(const glm::mat4& model) const;
+	bool intersects(const BoundingBox& box) const;
+};
+
 class Model : public Resource {
 public:
 	Model(const std::string& name, const std::string& filename);
@@ -17,10 +29,12 @@ public:
 	virtual ~Model() = default;
 
 	const std::vector<std::shared_ptr<Mesh>>& getMeshes();
+	const BoundingBox& getBoundingBox() const;
 
 private:
 	const std::string filename_;
 	std::vector<std::shared_ptr<Mesh>> meshes_;
+	BoundingBox boundingBox_;
 
 	void loadImpl() override;
 };
