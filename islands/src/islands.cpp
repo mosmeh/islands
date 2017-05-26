@@ -2,7 +2,7 @@
 #include "ResourceSystem.h"
 #include "Camera.h"
 #include "InputSystem.h"
-#include "Chunk.h"
+#include "ChunkManager.h"
 #include "PlayerController.h"
 #include "PhysicalBody.h"
 #include "Log.h"
@@ -167,32 +167,6 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	ResourceSystem::getInstance().setDefaultProgram(ResourceSystem::ProgramType::Lightmap,
 	ResourceSystem::getInstance().createOrGet<Program>("LightmapProgram", "default.vert", "lightmap.frag"));
 
-	const auto chunk = std::make_shared<Chunk>("chunk", "forest1.json");
-
-	const auto entity = std::make_shared<Entity>("Player");
-	entity->setPosition({0, 0, 10.f});
-	entity->setScale({0.00485f, 0.00485f, 0.006525f});
-
-	entity->attachComponent(std::make_shared<PlayerController>());
-
-	constexpr auto meshName = "character6a.fbx";
-	const auto model = ResourceSystem::getInstance().createOrGet<Model>(meshName, meshName);
-	const auto drawer = std::make_shared<ModelDrawer>(model);
-	entity->attachComponent(drawer);
-
-	const auto collider = std::make_shared<SphereCollider>(model, 1.f);
-	chunk->getPhysicsSystem().registerCollider(collider);
-	entity->attachComponent(collider);
-
-	const auto body = std::make_shared<PhysicalBody>(1.f);
-	body->setCollider(collider);
-	chunk->getPhysicsSystem().registerBody(body);
-	entity->attachComponent(body);
-
-	chunk->addEntity(entity);
-
-	chunk->loadAsync();
-
 	std::ostringstream ss;
 	while (Window::getInstance().update()) {
 		const auto beforeTime = glfwGetTime();
@@ -200,12 +174,12 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 
 		Profiler::getInstance().enterSection("update");
 		InputSystem::getInstance().update();
-		chunk->update();
+		ChunkManager::getInstance().update();
 		Profiler::getInstance().leaveSection("update");
 
 		Profiler::getInstance().enterSection("draw");
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		chunk->draw();
+		ChunkManager::getInstance().draw();
 		Profiler::getInstance().leaveSection("draw");
 
 #ifdef _DEBUG
