@@ -57,7 +57,7 @@ bool Window::update() {
 	return true;
 }
 
-glm::uvec2 Window::getSize() const {
+glm::uvec2 Window::getFramebufferSize() const {
 	return {width_, height_};
 }
 

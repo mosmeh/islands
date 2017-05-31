@@ -12,7 +12,7 @@ public:
 
 	GLFWwindow* getHandle() const;
 	bool update();
-	glm::uvec2 getSize() const;
+	glm::uvec2 getFramebufferSize() const;
 
 private:
 	GLFWwindow* window_;
