@@ -1,6 +1,9 @@
 #include "Window.h"
 #include "Log.h"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
 namespace islands {
 
 Window::Window() : lastUpdateTime_(0.f) {
@@ -59,6 +62,29 @@ bool Window::update() {
 
 glm::uvec2 Window::getFramebufferSize() const {
 	return {width_, height_};
+}
+
+void Window::saveScreenShot(const char* filename) const {
+	constexpr int numComponents = 3;
+
+	SLOG << "Screen shot: Saving to " << filename << std::endl;
+
+	const auto size = numComponents * width_ * height_;
+
+	// TODO: 次を調べる
+	// 画面サイズが2のべき乗でないときうまく動かない
+	// size だけ確保するとアクセス違反を起こす
+	const auto pixels = std::make_unique<char[]>(4 * width_ * height_);
+	glReadPixels(0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, pixels.get());
+	for (int y = 0; y < height_ / 2; ++y) {
+		// swap_ranges を使うと unsafe だと怒られる
+		for (int x = 0; x < width_ * numComponents; ++x) {
+			std::swap(pixels[x + y * width_ * numComponents],
+				pixels[x + (height_ - y - 1) * width_ * numComponents]);
+		}
+	}
+
+	stbi_write_png(filename, width_, height_, numComponents, pixels.get(), 0);
 }
 
 }

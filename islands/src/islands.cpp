@@ -8,9 +8,6 @@
 #include "Log.h"
 #include "Profiler.h"
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb_image_write.h>
-
 namespace islands {
 
 void printSystemInformation() {
@@ -47,33 +44,6 @@ void printSystemInformation() {
 
 #undef GL_PRINT_STRING
 #undef GL_PRINT_INTEGER
-}
-
-void saveScreenShot(GLFWwindow* window) {
-	const int numComponents = 3;
-	int width, height;
-	glfwGetFramebufferSize(window, &width, &height);
-	const auto size = numComponents * width * height;
-
-	// TODO: 次を調べる
-	// 画面サイズが2のべき乗でないときうまく動かない
-	// size だけ確保するとアクセス違反を起こす
-	const auto pixels = std::make_unique<char[]>(4 * width * height);
-	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels.get());
-	for (int y = 0; y < height / 2; ++y) {
-		// swap_ranges を使うと unsafe だと怒られる
-		for (int x = 0; x < width * numComponents; ++x) {
-			std::swap(pixels[x + y * width * numComponents],
-				pixels[x + (height - y - 1) * width * numComponents]);
-		}
-	}
-
-	const auto time = sys::getTime();
-	char buf[32];
-	strftime(buf, sizeof(buf), "screenshot%Y%m%d%I%M%S.png", &time);
-
-	SLOG << "Screen shot: Saving to " << buf << std::endl;
-	stbi_write_png(buf, width, height, numComponents, pixels.get(), 0);
 }
 
 }
@@ -153,7 +123,11 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 			break;
 		case GLFW_KEY_PRINT_SCREEN:
 			if (action == GLFW_PRESS) {
-				saveScreenShot(window);
+				const auto time = sys::getTime();
+				char buf[32];
+				strftime(buf, sizeof(buf), "screenshot%Y%m%d%I%M%S.png", &time);
+
+				Window::getInstance().saveScreenShot(buf);
 			}
 			break;
 		}

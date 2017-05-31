@@ -13,6 +13,7 @@ public:
 	GLFWwindow* getHandle() const;
 	bool update();
 	glm::uvec2 getFramebufferSize() const;
+	void saveScreenShot(const char* filename) const;
 
 private:
 	GLFWwindow* window_;
