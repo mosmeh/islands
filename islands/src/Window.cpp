@@ -6,7 +6,10 @@
 
 namespace islands {
 
-Window::Window() : lastUpdateTime_(0.f) {
+Window::Window() :
+	lastUpdateTime_(0.0),
+	deltaTime_(0.0) {
+
 	SLOG << "GLFW: Creating window" << std::endl;
 	window_ = glfwCreateWindow(1280, 720, u8"“V‹ó‚Ì“‡", nullptr, nullptr);
 	glfwMakeContextCurrent(window_);
@@ -50,18 +53,27 @@ bool Window::update() {
 	glfwSwapBuffers(window_);
 	glfwPollEvents();
 
-	static constexpr auto TARGET_FPS = 60;
-	const auto sleepDuration = 1000 * (1.0 / TARGET_FPS - glfwGetTime() + lastUpdateTime_);
+	constexpr auto TARGET_DELTA_TIME = 1.0 / 60;
+	constexpr auto MAX_DELTA_TIME = 1.0 / 15;
+
+	const auto sleepDuration = 1000 * (TARGET_DELTA_TIME - glfwGetTime() + lastUpdateTime_);
 	if (sleepDuration > 0) {
 		sys::sleep(std::chrono::milliseconds(static_cast<unsigned long>(sleepDuration)));
 	}
-	lastUpdateTime_ = glfwGetTime();
+
+	const auto now = glfwGetTime();
+	deltaTime_ = static_cast<float>(std::min(MAX_DELTA_TIME, now - lastUpdateTime_));
+	lastUpdateTime_ = now;
 
 	return true;
 }
 
 glm::uvec2 Window::getFramebufferSize() const {
 	return {width_, height_};
+}
+
+float Window::getDeltaTime() const {
+	return deltaTime_;
 }
 
 void Window::saveScreenShot(const char* filename) const {

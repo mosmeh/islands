@@ -9,12 +9,35 @@ PlayerController::PlayerController() : attacking_(false) {}
 void PlayerController::start() {
 	body_ = getEntity().getComponent<PhysicalBody>();
 	drawer_ = getEntity().getComponent<ModelDrawer>();
+
+	ball = std::make_shared<Entity>("ball");
+	ball->setScale(glm::vec3(0.9f));
+
+	const auto model = ResourceSystem::getInstance().createOrGet<Model>("ball", "sphere.obj");
+	const auto drawer = std::make_shared<ModelDrawer>(model);
+	drawer->setVisible(false);
+	ball->attachComponent(drawer);
+
+	body = std::make_shared<PhysicalBody>(1.f);
+	const auto collider = std::make_shared<SphereCollider>(model, 0.f);
+	collider->registerCallback([this] {
+		ball->getComponent<ModelDrawer>()->setVisible(false);
+	});
+	body->setCollider(collider);
+
+	ball->attachComponent(collider);
+
+	body->setReceiveGravity(false);
+	getChunk().getPhysicsSystem().registerBody(body);
+	ball->attachComponent(body);
+
+	getChunk().addEntity(ball);
 }
 
 void PlayerController::update() {
 	Camera::getInstance().lookAt(getEntity().getPosition());
 
-	static const float SPEED = 0.2f;
+	static const float SPEED = 12.f;
 	static const auto THETA = 5 * glm::quarter_pi<float>();
 	static const auto ROTATION = glm::mat2(glm::cos(THETA), glm::sin(-THETA),
 		glm::sin(THETA), glm::cos(THETA)) * glm::mat2(-1, 0, 0, 1);

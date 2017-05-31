@@ -1,17 +1,21 @@
 #include "PhysicsSystem.h"
 #include "Entity.h"
+#include "Window.h"
 
 namespace islands {
 
 PhysicsSystem::PhysicsSystem() :
-	GRAVITY(0, 0, -0.01f),
-	FRICTION(0.05f) {}
+	GRAVITY(0, 0, -36.f),
+	FRICTION(3.f) {}
 
 void PhysicsSystem::update() {
-	static constexpr size_t MAX_NUM_ITERATIONS = 32;
+	constexpr size_t MAX_NUM_ITERATIONS = 32;
 
 	for (const auto body : bodies_) {
-		auto v = body->getVelocity() + GRAVITY;
+		auto v = body->getVelocity();
+		if (body->getReceiveGravity()) {
+			v += GRAVITY * Window::getInstance().getDeltaTime();
+		}
 
 		if (body->hasCollider()) {
 			const auto collider = std::dynamic_pointer_cast<SphereCollider>(body->getCollider());

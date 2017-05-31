@@ -13,12 +13,14 @@ public:
 	GLFWwindow* getHandle() const;
 	bool update();
 	glm::uvec2 getFramebufferSize() const;
+	float getDeltaTime() const;
 	void saveScreenShot(const char* filename) const;
 
 private:
 	GLFWwindow* window_;
 	int width_, height_;
 	double lastUpdateTime_;
+	float deltaTime_;
 
 	Window();
 	

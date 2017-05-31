@@ -1,5 +1,6 @@
 #include "PhysicalBody.h"
 #include "Entity.h"
+#include "Window.h"
 
 namespace islands {
 
@@ -35,11 +36,11 @@ const glm::vec3& PhysicalBody::getVelocity() const {
 }
 
 void PhysicalBody::stepForward() const {
-	getEntity().setPosition(getEntity().getPosition() + velocity_);
+	getEntity().setPosition(getEntity().getPosition() + Window::getInstance().getDeltaTime() * velocity_);
 }
 
 void PhysicalBody::stepBackward() const {
-	getEntity().setPosition(getEntity().getPosition() - velocity_);
+	getEntity().setPosition(getEntity().getPosition() - Window::getInstance().getDeltaTime() * velocity_);
 }
 
 void PhysicalBody::applyImpulse(const glm::vec3& impulse) {
