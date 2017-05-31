@@ -8,6 +8,9 @@
 #include "Log.h"
 #include "Profiler.h"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
 namespace islands {
 
 void printSystemInformation() {
@@ -50,7 +53,7 @@ void saveScreenShot(GLFWwindow* window) {
 	const int numComponents = 3;
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
-	size_t size = numComponents * width * height;
+	const auto size = numComponents * width * height;
 
 	// TODO: 次を調べる
 	// 画面サイズが2のべき乗でないときうまく動かない
@@ -67,14 +70,10 @@ void saveScreenShot(GLFWwindow* window) {
 
 	const auto time = sys::getTime();
 	char buf[32];
-	strftime(buf, sizeof(buf), "screenshot%Y%m%d%I%M%S.pbm", &time);
+	strftime(buf, sizeof(buf), "screenshot%Y%m%d%I%M%S.png", &time);
 
 	SLOG << "Screen shot: Saving to " << buf << std::endl;
-	std::ofstream ofs(buf, std::ios::binary);
-	ofs << "P6" << std::endl
-		<< width << " " << height << std::endl
-		<< 255 << std::endl;
-	ofs.write(pixels.get(), size);
+	stbi_write_png(buf, width, height, numComponents, pixels.get(), 0);
 }
 
 }
