@@ -23,7 +23,7 @@ void main() {
         bones[boneIDs[2]] * weights[2] +
         bones[boneIDs[3]] * weights[3];
 
-    gl_Position = MVP * boneTransform * vec4(pos, 1);
+    gl_Position = MVP * (boneTransform * vec4(pos, 1));
     uv = in_uv;
     normal = (boneTransform * vec4(normal, 0)).xyz;
     diffuseColor = diffuse;
