@@ -1,14 +1,17 @@
 #include "PlayerController.h"
 #include "Camera.h"
 #include "InputSystem.h"
+#include "Chunk.h"
+#include "ResourceSystem.h"
+#include "NameGenerator.h"
 
 namespace islands {
 
 PlayerController::PlayerController() : attacking_(false) {}
 
 void PlayerController::start() {
-	body_ = getEntity().getComponent<PhysicalBody>();
-	drawer_ = getEntity().getComponent<ModelDrawer>();
+	body_ = getEntity().getFirstComponent<PhysicalBody>();
+	drawer_ = getEntity().getFirstComponent<ModelDrawer>();
 
 	ball = std::make_shared<Entity>("ball");
 	ball->setScale(glm::vec3(0.9f));

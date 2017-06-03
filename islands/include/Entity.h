@@ -37,7 +37,11 @@ public:
 
 	template <class T>
 	std::enable_if_t<std::is_base_of<Component, T>::value, std::shared_ptr<T>>
-	getComponent() const;
+	getFirstComponent() const;
+
+	template <class T>
+	std::enable_if_t<std::is_base_of<Component, T>::value, std::vector<std::shared_ptr<T>>>
+	getComponents() const;
 
 private:
 	const std::string name_;
@@ -64,13 +68,25 @@ Entity::hasComponent() const {
 
 template<class T>
 inline std::enable_if_t<std::is_base_of<Component, T>::value, std::shared_ptr<T>>
-Entity::getComponent() const {
+Entity::getFirstComponent() const {
 	for (const auto c : components_) {
 		if (const auto t = std::dynamic_pointer_cast<T>(c)) {
 			return t;
 		}
 	}
 	throw std::invalid_argument("not found");
+}
+
+template<class T>
+inline std::enable_if_t<std::is_base_of<Component, T>::value, std::vector<std::shared_ptr<T>>>
+Entity::getComponents() const {
+	std::vector<std::shared_ptr<T>> comps;
+	for (const auto c : components_) {
+		if (const auto t = std::dynamic_pointer_cast<T>(c)) {
+			comps.emplace_back(t);
+		}
+	}
+	return comps;
 }
 
 }
