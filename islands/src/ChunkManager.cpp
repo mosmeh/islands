@@ -44,7 +44,7 @@ ChunkManager::ChunkManager() : player_(std::make_shared<Entity>("Player")) {
 	const auto collider = std::make_shared<SphereCollider>(model, 1.f);
 	player_->attachComponent(collider);
 
-	const auto body = std::make_shared<PhysicalBody>(1.f);
+	const auto body = std::make_shared<PhysicalBody>();
 	body->setCollider(collider);
 	player_->attachComponent(body);
 

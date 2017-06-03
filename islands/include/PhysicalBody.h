@@ -7,7 +7,7 @@ namespace islands {
 
 class PhysicalBody : public Component {
 public:
-	PhysicalBody(float mass);
+	PhysicalBody();
 	virtual ~PhysicalBody() = default;
 
 	void update() override;
@@ -15,6 +15,8 @@ public:
 	void setCollider(std::shared_ptr<Collider> collider);
 	std::shared_ptr<Collider> getCollider() const;
 	bool hasCollider() const;
+
+	void setMass(float mass);
 
 	void setVelocity(const glm::vec3& velocity);
 	void addVelocity(const glm::vec3& velocity);
@@ -24,7 +26,7 @@ public:
 	void applyImpulse(const glm::vec3& impulse);
 
 private:
-	const float mass_;
+	float mass_;
 	glm::vec3 velocity_;
 	std::shared_ptr<Collider> collider_;
 };

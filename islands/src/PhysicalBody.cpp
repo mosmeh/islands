@@ -4,10 +4,11 @@
 
 namespace islands {
 
-PhysicalBody::PhysicalBody(float mass) :
-	mass_(mass),
+PhysicalBody::PhysicalBody() :
+	mass_(1.f),
 	velocity_(0.f),
-	collider_(nullptr) {}
+	collider_(nullptr),
+	receiveGravity_(true) {}
 
 void PhysicalBody::update() {}
 
@@ -21,6 +22,10 @@ std::shared_ptr<Collider> PhysicalBody::getCollider() const {
 
 bool PhysicalBody::hasCollider() const {
 	return collider_ != nullptr;
+}
+
+void PhysicalBody::setMass(float mass) {
+	mass_ = mass;
 }
 
 void PhysicalBody::setVelocity(const glm::vec3& velocity) {
@@ -45,6 +50,14 @@ void PhysicalBody::stepBackward() const {
 
 void PhysicalBody::applyImpulse(const glm::vec3& impulse) {
 	velocity_ += impulse / mass_;
+}
+
+void PhysicalBody::setReceiveGravity(bool receive) {
+	receiveGravity_ = receive;
+}
+
+bool PhysicalBody::getReceiveGravity() const {
+	return receiveGravity_;
 }
 
 }
