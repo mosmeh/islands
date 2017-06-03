@@ -112,6 +112,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
+	glEnable(GL_MULTISAMPLE);
 
 	InputSystem::getInstance().registerKeyboardCallback(
 		[](GLFWwindow* window, int key, int, int action, int) {
