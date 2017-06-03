@@ -86,11 +86,15 @@ void PhysicsSystem::update() {
 }
 
 void PhysicsSystem::registerCollider(std::shared_ptr<Collider> collider) {
-	colliders_.emplace_back(collider);
+	if (std::find(colliders_.begin(), colliders_.end(), collider) == colliders_.end()) {
+		colliders_.emplace_back(collider);
+	}
 }
 
 void PhysicsSystem::registerBody(std::shared_ptr<PhysicalBody> body) {
-	bodies_.emplace_back(body);
+	if (std::find(bodies_.begin(), bodies_.end(), body) == bodies_.end()) {
+		bodies_.emplace_back(body);
+	}
 }
 
 bool PhysicsSystem::intersects(std::shared_ptr<Collider> collider) const {
