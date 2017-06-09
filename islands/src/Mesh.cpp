@@ -71,7 +71,6 @@ void Mesh::draw() {
 	glBindVertexArray(vertexArray_);
 	material_->use();
 	glDrawElements(GL_TRIANGLES, numIndices_, GL_UNSIGNED_INT, nullptr);
-	glBindVertexArray(0);
 }
 
 bool Mesh::hasUV() const {
@@ -119,8 +118,6 @@ void Mesh::uploadImpl() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer_);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices_ * sizeof(GLuint),
 		indices_.get(), GL_STATIC_DRAW);
-
-	glBindVertexArray(0);
 }
 
 glm::mat4 aiMatrix4ToGlmMat4(const aiMatrix4x4& mat) {
@@ -227,8 +224,6 @@ const size_t SkinnedMesh::getNumBones() const {
 void SkinnedMesh::uploadImpl() {
 	Mesh::uploadImpl();
 
-	glBindVertexArray(vertexArray_);
-
 	glGenBuffers(1, &boneBuffer_);
 	glBindBuffer(GL_ARRAY_BUFFER, boneBuffer_);
 	glBufferData(GL_ARRAY_BUFFER, numVertices_ * sizeof(BoneDataPerVertex),
@@ -242,8 +237,6 @@ void SkinnedMesh::uploadImpl() {
 	glEnableVertexAttribArray(SkinningLocation::WEIGHT);
 	glVertexAttribPointer(SkinningLocation::WEIGHT, NUM_BONES_PER_VERTEX, GL_FLOAT, GL_FALSE,
 		sizeof(BoneDataPerVertex), reinterpret_cast<GLvoid*>(sizeof(GLfloat) * NUM_BONES_PER_VERTEX));
-
-	glBindVertexArray(0);
 }
 
 std::shared_ptr<SkinnedMesh::Node> SkinnedMesh::constructNodeTree(const aiNode* aNode,
