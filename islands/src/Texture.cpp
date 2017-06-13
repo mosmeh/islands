@@ -12,6 +12,7 @@ namespace islands {
 
 Texture2D::Texture2D(const std::string& name, const std::string& filename) :
 	Resource(name),
+	id_(0),
 	filename_(filename),
 	data_(nullptr) {}
 
@@ -32,7 +33,7 @@ void Texture2D::bind(unsigned int textureUnit) {
 
 void Texture2D::loadImpl() {
 	int numComponents;
-	stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(TRUE);
 	data_ = stbi_load(filename_.c_str(), &width_, &height_, &numComponents, STBI_rgb_alpha);
 	if (!data_) {
 		SLOG << "stbi: " << stbi_failure_reason() << std::endl;

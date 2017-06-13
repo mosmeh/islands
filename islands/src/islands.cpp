@@ -119,7 +119,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		switch (key) {
 		case GLFW_KEY_ESCAPE:
 			if (action == GLFW_PRESS) {
-				glfwSetWindowShouldClose(window, true);
+				glfwSetWindowShouldClose(window, GLFW_TRUE);
 			}
 			break;
 		case GLFW_KEY_PRINT_SCREEN:

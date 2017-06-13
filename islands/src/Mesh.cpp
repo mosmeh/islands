@@ -22,7 +22,7 @@ Mesh::Mesh(const aiMesh* mesh, const aiMaterial* material) :
 		uvs_ = std::make_unique<glm::vec2[]>(numVertices_);
 	}
 
-	for (unsigned int i = 0; i < numVertices_; ++i) {
+	for (size_t i = 0; i < numVertices_; ++i) {
 		const auto pos = mesh->mVertices[i];
 		vertices_[i] = {pos.x, pos.y, pos.z};
 
@@ -172,7 +172,7 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 	}
 	assert(bones_.size() <= NUM_MAX_BONES);
 
-	for (unsigned int i = 0; i < numAnimations; ++i) {
+	for (size_t i = 0; i < numAnimations; ++i) {
 		const auto animation = animations[i];
 		const auto anim = std::make_shared <Animation>();
 		anim->ticksPerSecond = static_cast<float>(animation->mTicksPerSecond == 0 ?

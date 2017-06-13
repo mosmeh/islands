@@ -55,6 +55,8 @@ private:
 
 class SkinnedMesh : public Mesh {
 public:
+	static const size_t NUM_BONES_PER_VERTEX = 4;
+
 	SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const aiNode* root, aiAnimation** animations, size_t numAnimations);
 	virtual ~SkinnedMesh();
 
@@ -76,7 +78,6 @@ private:
 		float time;
 		T value;
 
-		Key() : value(glm::uninitialize) {}
 		Key(float time_, T value_) : time(time_), value(value_) {}
 	};
 
@@ -89,11 +90,10 @@ private:
 		std::vector<std::shared_ptr<Node>> children;
 	};
 
-	static const size_t NUM_BONES_PER_VERTEX = 4;
 	static const size_t NUM_MAX_BONES = 128;
 
 	struct BoneDataPerVertex {
-		GLuint boneIDs[NUM_BONES_PER_VERTEX];
+		GLuint boneIDs[NUM_BONES_PER_VERTEX] = {};
 		GLfloat weights[NUM_BONES_PER_VERTEX] = {};
 	};
 

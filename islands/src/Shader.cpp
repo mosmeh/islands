@@ -6,6 +6,7 @@ namespace islands {
 
 Shader::Shader(const std::string& name, const std::string& filename, GLenum type) :
 	Resource(name),
+	id_(0),
 	filename_(filename),
 	type_(type) {
 
@@ -56,6 +57,7 @@ void Shader::uploadImpl() {
 
 Program::Program(const std::string& name, const std::string& vertex, const std::string& fragment) :
 	Resource(name),
+	id_(0),
 	vertex_(ResourceSystem::getInstance().createOrGet<Shader>(vertex, vertex, GL_VERTEX_SHADER)),
 	fragment_(ResourceSystem::getInstance().createOrGet<Shader>(fragment, fragment, GL_FRAGMENT_SHADER)) {}
 

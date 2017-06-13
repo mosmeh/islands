@@ -21,7 +21,7 @@ const BoundingBox& Model::getBoundingBox() const {
 
 void Model::loadImpl() {
 	static Assimp::Importer importer;
-	importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 4);
+	importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, SkinnedMesh::NUM_BONES_PER_VERTEX);
 	importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
 	const auto scene = importer.ReadFile(filename_,
 		aiProcess_GenNormals | aiProcess_ImproveCacheLocality | aiProcess_JoinIdenticalVertices |
