@@ -1,7 +1,8 @@
 #version 330 core
 
 in vec4 diffuseColor;
+out vec4 fragColor;
 
 void main() {
-    gl_FragColor = vec4(pow(diffuseColor.rgb, 0.4545 * vec3(1, 1, 1)), 1);
+    fragColor = vec4(pow(diffuseColor.rgb, 0.4545 * vec3(1, 1, 1)), 1);
 }

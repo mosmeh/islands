@@ -2,7 +2,8 @@
 
 uniform sampler2D lightmap;
 in vec2 uv;
+out vec4 fragColor;
 
 void main() {
-    gl_FragColor = texture2D(lightmap, uv);
+    fragColor = texture(lightmap, uv);
 }
