@@ -2,133 +2,106 @@
 
 #include "Component.h"
 #include "Model.h"
-
-//#define SHOW_BOX
+#include "Geometry.h"
 
 namespace islands {
 
-struct Sphere {
-	glm::vec3 center;
-	float radius;
-
-	bool triangleIntersects(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2) const;
-};
-
-struct Triangle {
-	glm::vec3 v0, v1, v2;
-};
-
-struct Capsule {
-	float r;
-	glm::vec3 a, b;
-
-	Capsule applyTransform(const glm::mat4& model, const glm::vec3& scale) const;
-};
-
-struct Plane {
-	glm::vec3 normal;
-	float d;
-
-	bool sphereIntersects(const Sphere& sphere) const;
-};
-
-class MeshCollider;
+class AABBCollider;
 class SphereCollider;
 class PlaneCollider;
 
 class Collider :
-	public std::enable_shared_from_this<Collider>, 
+	public std::enable_shared_from_this<Collider>,
 	public Component {
 public:
 	Collider(std::shared_ptr<Model> model);
 	virtual ~Collider() = default;
 
-	void update() override;
-
 	void registerCallback(std::function<void(void)> callback);
 	void notifyCollision() const;
 
-	bool intersects(const std::shared_ptr<Collider> collider) const;
+	virtual void update() override;
+	virtual glm::vec3 getNormal(const glm::vec3& refPos) const = 0;
 
-	std::shared_ptr<Model> getModel() const;
-	const BoundingBox& getAABB() const;
+	glm::vec3 getSinkingCorrectionVector(std::shared_ptr<Collider> collider) const;
+	bool intersects(std::shared_ptr<Collider>) const;
+
+	virtual bool intersects(std::shared_ptr<AABBCollider>) const {
+		throw std::exception("not implemented");
+	}
+	virtual bool intersects(std::shared_ptr<SphereCollider>) const {
+		throw std::exception("not implemented");
+	}
+	virtual bool intersects(std::shared_ptr<PlaneCollider>) const {
+		throw std::exception("not implemented");
+	}
 
 protected:
+	std::shared_ptr<Model> getModel() const;
+	const geometry::AABB& getGlobalAABB() const;
+
+	virtual float getSinking(std::shared_ptr<AABBCollider>) const {
+		throw std::exception("not implemented");
+	}
+	virtual float getSinking(std::shared_ptr<SphereCollider>) const {
+		throw std::exception("not implemented");
+	}
+	virtual float getSinking(std::shared_ptr<PlaneCollider>) const {
+		throw std::exception("not implemented");
+	}
+
+private:
 	std::shared_ptr<Model> model_;
-	BoundingBox aabb_;
+	geometry::AABB globalAABB_;
 	std::vector<std::function<void(void)>> callbacks_;
+};
 
-#ifdef SHOW_BOX
-	std::shared_ptr<Program> program_;
-	GLuint vertexArray_, vertexBuffer_;
-#endif
+class AABBCollider : public Collider {
+public:
+	using Collider::Collider;
+	virtual ~AABBCollider() = default;
 
-	virtual bool intersectsImpl(std::shared_ptr<MeshCollider> collider) const {
-		throw;
+	glm::vec3 getNormal(const glm::vec3&) const override {
+		throw std::exception("not implemented");
 	}
 
-	virtual bool intersectsImpl(std::shared_ptr<SphereCollider> collider) const {
-		throw;
-	}
-
-	virtual bool intersectsImpl(std::shared_ptr<PlaneCollider> collider) const {
-		throw;
-	}
+	bool intersects(std::shared_ptr<AABBCollider>) const override;
 };
 
 class SphereCollider : public Collider {
 public:
-	SphereCollider(std::shared_ptr<Model> model, const float radius);
+	using Collider::Collider;
 	virtual ~SphereCollider() = default;
 
 	void update() override;
-
-	bool intersectsImpl(std::shared_ptr<MeshCollider> collider) const override;
-	bool intersectsImpl(std::shared_ptr<SphereCollider> collider) const override;
-	bool intersectsImpl(std::shared_ptr<PlaneCollider> collider) const override;
-
-	std::vector<Triangle> getCollidingTriangles(std::shared_ptr<MeshCollider> collider) const;
-
-	const Sphere& getSphere() const;
+	glm::vec3 getNormal(const glm::vec3& refPos) const override;
+	bool intersects(std::shared_ptr<SphereCollider>) const override;
+	bool intersects(std::shared_ptr<PlaneCollider>) const override;
+	const geometry::Sphere& getGlobalSphere() const;
 
 private:
-	Sphere sphere_;
-};
+	geometry::Sphere sphere_;
 
-class MeshCollider : public Collider {
-public:
-	using Collider::Collider;
-	virtual ~MeshCollider() = default;
-
-	bool intersectsImpl(std::shared_ptr<MeshCollider> collider) const override;
-	bool intersectsImpl(std::shared_ptr<SphereCollider> collider) const override;
-};
-
-class CapsuleCollider : public Collider {
-public:
-	CapsuleCollider(std::shared_ptr<Model> model, Capsule capsule);
-	virtual ~CapsuleCollider() = default;
-
-	void update();
-	bool intersectsImpl(std::shared_ptr<CapsuleCollider> collider) const;
-
-	const Capsule& getCapsule() const;
-
-private:
-	Capsule capsule_, transformedCapsule_;
+	float getSinking(std::shared_ptr<SphereCollider>) const override;
+	float getSinking(std::shared_ptr<PlaneCollider>) const override;
 };
 
 class PlaneCollider : public Collider {
 public:
-	PlaneCollider(std::shared_ptr<Model> model, const Plane& plane);
+	PlaneCollider(std::shared_ptr<Model> model, const glm::vec3& normal);
 	virtual ~PlaneCollider() = default;
 
-	bool intersectsImpl(std::shared_ptr<SphereCollider> collider) const;
-
-	const Plane& getPlane() const;
+	void update() override;
+	glm::vec3 getNormal(const glm::vec3& refPos) const override;
+	bool intersects(std::shared_ptr<SphereCollider>) const override;
+	const geometry::Plane& getGlobalPlane() const;
+	void setOffset(float offset);
 
 private:
-	const Plane plane_;
+	geometry::Plane globalPlane_;
+	float offset_;
+
+	float getSinking(std::shared_ptr<SphereCollider>) const override;
 };
 
 }

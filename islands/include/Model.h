@@ -3,20 +3,9 @@
 #include "Resource.h"
 #include "Component.h"
 #include "Mesh.h"
+#include "Geometry.h"
 
 namespace islands {
-
-struct BoundingBox {
-	glm::vec3 min, max;
-
-	BoundingBox() :
-		min(INFINITY),
-		max(-INFINITY) {}
-
-	void expand(const glm::vec3& vertex);
-	BoundingBox calculateAABB(const glm::mat4& model) const;
-	bool intersects(const BoundingBox& box) const;
-};
 
 class Model : public Resource {
 public:
@@ -29,12 +18,12 @@ public:
 	virtual ~Model() = default;
 
 	const std::vector<std::shared_ptr<Mesh>>& getMeshes();
-	const BoundingBox& getBoundingBox() const;
+	const geometry::AABB& getLocalAABB();
 
 private:
 	const std::string filename_;
 	std::vector<std::shared_ptr<Mesh>> meshes_;
-	BoundingBox boundingBox_;
+	geometry::AABB localAABB_;
 
 	void loadImpl() override;
 };

@@ -5,13 +5,11 @@
 
 namespace islands {
 
-class Collider;
 class MeshCollider;
 class SphereCollider;
 
 class Mesh : public Resource {
 	friend class Model;
-	friend class Collider;
 	friend class MeshCollider;
 	friend class SphereCollider;
 

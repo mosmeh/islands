@@ -15,8 +15,9 @@ const std::vector<std::shared_ptr<Mesh>>& Model::getMeshes() {
 	return meshes_;
 }
 
-const BoundingBox& Model::getBoundingBox() const {
-	return boundingBox_;
+const geometry::AABB& Model::getLocalAABB() {
+	load();
+	return localAABB_;
 }
 
 void Model::loadImpl() {
@@ -33,6 +34,8 @@ void Model::loadImpl() {
 	}
 
 	assert(scene->HasMaterials());
+	localAABB_.min = glm::vec3(INFINITY);
+	localAABB_.max = glm::vec3(-INFINITY);
 	for (unsigned int iMesh = 0; iMesh < scene->mNumMeshes; ++iMesh) {
 		const auto aMesh = scene->mMeshes[iMesh];
 		const auto material = scene->mMaterials[aMesh->mMaterialIndex];
@@ -48,7 +51,9 @@ void Model::loadImpl() {
 		meshes_.emplace_back(mesh);
 
 		for (size_t iVert = 0; iVert < mesh->numVertices_; ++iVert) {
-			boundingBox_.expand(mesh->vertices_[iVert]);
+			const auto& vert = mesh->vertices_[iVert];
+			localAABB_.min = glm::min(localAABB_.min, vert);
+			localAABB_.max = glm::max(localAABB_.max, vert);
 		}
 	}
 	importer.FreeScene();

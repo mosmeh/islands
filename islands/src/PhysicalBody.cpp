@@ -40,12 +40,12 @@ const glm::vec3& PhysicalBody::getVelocity() const {
 	return velocity_;
 }
 
-void PhysicalBody::stepForward() const {
-	getEntity().setPosition(getEntity().getPosition() + Window::getInstance().getDeltaTime() * velocity_);
+void PhysicalBody::moveBy(const glm::vec3& offset) const {
+	getEntity().setPosition(getEntity().getPosition() + offset);
 }
 
-void PhysicalBody::stepBackward() const {
-	getEntity().setPosition(getEntity().getPosition() - Window::getInstance().getDeltaTime() * velocity_);
+void PhysicalBody::stepForward() const {
+	moveBy(Window::getInstance().getDeltaTime() * velocity_);
 }
 
 void PhysicalBody::applyImpulse(const glm::vec3& impulse) {

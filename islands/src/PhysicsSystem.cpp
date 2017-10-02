@@ -9,63 +9,34 @@ PhysicsSystem::PhysicsSystem() :
 	FRICTION(3.f) {}
 
 void PhysicsSystem::update() {
-	constexpr size_t MAX_NUM_ITERATIONS = 32;
-
 	for (const auto body : bodies_) {
 		auto v = body->getVelocity();
 		if (body->getReceiveGravity()) {
 			v += GRAVITY * Window::getInstance().getDeltaTime();
 		}
-
+		body->setVelocity(v);
+		body->stepForward();
 		if (body->hasCollider()) {
-			const auto collider = std::dynamic_pointer_cast<SphereCollider>(body->getCollider());
-			assert(collider);
+			body->getCollider()->update();
+		}
+	}
 
-			body->stepForward();
-			collider->update();
-
-			static const auto rectifyVelocity = [&v](const glm::vec3& normal) {
-				if (glm::dot(normal, v) < 0) {
-					v -= (glm::dot(normal, v) / glm::dot(normal, normal)) * normal;
-				}
-			};
-
+	for (const auto body : bodies_) {
+		if (body->hasCollider()) {
 			bool collide = false;
-			auto prevV = glm::vec3(INFINITY);
-			for (size_t count = 0; count < MAX_NUM_ITERATIONS; ++count) {
-				if (glm::distance2(prevV, v) < glm::epsilon<float>()) {
-					break;
-				}
-				prevV = v;
-
-				for (const auto c : colliders_) {
+			const auto collider = body->getCollider();
+			for (const auto c : colliders_) {
+				if (collider->intersects(c)) {
 					if (c == collider) {
 						continue;
 					}
-					if (collider->intersects(c)) {
-						collide = true;
-						if (const auto meshCollider = std::dynamic_pointer_cast<MeshCollider>(c)) {
-							for (const auto& tri : collider->getCollidingTriangles(meshCollider)) {
-								rectifyVelocity(glm::cross(tri.v1 - tri.v0, tri.v2 - tri.v0));
 
-								/*const auto a = tri.v0 - sphere.center;
-								const auto b = tri.v1 - sphere.center;
-								const auto c = tri.v2 - sphere.center;
-								const auto v = glm::cross(b - a, c - a);
-								const auto d = glm::dot(a, v);
-								const auto e = glm::dot(v, v);
-								body->getEntity().setPosition(body->getEntity().getPosition() +
-									(sphere.radius - glm::abs(d) * glm::inversesqrt(e)) * glm::normalize(n));*/
-							}
-						} else if (const auto sphereCollider = std::dynamic_pointer_cast<SphereCollider>(c)) {
-							rectifyVelocity(collider->getSphere().center - sphereCollider->getSphere().center);
-						} else if (const auto planeCollider = std::dynamic_pointer_cast<PlaneCollider>(c)) {
-							rectifyVelocity(planeCollider->getPlane().normal);
-						}
-					}
+					collide = true;
+					body->moveBy(c->getSinkingCorrectionVector(collider));
 				}
 			}
 			if (collide) {
+				auto v = body->getVelocity();
 				for (glm::length_t i = 0; i < v.length(); ++i) {
 					if (v[i] > FRICTION) {
 						v[i] -= FRICTION;
@@ -75,13 +46,10 @@ void PhysicsSystem::update() {
 						v[i] = 0;
 					}
 				}
+				body->setVelocity(v);
 				collider->notifyCollision();
 			}
-			body->stepBackward();
 		}
-
-		body->setVelocity(v);
-		body->stepForward();
 	}
 }
 

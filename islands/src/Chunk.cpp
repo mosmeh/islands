@@ -127,12 +127,12 @@ void Chunk::loadImpl() {
 				//const auto& type = modelProp.at("collision").get<std::string>();
 
 				if (entity->getName() == "Plane.003") {
-					const auto collider = std::make_shared<PlaneCollider>(model,
-						Plane{glm::vec3(0, 0, 1.f), 2.0f});
+					const auto collider = std::make_shared<PlaneCollider>(model, glm::vec3(0.f, 0.f, 1.f));
+					collider->setOffset(2.2f);
 					physicsSystem_.registerCollider(collider);
 					entity->attachComponent(collider);
 				} else {
-					const auto collider = std::make_shared<SphereCollider>(model, 0.f);
+					const auto collider = std::make_shared<SphereCollider>(model);
 					physicsSystem_.registerCollider(collider);
 					entity->attachComponent(collider);
 				}
