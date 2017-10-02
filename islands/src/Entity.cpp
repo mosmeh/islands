@@ -54,8 +54,7 @@ const glm::mat4& Entity::getModelMatrix() const {
 
 void Entity::update() {
 	for (const auto c : components_) {
-		c->startOnce();
-		c->update();
+		c->startAndUpdate();
 	}
 }
 

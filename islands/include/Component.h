@@ -9,7 +9,8 @@ class Chunk;
 class Component {
 public:
 	Component() :
-		entity_(nullptr) {}
+		entity_(nullptr),
+		isFirstUpdate_(true) {}
 	virtual ~Component() = default;
 
 	void setEntity(Entity* entity) {
@@ -21,15 +22,14 @@ public:
 		return *entity_;
 	}
 
-	void startOnce() {
-		static bool isFirstTime = true;
-		if (isFirstTime) {
+	void startAndUpdate() {
+		if (isFirstUpdate_) {
 			start();
-			isFirstTime = false;
+			isFirstUpdate_ = false;
 		}
-	}
 
-	virtual void update() = 0;
+		update();
+	}
 
 protected:
 	Chunk& getChunk() const {
@@ -37,9 +37,11 @@ protected:
 	}
 
 	virtual void start() {}
+	virtual void update() = 0;
 
 private:
 	Entity* entity_;
+	bool isFirstUpdate_;
 };
 
 class Drawable : public Component {
