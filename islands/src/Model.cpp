@@ -76,6 +76,8 @@ void ModelDrawer::draw() {
 	}
 
 	if (visible_) {
+		const auto mvp = Camera::getInstance().getProjectionViewMatrix() *
+			getEntity().getModelMatrix();
 		std::stringstream ss;
 		for (const auto mesh : model_->getMeshes()) {
 			if (lightmap_) {
@@ -84,8 +86,7 @@ void ModelDrawer::draw() {
 
 			const auto program = mesh->getMaterial()->getProgram();
 			program->use();
-			program->setUniform("MVP",
-				Camera::getInstance().getProjectionViewMatrix() * getEntity().getModelMatrix());
+			program->setUniform("MVP", mvp);
 
 			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
 				if (animPlaying_) {
