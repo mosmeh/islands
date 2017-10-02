@@ -4,8 +4,13 @@ namespace islands {
 namespace geometry {
 
 bool intersect(const AABB& a, const AABB& b) {
-	return glm::all(glm::greaterThan(a.max, b.min)) &&
-		glm::all(glm::lessThan(a.min, b.max));
+	return glm::all(glm::greaterThanEqual(a.max, b.min)) &&
+		glm::all(glm::lessThanEqual(a.min, b.max));
+}
+
+bool contains(const AABB& a, const AABB& b) {
+	return glm::all(glm::lessThanEqual(a.min, b.min)) &&
+		glm::all(glm::greaterThanEqual(a.max, b.max));
 }
 
 bool intersect(const Triangle& triangle, const Sphere& sphere) {

@@ -29,6 +29,7 @@ struct Capsule {
 };
 
 bool intersect(const AABB& a, const AABB& b);
+bool contains(const AABB& a, const AABB& b);
 bool intersect(const Triangle& triangle, const Sphere& sphere);
 bool intersect(const Sphere& a, const Sphere& b);
 float getSinking(const Sphere& a, const Sphere& b);
