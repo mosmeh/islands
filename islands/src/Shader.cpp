@@ -33,7 +33,7 @@ void Shader::loadImpl() {
 
 void Shader::uploadImpl() {
 	const auto str = source_.c_str();
-	const GLint length = source_.size();
+	const auto length = static_cast<GLint>(source_.size());
 
 	id_ = glCreateShader(type_);
 	glShaderSource(id_, 1, &str, &length);
