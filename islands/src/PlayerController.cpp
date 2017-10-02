@@ -22,9 +22,9 @@ void PlayerController::start() {
 	ball->attachComponent(drawer);
 
 	body = std::make_shared<PhysicalBody>();
-	const auto collider = std::make_shared<SphereCollider>(model, 0.f);
+	const auto collider = std::make_shared<SphereCollider>(model);
 	collider->registerCallback([this] {
-		ball->getComponent<ModelDrawer>()->setVisible(false);
+		ball->getFirstComponent<ModelDrawer>()->setVisible(false);
 	});
 	body->setCollider(collider);
 
