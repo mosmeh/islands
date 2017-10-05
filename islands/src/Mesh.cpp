@@ -187,8 +187,6 @@ SkinnedMesh::~SkinnedMesh() {
 }
 
 void SkinnedMesh::setPlayingAnimation(const std::string& name) {
-	load();
-
 	assert(animations_.find(name) != animations_.end());
 	playingAnim_ = animations_.at(name);
 }
