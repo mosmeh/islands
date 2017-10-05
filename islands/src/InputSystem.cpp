@@ -22,9 +22,9 @@ void InputSystem::update() {
 		keyboard_.update();
 		dir += keyboard_.getDirection();
 	}
-	if (joystick_.isPresent()) {
-		joystick_.update();
-		dir += joystick_.getDirection();
+	if (gamepad_.isPresent()) {
+		gamepad_.update();
+		dir += gamepad_.getDirection();
 	}
 	if (glm::length2(dir) > glm::epsilon<float>()) {
 		direction_ = glm::normalize(dir);
@@ -45,7 +45,7 @@ const glm::vec2 InputSystem::getDirection() const {
 bool InputSystem::isCommandActive(Command command) const {
 	if (keyboard_.isPresent() && keyboard_.isCommandActive(command)) {
 		return true;
-	} else if (joystick_.isPresent() && joystick_.isCommandActive(command)) {
+	} else if (gamepad_.isPresent() && gamepad_.isCommandActive(command)) {
 		return true;
 	}
 	return false;
@@ -100,74 +100,68 @@ bool InputSystem::Keyboard::isKeyPressed(int key) const {
 	return glfwGetKey(Window::getInstance().getHandle(), key) == GLFW_PRESS;
 }
 
-InputSystem::Joystick::Joystick() :
-	present_(false),
-	buttons_(nullptr) {
-
+InputSystem::Gamepad::Gamepad() : present_(false) {
 	for (id_ = GLFW_JOYSTICK_1; id_ <= GLFW_JOYSTICK_LAST; ++id_) {
-		if (glfwJoystickPresent(id_)) {
+		if (glfwJoystickPresent(id_) && glfwJoystickIsGamepad(id_)) {
 			present_ = true;
 			break;
 		}
 	}
 }
 
-bool InputSystem::Joystick::isPresent() const {
+bool InputSystem::Gamepad::isPresent() const {
 	return present_;
 }
 
-void InputSystem::Joystick::update() {
+void InputSystem::Gamepad::update() {
 	static const float DEADZONE_RADIUS_SQUARED = 0.1f;
 
-	int numAxes, numButtons;
-	const auto axes = glfwGetJoystickAxes(id_, &numAxes);
-	assert(numAxes >= static_cast<size_t>(Axis::Count));
-	buttons_ = glfwGetJoystickButtons(id_, &numButtons);
-	assert(numButtons >= static_cast<size_t>(Button::Count));
+	if (glfwGetGamepadState(id_, &state_)) {
+		if (!isButtonPressed(GLFW_GAMEPAD_BUTTON_DPAD_UP) &&
+			!isButtonPressed(GLFW_GAMEPAD_BUTTON_DPAD_RIGHT) &&
+			!isButtonPressed(GLFW_GAMEPAD_BUTTON_DPAD_DOWN) &&
+			!isButtonPressed(GLFW_GAMEPAD_BUTTON_DPAD_LEFT)) {
 
-	if (!isButtonPressed(Button::Up) && !isButtonPressed(Button::Right) &&
-		!isButtonPressed(Button::Down) && !isButtonPressed(Button::Left)) {
-		const auto dir = glm::vec2(
-			axes[static_cast<size_t>(Axis::LeftHorizontal)],
-			axes[static_cast<size_t>(Axis::LeftVertical)]);
-		if (glm::length2(dir) > DEADZONE_RADIUS_SQUARED) {
-			direction_ = glm::normalize(dir);
+			const auto dir = glm::vec2(
+				state_.axes[GLFW_GAMEPAD_AXIS_LEFT_X],
+				state_.axes[GLFW_GAMEPAD_AXIS_LEFT_Y]);
+			if (glm::length2(dir) > DEADZONE_RADIUS_SQUARED) {
+				direction_ = glm::normalize(dir);
+			} else {
+				direction_ = glm::zero<glm::vec2>();
+			}
 		} else {
-			direction_ = glm::zero<glm::vec2>();
-		}
-	} else {
-		if (isButtonPressed(Button::Up)) {
-			direction_ = {0, -1};
-		} else if (isButtonPressed(Button::Down)) {
-			direction_ = {0, 1};
-		}
-		if (isButtonPressed(Button::Right)) {
-			direction_ = {1, 0};
-		} else if (isButtonPressed(Button::Left)) {
-			direction_ = {-1, 0};
+			if (isButtonPressed(GLFW_GAMEPAD_BUTTON_DPAD_UP)) {
+				direction_ = {0, -1};
+			} else if (isButtonPressed(GLFW_GAMEPAD_BUTTON_DPAD_DOWN)) {
+				direction_ = {0, 1};
+			}
+			if (isButtonPressed(GLFW_GAMEPAD_BUTTON_DPAD_RIGHT)) {
+				direction_ = {1, 0};
+			} else if (isButtonPressed(GLFW_GAMEPAD_BUTTON_DPAD_LEFT)) {
+				direction_ = {-1, 0};
+			}
 		}
 	}
 }
 
-glm::vec2 InputSystem::Joystick::getDirection() const {
+glm::vec2 InputSystem::Gamepad::getDirection() const {
 	return direction_;
 }
 
-bool InputSystem::Joystick::isCommandActive(Command command) const {
+bool InputSystem::Gamepad::isCommandActive(Command command) const {
 	switch (command) {
 	case Command::Jump:
-		return isButtonPressed(Button::X);
+		return isButtonPressed(GLFW_GAMEPAD_BUTTON_A);
 	case Command::Attack:
-		return isButtonPressed(Button::O);
+		return isButtonPressed(GLFW_GAMEPAD_BUTTON_B);
 	}
 	throw;
 }
 
-bool InputSystem::Joystick::isButtonPressed(Button button) const {
-	if (!buttons_) {
-		return false;
-	}
-	return buttons_[static_cast<size_t>(button)] == GLFW_PRESS;
+bool InputSystem::Gamepad::isButtonPressed(int button) const {
+	assert(GLFW_GAMEPAD_BUTTON_A <= button && button <= GLFW_GAMEPAD_BUTTON_LAST);
+	return state_.buttons[static_cast<size_t>(button)] == GLFW_PRESS;
 }
 
 }

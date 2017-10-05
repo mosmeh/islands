@@ -47,10 +47,10 @@ private:
 		bool isKeyPressed(int key) const;
 	} keyboard_;
 
-	class Joystick : public InputDevice {
+	class Gamepad : public InputDevice {
 	public:
-		Joystick();
-		virtual ~Joystick() = default;
+		Gamepad();
+		virtual ~Gamepad() = default;
 
 		bool isPresent() const override;
 		void update() override;
@@ -58,30 +58,13 @@ private:
 		bool isCommandActive(Command command) const override;
 
 	private:
-		// DualShock4 用コンフィグ
-		enum class Axis : size_t {
-			LeftHorizontal = 0,
-			LeftVertical = 1,
-			Count
-		};
-
-		enum class Button : size_t {
-			X = 1,
-			O = 2,
-			Up = 14,
-			Right = 15,
-			Down = 16,
-			Left = 17,
-			Count
-		};
-
 		int id_;
 		bool present_;
-		const unsigned char* buttons_;
+		GLFWgamepadstate state_;
 		glm::vec2 direction_;
 
-		bool isButtonPressed(Button button) const;
-	} joystick_;
+		bool isButtonPressed(int button) const;
+	} gamepad_;
 
 	GLFWwindow* window_;
 	std::vector<GLFWkeyfun> keyboardCallbacks_;
