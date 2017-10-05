@@ -106,7 +106,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	Window::getInstance().update();
 	printSystemInformation();
 
-	glClearColor(0.f, 0.f, 0.5f, 1.f);
+	glClearColor(0.9f, 0.9f, 0.9f, 1.f);
 	glClearDepth(1.0);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);

@@ -3,8 +3,8 @@
 namespace islands {
 
 Camera::Camera() :
-	PROJECTION(glm::perspective(glm::quarter_pi<float>(), 16.f / 9, 0.1f, 100.f)),
-	CAMERA_OFFSET(10.f * glm::vec3(-1.f, -1.f, 1.f)) {}
+	PROJECTION(glm::perspective(glm::radians(30.f), 16.f / 9, 0.1f, 100.f)),
+	CAMERA_OFFSET(15.f * glm::vec3(-1.f, -1.f, 1.f)) {}
 
 Camera& Camera::getInstance() {
 	static Camera instance;
