@@ -15,10 +15,9 @@ public:
 
 	ResourceSystem(const ResourceSystem&) = delete;
 	ResourceSystem& operator=(const ResourceSystem&) = delete;
-	virtual ~ResourceSystem();
+	virtual ~ResourceSystem() = default;
 
 	static ResourceSystem& getInstance();
-	void pushToLoadQueue(std::shared_ptr<Resource> resource);
 
 	template <class T, class... Args>
 	std::enable_if_t<std::is_base_of<Resource, T>::value, std::shared_ptr<T>>
@@ -35,14 +34,7 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<Resource>> resources_;
 	std::unordered_map<ProgramType, std::shared_ptr<Program>> defaultPrograms_;
 
-	std::queue<std::shared_ptr<Resource>> loadQueue_;
-	std::mutex loadQueueMutex_;
-	std::thread loader_;
-	std::atomic_bool loaderShouldStop_;
-
-	ResourceSystem();
-
-	void consumeLoadQueue();
+	ResourceSystem() = default;
 };
 
 template<class T, class... Args>

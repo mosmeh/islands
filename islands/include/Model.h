@@ -55,8 +55,6 @@ private:
 	bool animPlaying_, animLoop_;
 	std::string animName_;
 	float animStartTime_, animDuration_;
-
-	void loadImpl() override;
 };
 
 }

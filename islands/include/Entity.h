@@ -51,7 +51,6 @@ private:
 	glm::mat4 modelMatrix_;
 	std::vector<std::shared_ptr<Component>> components_;
 
-	void loadImpl() override;
 	void updateModelMatrix();
 };
 

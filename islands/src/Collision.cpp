@@ -18,8 +18,6 @@ void Collider::notifyCollision() const {
 }
 
 void Collider::update() {
-	getModel()->load();
-
 	const auto& localAABB = getModel()->getLocalAABB();
 	const auto& modelMat = getEntity().getModelMatrix();
 

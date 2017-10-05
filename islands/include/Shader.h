@@ -49,7 +49,6 @@ private:
 	const std::shared_ptr<Shader> vertex_, fragment_;
 	GLuint id_;
 
-	void loadImpl() override;
 	void uploadImpl() override;
 };
 

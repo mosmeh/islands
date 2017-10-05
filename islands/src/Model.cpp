@@ -152,11 +152,4 @@ bool ModelDrawer::isPlayingAnimation() const {
 	return animPlaying_;
 }
 
-void ModelDrawer::loadImpl() {
-	model_->loadAsync();
-	if (lightmap_) {
-		lightmap_->loadAsync();
-	}
-}
-
 };

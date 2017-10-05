@@ -81,10 +81,6 @@ std::shared_ptr<Material> Mesh::getMaterial() const {
 	return material_;
 }
 
-void Mesh::loadImpl() {
-	material_->loadAsync();
-}
-
 void Mesh::uploadImpl() {
 	glGenVertexArrays(1, &vertexArray_);
 	glBindVertexArray(vertexArray_);

@@ -107,11 +107,6 @@ void Program::setUniform(const char* name, const glm::mat4& value, bool transpos
 	glUniformMatrix4fv(glGetUniformLocation(id_, name), 1, transpose, glm::value_ptr(value));
 }
 
-void Program::loadImpl() {
-	vertex_->loadAsync();
-	fragment_->loadAsync();
-}
-
 void Program::uploadImpl() {
 	id_ = glCreateProgram();
 	glAttachShader(id_, vertex_->getId());

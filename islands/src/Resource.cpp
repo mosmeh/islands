@@ -16,19 +16,10 @@ const std::string& Resource::getName() const {
 }
 
 void Resource::load() {
-	auto unloaded = State::Unloaded;
-	if (status_.compare_exchange_strong(unloaded, State::Loading)) {
+	if (status_ == State::Unloaded) {
 		SLOG << "Loading " << getName() << std::endl;
 		loadImpl();
 		status_ = State::Loaded;
-	}
-}
-
-void Resource::loadAsync() {
-	auto unloaded = State::Unloaded;
-	if (status_.compare_exchange_strong(unloaded, State::Loading)) {
-		SLOG << "Loading " << getName() << std::endl;
-		ResourceSystem::getInstance().pushToLoadQueue(shared_from_this());
 	}
 }
 
@@ -42,11 +33,7 @@ bool Resource::isUploaded() const {
 
 void Resource::upload() {
 	if (status_ != State::Uploaded) {
-		if (status_ == State::Loading) {
-			while (!isLoaded());
-		} else {
-			load();
-		}
+		load();
 
 		SLOG << "Uploading " << getName() << std::endl;
 		uploadImpl();

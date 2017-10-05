@@ -80,14 +80,6 @@ void Entity::attachComponent(std::shared_ptr<Component> component) {
 	components_.emplace_back(component);
 }
 
-void Entity::loadImpl() {
-	for (const auto c : components_) {
-		if (const auto resource = std::dynamic_pointer_cast<Resource>(c)) {
-			resource->loadAsync();
-		}
-	}
-}
-
 void Entity::updateModelMatrix() {
 	modelMatrix_ = glm::scale(
 		glm::translate(glm::mat4(1.f), position_) * glm::mat4_cast(quaternion_), scale_);

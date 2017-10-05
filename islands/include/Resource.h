@@ -16,7 +16,6 @@ public:
 	virtual void uploadImpl() {}
 
 	void load();
-	void loadAsync();
 	void upload();
 	virtual bool isLoaded() const;
 	bool isUploaded() const;
@@ -24,7 +23,6 @@ public:
 private:
 	enum class State {
 		Unloaded,
-		Loading,
 		Loaded,
 		Uploaded
 	};

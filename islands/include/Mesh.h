@@ -47,8 +47,6 @@ private:
 	const size_t numIndices_;
 	const bool hasUV_;
 	std::shared_ptr<Material> material_;
-
-	void loadImpl() override;
 };
 
 class SkinnedMesh : public Mesh {

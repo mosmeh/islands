@@ -58,14 +58,4 @@ std::shared_ptr<Program> Material::getProgram() const {
 	return program_;
 }
 
-void Material::loadImpl() {
-	program_->loadAsync();
-	for (const auto texture : diffuseTextures_) {
-		texture->loadAsync();
-	}
-	if (lightmap_) {
-		lightmap_->loadAsync();
-	}
-}
-
 }
