@@ -70,13 +70,12 @@ ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
 	animPlaying_(false),
 	animStartTime_(0.f) {}
 
-void ModelDrawer::draw() {
+void ModelDrawer::update() {
 	if (animPlaying_) {
 		if (!animLoop_ && (glfwGetTime() - animStartTime_) > animDuration_) {
 			animPlaying_ = false;
 		}
 	}
-
 	if (visible_) {
 		const auto mvp = Camera::getInstance().getProjectionViewMatrix() *
 			getEntity().getModelMatrix();
@@ -85,16 +84,26 @@ void ModelDrawer::draw() {
 			if (lightmap_) {
 				mesh->getMaterial()->setLightmapTexture(lightmap_);
 			}
+			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
+				if (animPlaying_) {
+					skinned->updateBoneTransform(static_cast<float>(glfwGetTime()) - animStartTime_);
+				}
+			}
+		}
+	}
+}
 
+void ModelDrawer::draw() {
+	if (visible_) {
+		const auto mvp = Camera::getInstance().getProjectionViewMatrix() *
+			getEntity().getModelMatrix();
+		std::stringstream ss;
+		for (const auto mesh : model_->getMeshes()) {
 			const auto program = mesh->getMaterial()->getProgram();
 			program->use();
 			program->setUniform("MVP", mvp);
 
 			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
-				if (animPlaying_) {
-					skinned->updateBoneTransform(static_cast<float>(glfwGetTime()) - animStartTime_);
-				}
-
 				for (size_t i = 0; i < skinned->getNumBones(); ++i) {
 					ss.str("");
 					ss << "bones[" << i << "]";

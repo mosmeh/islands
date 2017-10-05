@@ -35,6 +35,7 @@ public:
 	ModelDrawer(std::shared_ptr<Model> model);
 	virtual ~ModelDrawer() = default;
 
+	void update() override;
 	void draw() override;
 
 	bool isLoaded() const override;
