@@ -27,7 +27,6 @@
 #pragma warning(push)
 #pragma warning(disable: 4201)
 #define GLM_FORCE_SWIZZLE
-#define GLM_FORCE_NO_CTOR_INIT
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
