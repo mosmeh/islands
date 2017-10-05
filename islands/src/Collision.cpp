@@ -7,13 +7,13 @@ namespace islands {
 
 Collider::Collider(std::shared_ptr<Model> model) : model_(model) {}
 
-void Collider::registerCallback(std::function<void(void)> callback) {
+void Collider::registerCallback(std::function<void(std::shared_ptr<Collider>)> callback) {
 	callbacks_.emplace_back(callback);
 }
 
-void Collider::notifyCollision() const {
+void Collider::notifyCollision(std::shared_ptr<Collider> opponent) const {
 	for (const auto callback : callbacks_) {
-		callback();
+		callback(opponent);
 	}
 }
 

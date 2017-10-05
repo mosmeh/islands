@@ -17,8 +17,8 @@ public:
 	Collider(std::shared_ptr<Model> model);
 	virtual ~Collider() = default;
 
-	void registerCallback(std::function<void(void)> callback);
-	void notifyCollision() const;
+	void registerCallback(std::function<void(std::shared_ptr<Collider>)> callback);
+	void notifyCollision(std::shared_ptr<Collider> opponent) const;
 
 	const geometry::AABB& getGlobalAABB() const;
 
@@ -54,7 +54,7 @@ protected:
 private:
 	std::shared_ptr<Model> model_;
 	geometry::AABB globalAABB_;
-	std::vector<std::function<void(void)>> callbacks_;
+	std::vector<std::function<void(std::shared_ptr<Collider>)>> callbacks_;
 };
 
 class AABBCollider : public Collider {

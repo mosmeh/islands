@@ -33,6 +33,7 @@ void PhysicsSystem::update() {
 
 					collide = true;
 					body->moveBy(c->getSinkingCorrectionVector(collider));
+					collider->notifyCollision(c);
 				}
 			}
 			if (collide) {
@@ -47,7 +48,6 @@ void PhysicsSystem::update() {
 					}
 				}
 				body->setVelocity(v);
-				collider->notifyCollision();
 			}
 		}
 	}
