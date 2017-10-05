@@ -7,6 +7,8 @@
 
 namespace islands {
 
+static const std::string LEVEL_DIR = "level";
+
 class Chunk : public Resource {
 public:
 	Chunk(const std::string& name, const std::string& filename);

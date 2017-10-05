@@ -21,10 +21,12 @@ const geometry::AABB& Model::getLocalAABB() {
 }
 
 void Model::loadImpl() {
+	static const std::string MESH_DIR = "mesh";
+
 	static Assimp::Importer importer;
 	importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, SkinnedMesh::NUM_BONES_PER_VERTEX);
 	importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
-	const auto scene = importer.ReadFile(filename_,
+	const auto scene = importer.ReadFile(MESH_DIR + sys::getFilePathSeperator() + filename_,
 		aiProcess_GenNormals | aiProcess_ImproveCacheLocality | aiProcess_JoinIdenticalVertices |
 		aiProcess_LimitBoneWeights | aiProcess_OptimizeMeshes | aiProcess_RemoveComponent |
 		aiProcess_Triangulate);

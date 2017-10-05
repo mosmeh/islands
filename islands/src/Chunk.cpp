@@ -1,3 +1,4 @@
+#include "System.h"
 #include "Chunk.h"
 #include "ResourceSystem.h"
 #include "PhysicalBody.h"
@@ -84,7 +85,7 @@ PhysicsSystem& Chunk::getPhysicsSystem() {
 void Chunk::loadImpl() {
 	picojson::value json;
 	{
-		std::ifstream ifs(filename_);
+		std::ifstream ifs(LEVEL_DIR + sys::getFilePathSeperator() + filename_);
 		ifs >> json;
 	}
 

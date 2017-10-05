@@ -25,7 +25,8 @@ GLuint Shader::getId() {
 }
 
 void Shader::loadImpl() {
-	std::ifstream ifs(filename_.c_str(), std::ios::in);
+	static const std::string SHADER_DIR = "shader";
+	std::ifstream ifs(SHADER_DIR + sys::getFilePathSeperator() + filename_, std::ios::in);
 	std::ostringstream ss;
 	ss << ifs.rdbuf();
 	source_ = ss.str();

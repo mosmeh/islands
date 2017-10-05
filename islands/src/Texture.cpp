@@ -32,9 +32,12 @@ void Texture2D::bind(unsigned int textureUnit) {
 }
 
 void Texture2D::loadImpl() {
+	static const std::string TEXTURE_DIR = "texture";
+	const auto filePath = TEXTURE_DIR + sys::getFilePathSeperator() + filename_;
+
 	int numComponents;
 	stbi_set_flip_vertically_on_load(TRUE);
-	data_ = stbi_load(filename_.c_str(), &width_, &height_, &numComponents, STBI_rgb_alpha);
+	data_ = stbi_load(filePath.c_str(), &width_, &height_, &numComponents, STBI_rgb_alpha);
 	if (!data_) {
 		SLOG << "stbi: " << stbi_failure_reason() << std::endl;
 		throw;
