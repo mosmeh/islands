@@ -38,8 +38,11 @@ bool Chunk::isLoaded() const {
 }
 
 void Chunk::addEntity(std::shared_ptr<Entity> entity) {
-	entity->setChunk(this);
-	entitiesToBeAdded_.emplace_back(entity);
+	if (std::find(entities_.begin(), entities_.end(), entity) == entities_.end() &&
+		std::find(entitiesToBeAdded_.begin(), entitiesToBeAdded_.end(), entity) == entitiesToBeAdded_.end()) {
+		entity->setChunk(this);
+		entitiesToBeAdded_.emplace_back(entity);
+	}
 }
 
 std::shared_ptr<Entity> Chunk::getEntity(const std::string& name) const {

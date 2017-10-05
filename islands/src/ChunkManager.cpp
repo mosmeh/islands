@@ -122,8 +122,8 @@ void ChunkManager::jumpTo(const glm::ivec3& dest) {
 	currentChunk_ = chunks_.at(dest);
 
 	player_->setChunk(currentChunk_.get());
-	currentChunk_->getPhysicsSystem().registerBody(player_->getFirstComponent<PhysicalBody>());
-	currentChunk_->getPhysicsSystem().registerCollider(player_->getFirstComponent<Collider>());
+	player_->update();
+	player_->getFirstComponent<PlayerController>()->updateParentChunk();
 }
 
 }
