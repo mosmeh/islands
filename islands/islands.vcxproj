@@ -179,7 +179,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Chunk.cpp" />
-    <ClCompile Include="src\ChunkManager.cpp" />
+    <ClCompile Include="src\SceneManager.cpp" />
     <ClCompile Include="src\Collision.cpp" />
     <ClCompile Include="src\Entity.cpp" />
     <ClCompile Include="src\Geometry.cpp" />
@@ -247,7 +247,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Chunk.h" />
-    <ClInclude Include="include\ChunkManager.h" />
+    <ClInclude Include="include\SceneManager.h" />
     <ClInclude Include="include\Collision.h" />
     <ClInclude Include="include\Component.h" />
     <ClInclude Include="include\Entity.h" />

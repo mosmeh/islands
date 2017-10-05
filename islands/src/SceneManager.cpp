@@ -1,4 +1,4 @@
-#include "ChunkManager.h"
+#include "SceneManager.h"
 #include "PlayerController.h"
 #include "ResourceSystem.h"
 #include "Window.h"
@@ -32,7 +32,7 @@ std::uint64_t cantorPair(std::uint64_t a, std::uint64_t b) {
 
 }
 
-ChunkManager::ChunkManager() :
+SceneManager::SceneManager() :
 	NEIGHBOR_OFFSETS{
 		glm::ivec3(-1, 0, 0), glm::ivec3(1, 0, 0),
 		glm::ivec3(0, -1, 0), glm::ivec3(0, 1, 0),
@@ -116,18 +116,18 @@ ChunkManager::ChunkManager() :
 	jumpTo(glm::ivec3(0));
 }
 
-ChunkManager::~ChunkManager() {
+SceneManager::~SceneManager() {
 	glDeleteFramebuffers(1, &frameBuffer_);
 	glDeleteTextures(1, &fbTexture_);
 	glDeleteRenderbuffers(1, &renderBuffer_);
 }
 
-ChunkManager& ChunkManager::getInstance() {
-	static ChunkManager instance;
+SceneManager& SceneManager::getInstance() {
+	static SceneManager instance;
 	return instance;
 }
 
-void ChunkManager::update() {
+void SceneManager::update() {
 	player_->update();
 	currentChunk_->update();
 
@@ -145,7 +145,7 @@ void ChunkManager::update() {
 	}
 }
 
-void ChunkManager::draw() {
+void SceneManager::draw() {
 	if (transitioning_ && glfwGetTime() - transitionStartedAt_ > 1.0) {
 		transitioning_ = false;
 	}
@@ -166,7 +166,7 @@ void ChunkManager::draw() {
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void ChunkManager::jumpTo(const glm::ivec3& dest) {
+void SceneManager::jumpTo(const glm::ivec3& dest) {
 	SLOG << "Jump to " << dest << std::endl;
 	assert(chunks_.find(dest) != chunks_.end());
 

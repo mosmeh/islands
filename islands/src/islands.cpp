@@ -2,7 +2,7 @@
 #include "ResourceSystem.h"
 #include "Camera.h"
 #include "InputSystem.h"
-#include "ChunkManager.h"
+#include "SceneManager.h"
 #include "PlayerController.h"
 #include "PhysicalBody.h"
 #include "Log.h"
@@ -148,11 +148,11 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 
 		Profiler::getInstance().enterSection("update");
 		InputSystem::getInstance().update();
-		ChunkManager::getInstance().update();
+		SceneManager::getInstance().update();
 		Profiler::getInstance().leaveSection("update");
 
 		Profiler::getInstance().enterSection("draw");
-		ChunkManager::getInstance().draw();
+		SceneManager::getInstance().draw();
 		Profiler::getInstance().leaveSection("draw");
 
 #ifdef _DEBUG

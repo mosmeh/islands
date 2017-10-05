@@ -26,13 +26,13 @@ struct hash<glm::ivec3> {
 
 namespace islands {
 
-class ChunkManager {
+class SceneManager {
 public:
-	ChunkManager(const ChunkManager&) = delete;
-	ChunkManager& operator=(const ChunkManager&) = delete;
-	virtual ~ChunkManager();
+	SceneManager(const SceneManager&) = delete;
+	SceneManager& operator=(const SceneManager&) = delete;
+	virtual ~SceneManager();
 
-	static ChunkManager& getInstance();
+	static SceneManager& getInstance();
 
 	void update();
 	void draw();
@@ -51,7 +51,7 @@ private:
 	bool transitioning_;
 	double transitionStartedAt_;
 
-	ChunkManager();
+	SceneManager();
 };
 
 }
