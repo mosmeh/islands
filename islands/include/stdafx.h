@@ -10,6 +10,7 @@
 #include <sstream>
 #include <iterator>
 #include <vector>
+#include <array>
 #include <stack>
 #include <queue>
 #include <unordered_map>
@@ -40,5 +41,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #pragma warning(pop)
+
+#include "picojson/picojson.h"
 
 #define UNUSED(x) (static_cast<void>(x))

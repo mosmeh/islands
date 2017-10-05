@@ -2,7 +2,6 @@
 #include "Chunk.h"
 #include "ResourceSystem.h"
 #include "PhysicalBody.h"
-#include "picojson/picojson.h"
 
 glm::vec3 toVec3(const picojson::value& v) {
 	const auto& obj = v.get<picojson::object>();
@@ -59,9 +58,18 @@ std::shared_ptr<Entity> Chunk::getEntity(const std::string& name) const {
 
 void Chunk::update() {
 	load();
+
+	aabb_.min = glm::vec3(INFINITY);
+	aabb_.max = glm::vec3(-INFINITY);
 	for (const auto entity : entities_) {
 		entity->update();
+		for (const auto collider : entity->getComponents<Collider>()) {
+			aabb_.min = glm::min(aabb_.min, collider->getGlobalAABB().min);
+			aabb_.max = glm::max(aabb_.max, collider->getGlobalAABB().max);
+		}
 	}
+	aabb_.min.z = -INFINITY; // FIXME
+	aabb_.max.z = INFINITY;
 
 	std::copy(entitiesToBeAdded_.begin(), entitiesToBeAdded_.end(), std::back_inserter(entities_));
 	entitiesToBeAdded_.clear();
@@ -80,6 +88,10 @@ void Chunk::draw() {
 
 PhysicsSystem& Chunk::getPhysicsSystem() {
 	return physicsSystem_;
+}
+
+const geometry::AABB& Chunk::getGlobalAABB() const {
+	return aabb_;
 }
 
 void Chunk::loadImpl() {

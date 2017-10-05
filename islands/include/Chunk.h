@@ -4,6 +4,7 @@
 #include "Entity.h"
 #include "Collision.h"
 #include "PhysicsSystem.h"
+#include "Geometry.h"
 
 namespace islands {
 
@@ -23,8 +24,11 @@ public:
 
 	PhysicsSystem& getPhysicsSystem();
 
+	const geometry::AABB& getGlobalAABB() const;
+
 private:
 	const std::string filename_;
+	geometry::AABB aabb_;
 	std::vector<std::shared_ptr<Entity>> entities_;
 	std::vector<std::shared_ptr<Entity>> entitiesToBeAdded_;
 	PhysicsSystem physicsSystem_;

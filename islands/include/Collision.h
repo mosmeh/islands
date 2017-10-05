@@ -20,6 +20,8 @@ public:
 	void registerCallback(std::function<void(void)> callback);
 	void notifyCollision() const;
 
+	const geometry::AABB& getGlobalAABB() const;
+
 	virtual void update() override;
 	virtual glm::vec3 getNormal(const glm::vec3& refPos) const = 0;
 
@@ -38,7 +40,6 @@ public:
 
 protected:
 	std::shared_ptr<Model> getModel() const;
-	const geometry::AABB& getGlobalAABB() const;
 
 	virtual float getSinking(std::shared_ptr<AABBCollider>) const {
 		throw std::exception("not implemented");

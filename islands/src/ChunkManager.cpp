@@ -1,6 +1,7 @@
 #include "ChunkManager.h"
 #include "PlayerController.h"
 #include "ResourceSystem.h"
+#include "Log.h"
 
 namespace islands {
 
@@ -30,26 +31,56 @@ std::uint64_t cantorPair(std::uint64_t a, std::uint64_t b) {
 
 }
 
-ChunkManager::ChunkManager() : player_(std::make_shared<Entity>("Player")) {
-	player_->setPosition({0, 0, 10.f});
+ChunkManager::ChunkManager() :
+	NEIGHBOR_OFFSETS{
+		glm::ivec3(-1, 0, 0), glm::ivec3(1, 0, 0),
+		glm::ivec3(0, -1, 0), glm::ivec3(0, 1, 0),
+		glm::ivec3(0, 0, -1), glm::ivec3(0, 0, 1)
+	},
+	player_(std::make_shared<Entity>("Player")) {
+
+	picojson::value json;
+	{
+		std::ifstream ifs("levels.json");
+		ifs >> json;
+	}
+	for (const auto& item : json.get<picojson::array>()) {
+		const auto& obj = item.get<picojson::object>();
+
+		const auto& coordArray = obj.at("coord").get<picojson::array>();
+		assert(coordArray.size() == 3);
+		const glm::ivec3 coord(
+			coordArray.at(0).get<double>(),
+			coordArray.at(1).get<double>(),
+			coordArray.at(2).get<double>()
+		);
+
+		const auto& filename = obj.at("filename").get<std::string>();
+
+		const auto chunk = std::make_shared<Chunk>(filename, filename);
+		chunk->update();
+		chunk->update();
+		chunks_.emplace(coord, chunk);
+	}
+
+	player_->setPosition({0.f, 0.f, 2.f});
 	player_->setScale({0.00485f, 0.00485f, 0.006525f});
 
 	player_->attachComponent(std::make_shared<PlayerController>());
 
 	constexpr auto meshName = "character6a.fbx";
 	const auto model = ResourceSystem::getInstance().createOrGet<Model>(meshName, meshName);
-	const auto drawer = std::make_shared<ModelDrawer>(model);
-	player_->attachComponent(drawer);
+	player_->attachComponent(std::make_shared<ModelDrawer>(model));
 
-	const auto collider = std::make_shared<SphereCollider>(model, 1.f);
+	const auto collider = std::make_shared<SphereCollider>(model);
 	player_->attachComponent(collider);
 
 	const auto body = std::make_shared<PhysicalBody>();
 	body->setCollider(collider);
 	player_->attachComponent(body);
 
-	chunks_.emplace(glm::uvec3(0), std::make_shared<Chunk>("forest1.json", "forest1.json"));
-	jumpTo(glm::uvec3(0));
+	jumpTo(glm::ivec3(0));
+}
 }
 
 ChunkManager& ChunkManager::getInstance() {
@@ -60,6 +91,19 @@ ChunkManager& ChunkManager::getInstance() {
 void ChunkManager::update() {
 	player_->update();
 	currentChunk_->update();
+
+	const auto& playerAABB = player_->getFirstComponent<Collider>()->getGlobalAABB();
+	const auto& playerVelocity = player_->getFirstComponent<PhysicalBody>()->getVelocity();
+	for (const auto& offset : NEIGHBOR_OFFSETS) {
+		const auto destCoord = currentCoord_ + offset;
+		if (chunks_.find(destCoord) != chunks_.end()) {
+			if (glm::dot(playerVelocity, glm::vec3(offset)) > 0 &&
+				geometry::intersect(chunks_.at(destCoord)->getGlobalAABB(), playerAABB)) {
+
+				jumpTo(destCoord);
+			}
+		}
+	}
 }
 
 void ChunkManager::draw() {
@@ -68,9 +112,15 @@ void ChunkManager::draw() {
 }
 
 void ChunkManager::jumpTo(const glm::ivec3& dest) {
+	SLOG << "Jump to " << dest << std::endl;
 	assert(chunks_.find(dest) != chunks_.end());
+
+	transitioning_ = true;
+	transitionStartedAt_ = glfwGetTime();
+
 	currentCoord_ = dest;
 	currentChunk_ = chunks_.at(dest);
+
 	player_->setChunk(currentChunk_.get());
 	currentChunk_->getPhysicsSystem().registerBody(player_->getFirstComponent<PhysicalBody>());
 	currentChunk_->getPhysicsSystem().registerCollider(player_->getFirstComponent<Collider>());

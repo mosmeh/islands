@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Chunk.h"
+#include "Geometry.h"
 
 namespace islands {
 namespace detail {
@@ -29,7 +30,7 @@ class ChunkManager {
 public:
 	ChunkManager(const ChunkManager&) = delete;
 	ChunkManager& operator=(const ChunkManager&) = delete;
-	virtual ~ChunkManager() = default;
+	virtual ~ChunkManager();
 
 	static ChunkManager& getInstance();
 
@@ -39,10 +40,16 @@ public:
 	void jumpTo(const glm::ivec3& destination);
 
 private:
+	const std::array<glm::ivec3, 6> NEIGHBOR_OFFSETS;
+
 	std::unordered_map<glm::ivec3, std::shared_ptr<Chunk>> chunks_;
-	glm::uvec3 currentCoord_;
+	glm::ivec3 currentCoord_;
 	std::shared_ptr<Chunk> currentChunk_;
 	std::shared_ptr<Entity> player_;
+	std::shared_ptr<Program> fullScreenProgram_;
+	GLuint frameBuffer_, fbTexture_, renderBuffer_;
+	bool transitioning_;
+	double transitionStartedAt_;
 
 	ChunkManager();
 };
