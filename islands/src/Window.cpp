@@ -25,15 +25,22 @@ Window::Window() :
 
 	glfwSetWindowAspectRatio(window_, 16, 9);
 	glfwSetFramebufferSizeCallback(window_, framebufferSizeCallback);
-	glfwSetInputMode(window_, GLFW_STICKY_KEYS, GLFW_TRUE);
 
 	sys::disableIME(window_);
 }
 
-void Window::framebufferSizeCallback(GLFWwindow*, int width, int height) {
-	Window::getInstance().width_ = width;
-	Window::getInstance().height_ = height;
+void Window::updateFramebufferSize(int width, int height) {
+	width_ = width;
+	height_ = height;
 	glViewport(0, 0, width, height);
+
+	for (const auto callback : fbResizeCallbacks_) {
+		callback(width, height);
+	}
+}
+
+void Window::framebufferSizeCallback(GLFWwindow*, int width, int height) {
+	Window::getInstance().updateFramebufferSize(width, height);
 }
 
 Window& Window::getInstance() {
@@ -70,6 +77,10 @@ bool Window::update() {
 
 glm::uvec2 Window::getFramebufferSize() const {
 	return {width_, height_};
+}
+
+void Window::registerFramebufferResizeCallback(std::function<void(int, int)> callback) {
+	fbResizeCallbacks_.emplace_back(callback);
 }
 
 float Window::getDeltaTime() const {

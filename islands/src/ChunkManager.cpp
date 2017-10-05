@@ -1,6 +1,7 @@
 #include "ChunkManager.h"
 #include "PlayerController.h"
 #include "ResourceSystem.h"
+#include "Window.h"
 #include "Log.h"
 
 namespace islands {
@@ -37,7 +38,40 @@ ChunkManager::ChunkManager() :
 		glm::ivec3(0, -1, 0), glm::ivec3(0, 1, 0),
 		glm::ivec3(0, 0, -1), glm::ivec3(0, 0, 1)
 	},
-	player_(std::make_shared<Entity>("Player")) {
+	player_(std::make_shared<Entity>("Player")),
+	fullScreenProgram_(ResourceSystem::getInstance().createOrGet<Program>(
+		"blackOut", "full_screen.vert", "black_out.frag")),
+	transitioning_(false) {
+
+	fullScreenProgram_->use();
+	fullScreenProgram_->setUniform("tex", static_cast<GLuint>(0));
+
+	glGenFramebuffers(1, &frameBuffer_);
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer_);
+
+	glGenTextures(1, &fbTexture_);
+	glBindTexture(GL_TEXTURE_2D, fbTexture_);
+	const auto& size = Window::getInstance().getFramebufferSize();
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbTexture_, 0);
+
+	glGenRenderbuffers(1, &renderBuffer_);
+	glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer_);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size.x, size.y);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer_);
+
+	Window::getInstance().registerFramebufferResizeCallback([&](int width, int height) {
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer_);
+
+		glBindTexture(GL_TEXTURE_2D, fbTexture_);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+		glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer_);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	});
 
 	picojson::value json;
 	{
@@ -81,6 +115,11 @@ ChunkManager::ChunkManager() :
 
 	jumpTo(glm::ivec3(0));
 }
+
+ChunkManager::~ChunkManager() {
+	glDeleteFramebuffers(1, &frameBuffer_);
+	glDeleteTextures(1, &fbTexture_);
+	glDeleteRenderbuffers(1, &renderBuffer_);
 }
 
 ChunkManager& ChunkManager::getInstance() {
@@ -107,8 +146,24 @@ void ChunkManager::update() {
 }
 
 void ChunkManager::draw() {
-	player_->draw();
-	currentChunk_->draw();
+	if (transitioning_ && glfwGetTime() - transitionStartedAt_ > 1.0) {
+		transitioning_ = false;
+	}
+
+	if (!transitioning_ || glfwGetTime() - transitionStartedAt_ > 0.5) {
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer_);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		player_->draw();
+		currentChunk_->draw();
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	fullScreenProgram_->use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, fbTexture_);
+	fullScreenProgram_->setUniform("progress", static_cast<float>(glfwGetTime() - transitionStartedAt_));
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 void ChunkManager::jumpTo(const glm::ivec3& dest) {

@@ -152,7 +152,6 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		Profiler::getInstance().leaveSection("update");
 
 		Profiler::getInstance().enterSection("draw");
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		ChunkManager::getInstance().draw();
 		Profiler::getInstance().leaveSection("draw");
 
