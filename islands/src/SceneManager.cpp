@@ -75,7 +75,7 @@ SceneManager::SceneManager() :
 
 	picojson::value json;
 	{
-		std::ifstream ifs("levels.json");
+		std::ifstream ifs(LEVEL_DIR + sys::getFilePathSeperator() + "levels.json");
 		ifs >> json;
 	}
 	for (const auto& item : json.get<picojson::array>()) {
