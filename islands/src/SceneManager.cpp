@@ -143,13 +143,13 @@ void SceneManager::update() {
 			}
 		}
 	}
-}
 
-void SceneManager::draw() {
 	if (transitioning_ && glfwGetTime() - transitionStartedAt_ > 1.0) {
 		transitioning_ = false;
 	}
+}
 
+void SceneManager::draw() {
 	if (!transitioning_ || glfwGetTime() - transitionStartedAt_ > 0.5) {
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer_);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
