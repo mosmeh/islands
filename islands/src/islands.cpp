@@ -114,12 +114,11 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	glCullFace(GL_BACK);
 	glEnable(GL_MULTISAMPLE);
 
-	InputSystem::getInstance().registerKeyboardCallback(
-		[](GLFWwindow* window, int key, int, int action, int) {
+	InputSystem::getInstance().registerKeyboardCallback([](int key, int action) {
 		switch (key) {
 		case GLFW_KEY_ESCAPE:
 			if (action == GLFW_PRESS) {
-				glfwSetWindowShouldClose(window, GLFW_TRUE);
+				glfwSetWindowShouldClose(Window::getInstance().getHandle(), GLFW_TRUE);
 			}
 			break;
 		case GLFW_KEY_PRINT_SCREEN:

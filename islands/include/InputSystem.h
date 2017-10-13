@@ -9,6 +9,8 @@ public:
 		Attack
 	};
 
+	using KeyboardCallback = std::function<void(int, int)>;
+
 	InputSystem(const InputSystem&) = delete;
 	InputSystem& operator=(const InputSystem&) = delete;
 	virtual ~InputSystem();
@@ -16,7 +18,7 @@ public:
 	static InputSystem& getInstance();
 
 	void update();
-	void registerKeyboardCallback(GLFWkeyfun callback);
+	void registerKeyboardCallback(const KeyboardCallback& callback);
 	const glm::vec2 getDirection() const;
 	bool isCommandActive(Command command) const;
 
@@ -67,12 +69,10 @@ private:
 	} gamepad_;
 
 	GLFWwindow* window_;
-	std::vector<GLFWkeyfun> keyboardCallbacks_;
+	std::vector<KeyboardCallback> keyboardCallbacks_;
 	glm::vec2 direction_;
 
 	InputSystem();
-
-	static void keyboardCallback(GLFWwindow*, int, int, int, int);
 };
 
 }

@@ -4,7 +4,11 @@
 namespace islands {
 
 InputSystem::InputSystem() {
-	glfwSetKeyCallback(Window::getInstance().getHandle(), keyboardCallback);
+	glfwSetKeyCallback(Window::getInstance().getHandle(), [](GLFWwindow*, int key, int, int action, int) {
+		for (const auto callback : getInstance().keyboardCallbacks_) {
+			callback(key, action);
+		}
+	});
 }
 
 InputSystem::~InputSystem() {
@@ -33,8 +37,7 @@ void InputSystem::update() {
 	}
 }
 
-void InputSystem::registerKeyboardCallback(GLFWkeyfun callback) {
-	assert(callback);
+void InputSystem::registerKeyboardCallback(const KeyboardCallback& callback) {
 	keyboardCallbacks_.push_back(callback);
 }
 
@@ -49,12 +52,6 @@ bool InputSystem::isCommandActive(Command command) const {
 		return true;
 	}
 	return false;
-}
-
-void InputSystem::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	for (const auto callback : getInstance().keyboardCallbacks_) {
-		callback(window, key, scancode, action, mods);
-	}
 }
 
 bool InputSystem::Keyboard::isPresent() const {
