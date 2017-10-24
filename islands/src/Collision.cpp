@@ -18,32 +18,27 @@ void Collider::notifyCollision(std::shared_ptr<Collider> opponent) const {
 }
 
 void Collider::update() {
-	const auto& localAABB = getModel()->getLocalAABB();
-	const auto& modelMat = getEntity().getModelMatrix();
-
-	globalAABB_.min = glm::vec3(INFINITY);
-	globalAABB_.max = glm::vec3(-INFINITY);
-	for (const auto& a : {localAABB.min, localAABB.max}) {
-		for (const auto& b : {localAABB.min, localAABB.max}) {
-			for (const auto& c : {localAABB.min, localAABB.max}) {
-				const auto worldPos = (modelMat * glm::vec4(a.x, b.y, c.z, 1)).xyz();
-				globalAABB_.min = glm::min(globalAABB_.min, worldPos);
-				globalAABB_.max = glm::max(globalAABB_.max, worldPos);
-			}
-		}
-	}
+	globalAABB_ = getModel()->getLocalAABB().transform(getEntity().getModelMatrix());
 }
 
 glm::vec3 Collider::getSinkingCorrectionVector(std::shared_ptr<Collider> collider) const {
-	const auto normal = glm::normalize(getNormal(collider->getEntity().getPosition()));
-	if (const auto a = std::dynamic_pointer_cast<AABBCollider>(collider)) {
-		return normal * getSinking(a);
-	} else if (const auto s = std::dynamic_pointer_cast<SphereCollider>(collider)) {
-		return normal * getSinking(s);
-	} else if (const auto p = std::dynamic_pointer_cast<PlaneCollider>(collider)) {
-		return normal * getSinking(p);
+	auto normal = glm::normalize(getNormal(collider->getEntity().getPosition()));
+	if (glm::any(glm::isnan(normal))) {
+		normal = glm::zero<glm::vec3>();
 	}
-	throw std::exception("unreachable");
+	float sinking;
+	if (const auto a = std::dynamic_pointer_cast<AABBCollider>(collider)) {
+		sinking = getSinking(a);
+	} else if (const auto s = std::dynamic_pointer_cast<SphereCollider>(collider)) {
+		sinking = getSinking(s);
+	} else if (const auto p = std::dynamic_pointer_cast<PlaneCollider>(collider)) {
+		sinking = getSinking(p);
+	} else if (const auto m = std::dynamic_pointer_cast<MeshCollider>(collider)) {
+		sinking = getSinking(m);
+	} else {
+		throw std::exception("unreachable");
+	}
+	return sinking * normal;
 }
 
 bool Collider::intersects(std::shared_ptr<Collider> collider) const {
@@ -53,6 +48,8 @@ bool Collider::intersects(std::shared_ptr<Collider> collider) const {
 		return intersects(s);
 	} else if (const auto p = std::dynamic_pointer_cast<PlaneCollider>(collider)) {
 		return intersects(p);
+	} else if (const auto m = std::dynamic_pointer_cast<MeshCollider>(collider)) {
+		return intersects(m);
 	}
 	throw std::exception("unreachable");
 }
@@ -69,12 +66,16 @@ bool AABBCollider::intersects(std::shared_ptr<AABBCollider> collider) const {
 	return geometry::intersect(getGlobalAABB(), collider->getGlobalAABB());
 }
 
+SphereCollider::SphereCollider(std::shared_ptr<Model> model) :
+	Collider(model),
+	sphere_{glm::zero<glm::vec3>(), 0.f}  {}
+
 void SphereCollider::update() {
 	Collider::update();
 
 	const auto& aabb = getGlobalAABB();
 	const auto d = aabb.max - aabb.min;
-	sphere_.radius = std::min({d.x, d.y, d.z}) / 2.f;
+	sphere_.radius = std::max(0.f, std::min({d.x, d.y, d.z}) / 2.f);
 	sphere_.center = (aabb.max + aabb.min) / 2.f;
 }
 
@@ -96,6 +97,14 @@ bool SphereCollider::intersects(std::shared_ptr<PlaneCollider> collider) const {
 
 float SphereCollider::getSinking(std::shared_ptr<PlaneCollider> collider) const {
 	return geometry::getSinking(sphere_, collider->getGlobalPlane());
+}
+
+bool SphereCollider::intersects(std::shared_ptr<MeshCollider> collider) const {
+	return geometry::intersect(collider->getCollisionMesh(), sphere_);
+}
+
+float SphereCollider::getSinking(std::shared_ptr<MeshCollider> collider) const {
+	return geometry::getSinking(collider->getCollisionMesh().nearestTriangle, sphere_);
 }
 
 const geometry::Sphere& SphereCollider::getGlobalSphere() const {
@@ -133,6 +142,48 @@ void PlaneCollider::setOffset(float offset) {
 
 float PlaneCollider::getSinking(std::shared_ptr<SphereCollider> collider) const {
 	return geometry::getSinking(collider->getGlobalSphere(), globalPlane_);
+}
+
+MeshCollider::MeshCollider(std::shared_ptr<Model> model) : Collider(model) {
+	size_t numTriangles = 0;
+	for (auto mesh : model->getMeshes()) {
+		assert(mesh->numIndices_ % 3 == 0);
+		numTriangles += mesh->numIndices_ / 3;
+	}
+	collisionMesh_.triangles.reserve(numTriangles);
+}
+
+void MeshCollider::update() {
+	Collider::update();
+
+	const auto& modelMat = getEntity().getModelMatrix();
+	collisionMesh_.triangles.clear();
+	for (auto mesh : getModel()->getMeshes()) {
+		for (size_t i = 0; i < mesh->numIndices_ / 3; ++i) {
+			const geometry::Triangle triangle{
+				mesh->vertices_[mesh->indices_[3 * i + 0]],
+				mesh->vertices_[mesh->indices_[3 * i + 1]],
+				mesh->vertices_[mesh->indices_[3 * i + 2]]
+			};
+			collisionMesh_.triangles.emplace_back(triangle.transform(modelMat));
+		}
+	}
+}
+
+glm::vec3 MeshCollider::getNormal(const glm::vec3&) const {
+	return collisionMesh_.nearestTriangle.getNormal();
+}
+
+bool MeshCollider::intersects(std::shared_ptr<SphereCollider> collider) const {
+	return geometry::intersect(collisionMesh_, collider->getGlobalSphere());
+}
+
+geometry::CollisionMesh& MeshCollider::getCollisionMesh() const {
+	return collisionMesh_;
+}
+
+float MeshCollider::getSinking(std::shared_ptr<SphereCollider> collider) const {
+	return geometry::getSinking(collisionMesh_.nearestTriangle, collider->getGlobalSphere());
 }
 
 }

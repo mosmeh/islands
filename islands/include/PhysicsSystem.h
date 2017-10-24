@@ -19,8 +19,6 @@ private:
 	const float FRICTION;
 	std::vector<std::shared_ptr<Collider>> colliders_;
 	std::vector<std::shared_ptr<PhysicalBody>> bodies_;
-
-	bool intersects(std::shared_ptr<Collider> collider) const;
 };
 
 }

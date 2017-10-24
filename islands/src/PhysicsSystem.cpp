@@ -26,11 +26,10 @@ void PhysicsSystem::update() {
 			bool collide = false;
 			const auto collider = body->getCollider();
 			for (const auto c : colliders_) {
+				if (c == collider) {
+					continue;
+				}
 				if (collider->intersects(c)) {
-					if (c == collider) {
-						continue;
-					}
-
 					collide = true;
 					body->moveBy(c->getSinkingCorrectionVector(collider));
 					collider->notifyCollision(c);
@@ -63,19 +62,6 @@ void PhysicsSystem::registerBody(std::shared_ptr<PhysicalBody> body) {
 	if (std::find(bodies_.begin(), bodies_.end(), body) == bodies_.end()) {
 		bodies_.emplace_back(body);
 	}
-}
-
-bool PhysicsSystem::intersects(std::shared_ptr<Collider> collider) const {
-	for (const auto c : colliders_) {
-		if (c == collider) {
-			continue;
-		}
-		if (collider->intersects(c)) {
-			return true;
-		}
-	}
-
-	return false;
 }
 
 }
