@@ -31,7 +31,7 @@ void PhysicsSystem::update() {
 				}
 				if (collider->intersects(c)) {
 					collide = true;
-					body->moveBy(c->getSinkingCorrectionVector(collider));
+					body->moveBy(c->getSinkingCorrector(collider));
 					collider->notifyCollision(c);
 				}
 			}
@@ -52,16 +52,38 @@ void PhysicsSystem::update() {
 	}
 }
 
-void PhysicsSystem::registerCollider(std::shared_ptr<Collider> collider) {
+bool PhysicsSystem::registerCollider(std::shared_ptr<Collider> collider) {
 	if (std::find(colliders_.begin(), colliders_.end(), collider) == colliders_.end()) {
 		colliders_.emplace_back(collider);
+		return true;
 	}
+	return false;
 }
 
-void PhysicsSystem::registerBody(std::shared_ptr<PhysicalBody> body) {
+bool PhysicsSystem::unregisterCollider(std::shared_ptr<Collider> collider) {
+	const auto iter = std::find(colliders_.begin(), colliders_.end(), collider);
+	if (iter != colliders_.end()) {
+		colliders_.erase(iter);
+		return true;
+	}
+	return false;
+}
+
+bool PhysicsSystem::registerBody(std::shared_ptr<PhysicalBody> body) {
 	if (std::find(bodies_.begin(), bodies_.end(), body) == bodies_.end()) {
 		bodies_.emplace_back(body);
+		return true;
 	}
+	return false;
+}
+
+bool PhysicsSystem::unregisterBody(std::shared_ptr<PhysicalBody> body) {
+	const auto iter = std::find(bodies_.begin(), bodies_.end(), body);
+	if (iter != bodies_.end()) {
+		bodies_.erase(iter);
+		return true;
+	}
+	return false;
 }
 
 }

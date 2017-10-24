@@ -11,8 +11,10 @@ public:
 	virtual ~PhysicsSystem() = default;
 
 	void update();
-	void registerCollider(std::shared_ptr<Collider> collider);
-	void registerBody(std::shared_ptr<PhysicalBody> body);
+	bool registerCollider(std::shared_ptr<Collider> collider);
+	bool unregisterCollider(std::shared_ptr<Collider> collider);
+	bool registerBody(std::shared_ptr<PhysicalBody> body);
+	bool unregisterBody(std::shared_ptr<PhysicalBody> body);
 
 private:
 	const glm::vec3 GRAVITY;

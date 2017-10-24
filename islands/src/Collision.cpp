@@ -5,27 +5,39 @@
 
 namespace islands {
 
-Collider::Collider(std::shared_ptr<Model> model) : model_(model) {}
+Collider::Collider(std::shared_ptr<Model> model) :
+	model_(model),
+	selfMask_(0),
+	filterMask_(0) {}
 
-void Collider::registerCallback(std::function<void(std::shared_ptr<Collider>)> callback) {
+void Collider::registerCallback(const Callback& callback) {
 	callbacks_.emplace_back(callback);
 }
 
 void Collider::notifyCollision(std::shared_ptr<Collider> opponent) const {
 	for (const auto callback : callbacks_) {
-		callback(opponent);
+		callback(opponent->selfMask_, opponent);
 	}
+}
+
+void Collider::setSelfMask(MaskType mask) {
+	selfMask_ = mask;
+}
+
+void Collider::setFilterMask(MaskType mask) {
+	filterMask_ = mask;
 }
 
 void Collider::update() {
 	globalAABB_ = getModel()->getLocalAABB().transform(getEntity().getModelMatrix());
 }
 
-glm::vec3 Collider::getSinkingCorrectionVector(std::shared_ptr<Collider> collider) const {
-	auto normal = glm::normalize(getNormal(collider->getEntity().getPosition()));
+glm::vec3 Collider::getSinkingCorrector(std::shared_ptr<Collider> collider) const {
+	const auto normal = glm::normalize(getNormal(collider->getEntity().getPosition()));
 	if (glm::any(glm::isnan(normal))) {
-		normal = glm::zero<glm::vec3>();
+		return glm::zero<glm::vec3>();
 	}
+
 	float sinking;
 	if (const auto a = std::dynamic_pointer_cast<AABBCollider>(collider)) {
 		sinking = getSinking(a);
@@ -38,18 +50,26 @@ glm::vec3 Collider::getSinkingCorrectionVector(std::shared_ptr<Collider> collide
 	} else {
 		throw std::exception("unreachable");
 	}
+	if (std::isnan(sinking)) {
+		return glm::zero<glm::vec3>();
+	}
+
 	return sinking * normal;
 }
 
 bool Collider::intersects(std::shared_ptr<Collider> collider) const {
+	if (!(filterMask_ & collider->selfMask_)) {
+		return false;
+	}
+
 	if (const auto a = std::dynamic_pointer_cast<AABBCollider>(collider)) {
-		return intersects(a);
+		return intersectsImpl(a);
 	} else if (const auto s = std::dynamic_pointer_cast<SphereCollider>(collider)) {
-		return intersects(s);
+		return intersectsImpl(s);
 	} else if (const auto p = std::dynamic_pointer_cast<PlaneCollider>(collider)) {
-		return intersects(p);
+		return intersectsImpl(p);
 	} else if (const auto m = std::dynamic_pointer_cast<MeshCollider>(collider)) {
-		return intersects(m);
+		return intersectsImpl(m);
 	}
 	throw std::exception("unreachable");
 }
@@ -62,7 +82,7 @@ const geometry::AABB& Collider::getGlobalAABB() const {
 	return globalAABB_;
 }
 
-bool AABBCollider::intersects(std::shared_ptr<AABBCollider> collider) const {
+bool AABBCollider::intersectsImpl(std::shared_ptr<AABBCollider> collider) const {
 	return geometry::intersect(getGlobalAABB(), collider->getGlobalAABB());
 }
 
@@ -83,7 +103,7 @@ glm::vec3 SphereCollider::getNormal(const glm::vec3& refPos) const {
 	return glm::normalize(refPos - sphere_.center);
 }
 
-bool SphereCollider::intersects(std::shared_ptr<SphereCollider> collider) const {
+bool SphereCollider::intersectsImpl(std::shared_ptr<SphereCollider> collider) const {
 	return geometry::intersect(sphere_, collider->getGlobalSphere());
 }
 
@@ -91,7 +111,7 @@ float SphereCollider::getSinking(std::shared_ptr<SphereCollider> collider) const
 	return geometry::getSinking(sphere_, collider->getGlobalSphere());
 }
 
-bool SphereCollider::intersects(std::shared_ptr<PlaneCollider> collider) const {
+bool SphereCollider::intersectsImpl(std::shared_ptr<PlaneCollider> collider) const {
 	return geometry::intersect(sphere_, collider->getGlobalPlane());
 }
 
@@ -99,7 +119,7 @@ float SphereCollider::getSinking(std::shared_ptr<PlaneCollider> collider) const 
 	return geometry::getSinking(sphere_, collider->getGlobalPlane());
 }
 
-bool SphereCollider::intersects(std::shared_ptr<MeshCollider> collider) const {
+bool SphereCollider::intersectsImpl(std::shared_ptr<MeshCollider> collider) const {
 	return geometry::intersect(collider->getCollisionMesh(), sphere_);
 }
 
@@ -128,7 +148,7 @@ glm::vec3 PlaneCollider::getNormal(const glm::vec3&) const {
 	return globalPlane_.normal;
 }
 
-bool PlaneCollider::intersects(std::shared_ptr<SphereCollider> collider) const {
+bool PlaneCollider::intersectsImpl(std::shared_ptr<SphereCollider> collider) const {
 	return geometry::intersect(collider->getGlobalSphere(), globalPlane_);
 }
 
@@ -174,7 +194,7 @@ glm::vec3 MeshCollider::getNormal(const glm::vec3&) const {
 	return collisionMesh_.nearestTriangle.getNormal();
 }
 
-bool MeshCollider::intersects(std::shared_ptr<SphereCollider> collider) const {
+bool MeshCollider::intersectsImpl(std::shared_ptr<SphereCollider> collider) const {
 	return geometry::intersect(collisionMesh_, collider->getGlobalSphere());
 }
 
