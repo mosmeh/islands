@@ -3,6 +3,7 @@
 #include "Mesh.h"
 #include "ResourceSystem.h"
 
+//#define PRINT_ANIMATIONS
 #define FOREACH(var, ary, num) for (auto var = ary; var < ary + num; ++var)
 
 namespace islands {
@@ -10,7 +11,6 @@ namespace islands {
 Mesh::Mesh(const aiMesh* mesh, const aiMaterial* material) :
 	Resource(mesh->mName.C_Str()),
 	numVertices_(mesh->mNumVertices),
-	numIndices_(3 * mesh->mNumFaces),
 	vertices_(std::make_unique<glm::vec3[]>(mesh->mNumVertices)),
 	normals_(std::make_unique<glm::vec3[]>(mesh->mNumVertices)),
 	indices_(std::make_unique<GLuint[]>(3 * mesh->mNumFaces)),
@@ -43,6 +43,7 @@ Mesh::Mesh(const aiMesh* mesh, const aiMaterial* material) :
 			}
 		}
 	}
+	numIndices_ = idx;
 
 	aiString materialName;
 	material->Get(AI_MATKEY_NAME, materialName);
@@ -178,6 +179,13 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 		animations_.emplace(animation->mName.C_Str(), anim);
 	}
 	globalInverse_ = glm::inverse(animations_.begin()->second->rootNode->transform);
+
+#ifdef PRINT_ANIMATIONS
+	std::cout << mesh->mName.C_Str() << std::endl;
+	for (const auto& a : animations_) {
+		std::cout << "\t" << a.first << std::endl;
+	}
+#endif
 }
 
 SkinnedMesh::~SkinnedMesh() {

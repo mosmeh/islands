@@ -44,7 +44,7 @@ private:
 	std::unique_ptr<glm::vec3[]> vertices_, normals_;
 	std::unique_ptr<glm::vec2[]> uvs_;
 	std::unique_ptr<GLuint[]> indices_;
-	const size_t numIndices_;
+	size_t numIndices_;
 	const bool hasUV_;
 	std::shared_ptr<Material> material_;
 };
