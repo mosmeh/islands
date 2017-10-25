@@ -3,10 +3,10 @@
 
 namespace islands {
 
-Entity::Entity(const std::string& name) :
+Entity::Entity(const std::string& name, Chunk& chunk) :
 	Resource(name),
 	name_(name),
-	chunk_(nullptr),
+	chunk_(chunk),
 	position_(0),
 	quaternion_(1, 0, 0, 0),
 	scale_(1) {}
@@ -66,18 +66,15 @@ void Entity::draw() const {
 	}
 }
 
-void Entity::setChunk(Chunk* chunk) {
-	chunk_ = chunk;
-}
-
 Chunk& Entity::getChunk() const {
-	assert(chunk_);
-	return *chunk_;
+	return chunk_;
 }
 
 void Entity::attachComponent(std::shared_ptr<Component> component) {
-	component->setEntity(this);
-	components_.emplace_back(component);
+	if (std::find(components_.begin(), components_.end(), component) == components_.end()) {
+		component->setEntity(this);
+		components_.emplace_back(component);
+	}
 }
 
 void Entity::updateModelMatrix() {

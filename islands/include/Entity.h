@@ -9,7 +9,7 @@ class Chunk;
 
 class Entity : public Resource {
 public:
-	Entity(const std::string& name);
+	Entity(const std::string& name, Chunk& chunk);
 	virtual ~Entity() = default;
 
 	bool isLoaded() const override;
@@ -26,10 +26,13 @@ public:
 	void update();
 	void draw() const;
 
-	void setChunk(Chunk* chunk);
 	Chunk& getChunk() const;
 
 	void attachComponent(std::shared_ptr<Component> component);
+
+	template <class T, class... Args>
+	std::enable_if_t<std::is_base_of<Component, T>::value, std::shared_ptr<T>>
+	createComponent(Args... args);
 
 	template <class T>
 	std::enable_if_t<std::is_base_of<Component, T>::value, bool>
@@ -45,7 +48,7 @@ public:
 
 private:
 	const std::string name_;
-	Chunk* chunk_;
+	Chunk& chunk_;
 	glm::vec3 position_, scale_;
 	glm::quat quaternion_;
 	glm::mat4 modelMatrix_;
@@ -53,6 +56,14 @@ private:
 
 	void updateModelMatrix();
 };
+
+template<class T, class ...Args>
+inline std::enable_if_t<std::is_base_of<Component, T>::value, std::shared_ptr<T>>
+Entity::createComponent(Args ...args) {
+	const auto component = std::make_shared<T>(args...);
+	attachComponent(component);
+	return component;
+}
 
 template<class T>
 inline std::enable_if_t<std::is_base_of<Component, T>::value, bool>
