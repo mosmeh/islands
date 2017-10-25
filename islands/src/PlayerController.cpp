@@ -3,6 +3,7 @@
 #include "Input.h"
 #include "Chunk.h"
 #include "ResourceSystem.h"
+#include "Health.h"
 
 namespace islands {
 
@@ -29,12 +30,17 @@ void PlayerController::start() {
 	body_ = getChunk().getPhysics().createBody(collider);
 	getEntity().attachComponent(body_);
 
+	getEntity().createComponent<Health>(100);
 
 	fireBall_ = getEntity().createComponent<FireBall>();
 }
 
 void PlayerController::update() {
 	Camera::getInstance().lookAt(getEntity().getPosition());
+
+	if (getEntity().getFirstComponent<Health>()->isDead()) {
+		std::exit(0);
+	}
 
 	static const float SPEED = 8.f;
 	static const auto THETA = 5 * glm::quarter_pi<float>();
