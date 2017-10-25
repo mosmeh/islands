@@ -2,6 +2,7 @@
 #include "Chunk.h"
 #include "ResourceSystem.h"
 #include "PhysicalBody.h"
+#include "PlayerController.h"
 
 glm::vec3 toVec3(const picojson::value& v) {
 	const auto& obj = v.get<picojson::object>();
@@ -65,9 +66,11 @@ void Chunk::update() {
 	aabb_.max = glm::vec3(-INFINITY);
 	for (const auto entity : entities_) {
 		entity->update();
-		for (const auto collider : entity->getComponents<Collider>()) {
-			aabb_.min = glm::min(aabb_.min, collider->getGlobalAABB().min);
-			aabb_.max = glm::max(aabb_.max, collider->getGlobalAABB().max);
+		if (entity->getName() != "Player" && entity->getName() != "Ball") {
+			for (const auto collider : entity->getComponents<Collider>()) {
+				aabb_.min = glm::min(aabb_.min, collider->getGlobalAABB().min);
+				aabb_.max = glm::max(aabb_.max, collider->getGlobalAABB().max);
+			}
 		}
 	}
 	aabb_.min.z = -INFINITY; // FIXME

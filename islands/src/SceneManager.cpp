@@ -38,7 +38,6 @@ SceneManager::SceneManager() :
 		glm::ivec3(0, -1, 0), glm::ivec3(0, 1, 0),
 		glm::ivec3(0, 0, -1), glm::ivec3(0, 0, 1)
 	},
-	player_(std::make_shared<Entity>("Player")),
 	fullScreenProgram_(ResourceSystem::getInstance().createOrGet<Program>(
 		"blackOut", "full_screen.vert", "black_out.frag")),
 	transitioning_(false) {
@@ -97,23 +96,9 @@ SceneManager::SceneManager() :
 		chunks_.emplace(coord, chunk);
 	}
 
-	player_->setPosition({0.f, 0.f, 2.f});
-	player_->setScale({0.00485f, 0.00485f, 0.006525f});
-
-	player_->attachComponent(std::make_shared<PlayerController>());
-
-	constexpr auto meshName = "character6a.fbx";
-	const auto model = ResourceSystem::getInstance().createOrGet<Model>(meshName, meshName);
-	player_->attachComponent(std::make_shared<ModelDrawer>(model));
-
-	const auto collider = std::make_shared<SphereCollider>(model);
-	player_->attachComponent(collider);
-
-	const auto body = std::make_shared<PhysicalBody>();
-	body->setCollider(collider);
-	player_->attachComponent(body);
-
 	jumpTo(glm::ivec3(0));
+
+	currentChunk_->getEntityByName("Player")->setPosition({0.f, 0.f, 2.f});
 }
 
 SceneManager::~SceneManager() {
@@ -128,18 +113,21 @@ SceneManager& SceneManager::getInstance() {
 }
 
 void SceneManager::update() {
-	player_->update();
 	currentChunk_->update();
 
-	const auto& playerAABB = player_->getFirstComponent<Collider>()->getGlobalAABB();
-	const auto& playerVelocity = player_->getFirstComponent<PhysicalBody>()->getVelocity();
-	for (const auto& offset : NEIGHBOR_OFFSETS) {
-		const auto destCoord = currentCoord_ + offset;
-		if (chunks_.find(destCoord) != chunks_.end()) {
-			if (glm::dot(playerVelocity, glm::vec3(offset)) > 0 &&
-				geometry::intersect(chunks_.at(destCoord)->getGlobalAABB(), playerAABB)) {
+	if (!transitioning_) {
+		const auto playerEntity = currentChunk_->getEntityByName("Player");
+		const auto& playerAABB = playerEntity->getFirstComponent<Collider>()->getGlobalAABB();
+		const auto playerVelocity = glm::normalize(playerEntity->getFirstComponent<PhysicalBody>()->getVelocity());
+		for (const auto& offset : NEIGHBOR_OFFSETS) {
+			const auto destCoord = currentCoord_ + offset;
+			if (chunks_.find(destCoord) != chunks_.end()) {
+				const auto& destAABB = chunks_.at(destCoord)->getGlobalAABB();
+				if (glm::dot(playerVelocity, glm::vec3(offset)) > glm::inversesqrt(2.f) &&
+					geometry::intersect(destAABB, playerAABB)) {
 
-				jumpTo(destCoord);
+					jumpTo(destCoord);
+				}
 			}
 		}
 	}
@@ -153,7 +141,6 @@ void SceneManager::draw() {
 	if (!transitioning_ || glfwGetTime() - transitionStartedAt_ > 0.5) {
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer_);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		player_->draw();
 		currentChunk_->draw();
 	}
 
@@ -173,12 +160,15 @@ void SceneManager::jumpTo(const glm::ivec3& dest) {
 	transitioning_ = true;
 	transitionStartedAt_ = glfwGetTime();
 
+	if (currentChunk_) {
+		const auto currentPlayer = currentChunk_->getEntityByName("Player");
+		const auto nextPlayer = chunks_.at(dest)->getEntityByName("Player");
+		nextPlayer->setPosition(currentPlayer->getPosition());
+		nextPlayer->setQuaternion(currentPlayer->getQuaternion());
+	}
+
 	currentCoord_ = dest;
 	currentChunk_ = chunks_.at(dest);
-
-	player_->setChunk(currentChunk_.get());
-	player_->update();
-	player_->getFirstComponent<PlayerController>()->updateParentChunk();
 }
 
 }

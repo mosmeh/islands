@@ -3,37 +3,34 @@
 #include "Input.h"
 #include "Chunk.h"
 #include "ResourceSystem.h"
-#include "NameGenerator.h"
 
 namespace islands {
 
 PlayerController::PlayerController() : attacking_(false) {}
 
 void PlayerController::start() {
-	body_ = getEntity().getFirstComponent<PhysicalBody>();
-	drawer_ = getEntity().getFirstComponent<ModelDrawer>();
+	getEntity().setScale({0.00485f, 0.00485f, 0.006525f});
+
+	constexpr auto PLAYER_MESH_NAME = "player.fbx";
+	const auto model = ResourceSystem::getInstance().createOrGet<Model>(PLAYER_MESH_NAME, PLAYER_MESH_NAME);
+	drawer_ = getEntity().createComponent<ModelDrawer>(model);
 	drawer_->enableAnimation("Walk.002", false);
 	drawer_->update();
 
-	ball_ = std::make_shared<Entity>("ball");
-	ball_->setScale(glm::vec3(0.9f));
+	const auto collider = getChunk().getPhysics().createCollider<SphereCollider>(model);
+	collider->setSelfMask(Collider::Mask::Player);
+	collider->setFilterMask(
+		Collider::Mask::Prop |
+		Collider::Mask::Enemy |
+		Collider::Mask::EnemyAttack
+	);
+	getEntity().attachComponent(collider);
 
-	const auto model = ResourceSystem::getInstance().createOrGet<Model>("ball", "sphere.obj");
-	const auto drawer = std::make_shared<ModelDrawer>(model);
-	drawer->setVisible(false);
-	ball_->attachComponent(drawer);
+	body_ = getChunk().getPhysics().createBody(collider);
+	getEntity().attachComponent(body_);
 
-	ballBody_ = std::make_shared<PhysicalBody>();
-	const auto collider = std::make_shared<SphereCollider>(model);
-	collider->registerCallback([this] (std::shared_ptr<Collider>) {
-		ball_->getFirstComponent<ModelDrawer>()->setVisible(false);
-	});
-	ballBody_->setCollider(collider);
 
-	ball_->attachComponent(collider);
-
-	ballBody_->setReceiveGravity(false);
-	ball_->attachComponent(ballBody_);
+	fireBall_ = getEntity().createComponent<FireBall>();
 }
 
 void PlayerController::update() {
@@ -59,7 +56,6 @@ void PlayerController::update() {
 	}
 	body_->setVelocity(v);
 
-	static auto w = glm::vec3(1.f, 0, 0);
 	static auto start = INFINITY;
 	static bool playing = false;
 	if (Input::getInstance().isCommandActive(Input::Command::Attack)) {
@@ -71,7 +67,6 @@ void PlayerController::update() {
 
 	const auto u = glm::normalize(glm::vec3(v.xy, 0));
 	if (glm::length(u) > glm::epsilon<float>()) {
-		w = u;
 		drawer_->enableAnimation("Walk.002", true, 24 * 3);
 		attacking_ = false;
 
@@ -90,18 +85,9 @@ void PlayerController::update() {
 	if (attacking_ && glfwGetTime() > start + 60.f / 72 && playing) {
 		playing = false;
 		start = INFINITY;
-		ball_->setPosition(getEntity().getPosition() + 1.3f * w + glm::vec3(0, 0, 2.f));
-		ball_->getFirstComponent<ModelDrawer>()->setVisible(true);
-		ballBody_->setVelocity(12.f * w);
-	}
-}
 
-void PlayerController::updateParentChunk() {
-	getChunk().addEntity(ball_);
-	auto& ps = getChunk().getPhysicsSystem();
-	ps.registerBody(ballBody_);
-	ps.registerBody(getEntity().getFirstComponent<PhysicalBody>());
-	ps.registerCollider(getEntity().getFirstComponent<Collider>());
+		fireBall_->fire();
+	}
 }
 
 }
