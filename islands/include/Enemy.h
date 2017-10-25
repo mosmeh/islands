@@ -14,12 +14,11 @@ private:
 		Moving,
 		ChangingDirection,
 		Dying
-	};
+	} status_;
 
 	std::shared_ptr<PhysicalBody> body_;
 	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<Entity> playerEntity_;
-	State state_;
 	glm::vec3 direction_;
 	glm::quat targetQuat_;
 	double moveStartedAt_;

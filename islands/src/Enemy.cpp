@@ -7,7 +7,7 @@
 
 namespace islands {
 
-Slime::Slime() : state_(State::Moving) {}
+Slime::Slime() : status_(State::Moving) {}
 
 void Slime::start() {
 	static constexpr auto MESH_FILENAME = "slime.dae";
@@ -43,12 +43,12 @@ void Slime::update() {
 
 	Input::getInstance().registerKeyboardCallback([&](int key, int action) {
 		if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
-			state_ = State::Dying;
+			status_ = State::Dying;
 		}
 	});
 
 	const auto delta = glfwGetTime() - moveStartedAt_;
-	switch (state_) {
+	switch (status_) {
 	case State::Moving: {
 		const auto factor = static_cast<float>(std::max(0.0, (1.0 - std::cos(MOVE_DURATION_FACTOR * delta)) / 2.0));
 		if (delta > glm::two_pi<double>() / MOVE_DURATION_FACTOR) {
@@ -66,7 +66,7 @@ void Slime::update() {
 
 			moveStartedAt_ = glfwGetTime();
 			initPos_ = getEntity().getPosition();
-			state_ = State::ChangingDirection;
+			status_ = State::ChangingDirection;
 		} else {
 			body_->setVelocity(SPEED * factor * direction_);
 			drawer_->enableAnimation("", false, 3.f);
@@ -81,11 +81,11 @@ void Slime::update() {
 			getEntity().setPosition(initPos_ - glm::vec3(0, 0, 10.f * d * (d - CHANGE_DIR_DURATION / 2)));
 		} else {
 			moveStartedAt_ = glfwGetTime();
-			state_ = State::Moving;
+			status_ = State::Moving;
 		}
 		break;
 	case State::Dying: {
-		state_ = State::Moving;
+		status_ = State::Moving;
 		break;
 	}
 	}
