@@ -21,7 +21,7 @@ void PlayerController::start() {
 	const auto collider = getChunk().getPhysics().createCollider<SphereCollider>(model);
 	collider->setSelfMask(Collider::Mask::Player);
 	collider->setFilterMask(
-		Collider::Mask::Prop |
+		Collider::Mask::StaticObject |
 		Collider::Mask::Enemy |
 		Collider::Mask::EnemyAttack
 	);

@@ -16,7 +16,7 @@ void FireBall::start() {
 	const auto collider = std::make_shared<SphereCollider>(model);
 	collider->setSelfMask(Collider::Mask::PlayerAttack);
 	collider->setFilterMask(
-		Collider::Mask::Prop |
+		Collider::Mask::StaticObject |
 		Collider::Mask::Enemy
 	);
 	collider->registerCallback([this] (Collider::MaskType, std::shared_ptr<Collider>) {

@@ -176,8 +176,8 @@ void Chunk::loadImpl() {
 						throw std::exception("not implemented");
 					}
 				}
-				collider->setSelfMask(Collider::Mask::Prop);
-				collider->setFilterMask(Collider::Mask::DynamicObjects);
+				collider->setSelfMask(Collider::Mask::StaticObject);
+				collider->setFilterMask(Collider::Mask::DynamicObject);
 				entity->attachComponent(collider);
 			}
 		}

@@ -17,7 +17,7 @@ void Slime::start() {
 	const auto collider = getChunk().getPhysics().createCollider<SphereCollider>(model);
 	collider->setSelfMask(Collider::Mask::Enemy);
 	collider->setFilterMask(
-		Collider::Mask::Prop |
+		Collider::Mask::StaticObject |
 		Collider::Mask::Player |
 		Collider::Mask::PlayerAttack
 	);

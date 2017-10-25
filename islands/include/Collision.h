@@ -15,12 +15,12 @@ class Collider : public Component {
 public:
 	using MaskType = std::uint32_t;
 	enum Mask : MaskType {
-		Prop         = 1 << 0,
-		Player       = 1 << 1,
-		PlayerAttack = 1 << 2,
-		Enemy		 = 1 << 3,
-		EnemyAttack  = 1 << 4,
-		DynamicObjects = Player | PlayerAttack | Enemy | EnemyAttack
+		StaticObject  = 1 << 0,
+		Player        = 1 << 1,
+		PlayerAttack  = 1 << 2,
+		Enemy         = 1 << 3,
+		EnemyAttack   = 1 << 4,
+		DynamicObject = Player | PlayerAttack | Enemy | EnemyAttack
 	};
 
 	using Callback = std::function<void(MaskType, std::shared_ptr<Collider>)>;
