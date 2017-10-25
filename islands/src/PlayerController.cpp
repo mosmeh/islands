@@ -1,6 +1,6 @@
 #include "PlayerController.h"
 #include "Camera.h"
-#include "InputSystem.h"
+#include "Input.h"
 #include "Chunk.h"
 #include "ResourceSystem.h"
 #include "NameGenerator.h"
@@ -45,7 +45,7 @@ void PlayerController::update() {
 		glm::sin(THETA), glm::cos(THETA)) * glm::mat2(-1, 0, 0, 1);
 
 	glm::vec3 v = body_->getVelocity();
-	const auto dir = ROTATION * InputSystem::getInstance().getDirection();
+	const auto dir = ROTATION * Input::getInstance().getDirection();
 	if (dir.x != 0) {
 		v.x = SPEED * dir.x;
 	}
@@ -53,7 +53,7 @@ void PlayerController::update() {
 		v.y = SPEED * dir.y;
 	}
 	if (std::abs(v.z) < glm::epsilon<float>() &&
-		InputSystem::getInstance().isCommandActive(InputSystem::Command::Jump)) {
+		Input::getInstance().isCommandActive(Input::Command::Jump)) {
 
 		v.z = 10.f;
 	}
@@ -62,7 +62,7 @@ void PlayerController::update() {
 	static auto w = glm::vec3(1.f, 0, 0);
 	static auto start = INFINITY;
 	static bool playing = false;
-	if (InputSystem::getInstance().isCommandActive(InputSystem::Command::Attack)) {
+	if (Input::getInstance().isCommandActive(Input::Command::Attack)) {
 		attacking_ = true;
 		start = static_cast<float>(glfwGetTime());
 		playing = true;

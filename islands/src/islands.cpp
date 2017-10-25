@@ -1,7 +1,7 @@
 ﻿#include "Window.h"
 #include "ResourceSystem.h"
 #include "Camera.h"
-#include "InputSystem.h"
+#include "Input.h"
 #include "SceneManager.h"
 #include "PlayerController.h"
 #include "PhysicalBody.h"
@@ -114,7 +114,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	glCullFace(GL_BACK);
 	glEnable(GL_MULTISAMPLE);
 
-	InputSystem::getInstance().registerKeyboardCallback([](int key, int action) {
+	Input::getInstance().registerKeyboardCallback([](int key, int action) {
 		switch (key) {
 		case GLFW_KEY_ESCAPE:
 			if (action == GLFW_PRESS) {
@@ -146,7 +146,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		Profiler::getInstance().markFrame();
 
 		Profiler::getInstance().enterSection("update");
-		InputSystem::getInstance().update();
+		Input::getInstance().update();
 		SceneManager::getInstance().update();
 		Profiler::getInstance().leaveSection("update");
 

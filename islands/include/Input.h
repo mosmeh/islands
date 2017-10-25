@@ -2,7 +2,7 @@
 
 namespace islands {
 
-class InputSystem {
+class Input {
 public:
 	enum class Command {
 		Jump,
@@ -11,11 +11,11 @@ public:
 
 	using KeyboardCallback = std::function<void(int, int)>;
 
-	InputSystem(const InputSystem&) = delete;
-	InputSystem& operator=(const InputSystem&) = delete;
-	virtual ~InputSystem();
+	Input(const Input&) = delete;
+	Input& operator=(const Input&) = delete;
+	virtual ~Input();
 
-	static InputSystem& getInstance();
+	static Input& getInstance();
 
 	void update();
 	void registerKeyboardCallback(const KeyboardCallback& callback);
@@ -23,10 +23,10 @@ public:
 	bool isCommandActive(Command command) const;
 
 private:
-	class InputDevice {
+	class Device {
 	public:
-		InputDevice() = default;
-		virtual ~InputDevice() = default;
+		Device() = default;
+		virtual ~Device() = default;
 
 		virtual bool isPresent() const = 0;
 		virtual void update() = 0;
@@ -34,7 +34,7 @@ private:
 		virtual bool isCommandActive(Command command) const = 0;
 	};
 
-	class Keyboard : public InputDevice {
+	class Keyboard : public Device {
 	public:
 		virtual ~Keyboard() = default;
 
@@ -49,7 +49,7 @@ private:
 		bool isKeyPressed(int key) const;
 	} keyboard_;
 
-	class Gamepad : public InputDevice {
+	class Gamepad : public Device {
 	public:
 		Gamepad();
 		virtual ~Gamepad() = default;
@@ -72,7 +72,7 @@ private:
 	std::vector<KeyboardCallback> keyboardCallbacks_;
 	glm::vec2 direction_;
 
-	InputSystem();
+	Input();
 };
 
 }

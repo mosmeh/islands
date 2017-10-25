@@ -1,9 +1,9 @@
-#include "InputSystem.h"
+#include "Input.h"
 #include "Window.h"
 
 namespace islands {
 
-InputSystem::InputSystem() {
+Input::Input() {
 	glfwSetKeyCallback(Window::getInstance().getHandle(), [](GLFWwindow*, int key, int, int action, int) {
 		for (const auto callback : getInstance().keyboardCallbacks_) {
 			callback(key, action);
@@ -11,16 +11,16 @@ InputSystem::InputSystem() {
 	});
 }
 
-InputSystem::~InputSystem() {
+Input::~Input() {
 	glfwSetKeyCallback(Window::getInstance().getHandle(), nullptr);
 }
 
-InputSystem& InputSystem::getInstance() {
-	static InputSystem instance;
+Input& Input::getInstance() {
+	static Input instance;
 	return instance;
 }
 
-void InputSystem::update() {
+void Input::update() {
 	auto dir = glm::zero<glm::vec2>();
 	if (keyboard_.isPresent()) {
 		keyboard_.update();
@@ -37,15 +37,15 @@ void InputSystem::update() {
 	}
 }
 
-void InputSystem::registerKeyboardCallback(const KeyboardCallback& callback) {
+void Input::registerKeyboardCallback(const KeyboardCallback& callback) {
 	keyboardCallbacks_.push_back(callback);
 }
 
-const glm::vec2 InputSystem::getDirection() const {
+const glm::vec2 Input::getDirection() const {
 	return direction_;
 }
 
-bool InputSystem::isCommandActive(Command command) const {
+bool Input::isCommandActive(Command command) const {
 	if (keyboard_.isPresent() && keyboard_.isCommandActive(command)) {
 		return true;
 	} else if (gamepad_.isPresent() && gamepad_.isCommandActive(command)) {
@@ -54,11 +54,11 @@ bool InputSystem::isCommandActive(Command command) const {
 	return false;
 }
 
-bool InputSystem::Keyboard::isPresent() const {
+bool Input::Keyboard::isPresent() const {
 	return true;
 }
 
-void InputSystem::Keyboard::update() {
+void Input::Keyboard::update() {
 	direction_ = glm::zero<glm::vec2>();
 	if (isKeyPressed(GLFW_KEY_UP)) {
 		direction_ += glm::vec2(0, -1);
@@ -78,11 +78,11 @@ void InputSystem::Keyboard::update() {
 	}
 }
 
-glm::vec2 InputSystem::Keyboard::getDirection() const {
+glm::vec2 Input::Keyboard::getDirection() const {
 	return direction_;
 }
 
-bool InputSystem::Keyboard::isCommandActive(Command command) const {
+bool Input::Keyboard::isCommandActive(Command command) const {
 	switch (command) {
 	case Command::Jump:
 		return isKeyPressed(GLFW_KEY_X);
@@ -92,12 +92,12 @@ bool InputSystem::Keyboard::isCommandActive(Command command) const {
 	throw;
 }
 
-bool InputSystem::Keyboard::isKeyPressed(int key) const {
+bool Input::Keyboard::isKeyPressed(int key) const {
 	assert(GLFW_KEY_SPACE <= key && key <= GLFW_KEY_LAST);
 	return glfwGetKey(Window::getInstance().getHandle(), key) == GLFW_PRESS;
 }
 
-InputSystem::Gamepad::Gamepad() : present_(false) {
+Input::Gamepad::Gamepad() : present_(false) {
 	for (id_ = GLFW_JOYSTICK_1; id_ <= GLFW_JOYSTICK_LAST; ++id_) {
 		if (glfwJoystickPresent(id_) && glfwJoystickIsGamepad(id_)) {
 			present_ = true;
@@ -106,11 +106,11 @@ InputSystem::Gamepad::Gamepad() : present_(false) {
 	}
 }
 
-bool InputSystem::Gamepad::isPresent() const {
+bool Input::Gamepad::isPresent() const {
 	return present_;
 }
 
-void InputSystem::Gamepad::update() {
+void Input::Gamepad::update() {
 	static const float DEADZONE_RADIUS_SQUARED = 0.1f;
 
 	if (glfwGetGamepadState(id_, &state_)) {
@@ -142,11 +142,11 @@ void InputSystem::Gamepad::update() {
 	}
 }
 
-glm::vec2 InputSystem::Gamepad::getDirection() const {
+glm::vec2 Input::Gamepad::getDirection() const {
 	return direction_;
 }
 
-bool InputSystem::Gamepad::isCommandActive(Command command) const {
+bool Input::Gamepad::isCommandActive(Command command) const {
 	switch (command) {
 	case Command::Jump:
 		return isButtonPressed(GLFW_GAMEPAD_BUTTON_A);
@@ -156,7 +156,7 @@ bool InputSystem::Gamepad::isCommandActive(Command command) const {
 	throw;
 }
 
-bool InputSystem::Gamepad::isButtonPressed(int button) const {
+bool Input::Gamepad::isButtonPressed(int button) const {
 	assert(GLFW_GAMEPAD_BUTTON_A <= button && button <= GLFW_GAMEPAD_BUTTON_LAST);
 	return state_.buttons[static_cast<size_t>(button)] == GLFW_PRESS;
 }
