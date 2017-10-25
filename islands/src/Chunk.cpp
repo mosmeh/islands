@@ -3,6 +3,7 @@
 #include "ResourceSystem.h"
 #include "PhysicalBody.h"
 #include "PlayerController.h"
+#include "Enemy.h"
 
 glm::vec3 toVec3(const picojson::value& v) {
 	const auto& obj = v.get<picojson::object>();

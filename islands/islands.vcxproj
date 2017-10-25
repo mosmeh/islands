@@ -179,6 +179,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Chunk.cpp" />
+    <ClCompile Include="src\Enemy.cpp" />
     <ClCompile Include="src\FireBall.cpp" />
     <ClCompile Include="src\Health.cpp" />
     <ClCompile Include="src\SceneManager.cpp" />
