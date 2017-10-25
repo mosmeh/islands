@@ -78,7 +78,7 @@ void Chunk::update() {
 	entitiesToBeAdded_.clear();
 	entitiesToBeAdded_.shrink_to_fit();
 
-	physicsSystem_.update();
+	physics_.update();
 }
 
 void Chunk::draw() {
@@ -89,8 +89,8 @@ void Chunk::draw() {
 	}
 }
 
-PhysicsSystem& Chunk::getPhysicsSystem() {
-	return physicsSystem_;
+Physics& Chunk::getPhysics() {
+	return physics_;
 }
 
 const geometry::AABB& Chunk::getGlobalAABB() const {

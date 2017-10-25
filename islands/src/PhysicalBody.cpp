@@ -4,19 +4,16 @@
 
 namespace islands {
 
-PhysicalBody::PhysicalBody() :
+PhysicalBody::PhysicalBody(std::shared_ptr<Collider> collider = nullptr) :
 	mass_(1.f),
 	velocity_(0.f),
-	collider_(nullptr),
+	collider_(collider),
 	receiveGravity_(true) {}
 
 void PhysicalBody::update() {}
 
-void PhysicalBody::setCollider(std::shared_ptr<Collider> collider) {
-	collider_ = collider;
-}
-
 std::shared_ptr<Collider> PhysicalBody::getCollider() const {
+	assert(hasCollider());
 	return collider_;
 }
 

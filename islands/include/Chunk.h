@@ -3,7 +3,7 @@
 #include "Resource.h"
 #include "Entity.h"
 #include "Collision.h"
-#include "PhysicsSystem.h"
+#include "Physics.h"
 #include "Geometry.h"
 
 namespace islands {
@@ -22,7 +22,7 @@ public:
 	void update();
 	void draw();
 
-	PhysicsSystem& getPhysicsSystem();
+	Physics& getPhysics();
 
 	const geometry::AABB& getGlobalAABB() const;
 
@@ -31,7 +31,7 @@ private:
 	geometry::AABB aabb_;
 	std::vector<std::shared_ptr<Entity>> entities_;
 	std::vector<std::shared_ptr<Entity>> entitiesToBeAdded_;
-	PhysicsSystem physicsSystem_;
+	Physics physics_;
 
 	void loadImpl() override;
 };

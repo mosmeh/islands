@@ -7,12 +7,11 @@ namespace islands {
 
 class PhysicalBody : public Component {
 public:
-	PhysicalBody();
+	PhysicalBody(std::shared_ptr<Collider> collider);
 	virtual ~PhysicalBody() = default;
 
 	void update() override;
 
-	void setCollider(std::shared_ptr<Collider> collider);
 	std::shared_ptr<Collider> getCollider() const;
 	bool hasCollider() const;
 
@@ -29,9 +28,9 @@ public:
 	bool getReceiveGravity() const;
 
 private:
+	std::shared_ptr<Collider> collider_;
 	float mass_;
 	glm::vec3 velocity_;
-	std::shared_ptr<Collider> collider_;
 	bool receiveGravity_;
 };
 

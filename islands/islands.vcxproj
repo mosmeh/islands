@@ -189,7 +189,7 @@
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\PhysicalBody.cpp" />
-    <ClCompile Include="src\PhysicsSystem.cpp" />
+    <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\PlayerController.cpp" />
     <ClCompile Include="src\Resource.cpp" />
     <ClCompile Include="src\ResourceSystem.cpp" />
@@ -247,19 +247,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Chunk.h" />
+    <ClInclude Include="include\Enemy.h" />
+    <ClInclude Include="include\FireBall.h" />
+    <ClInclude Include="include\Health.h" />
     <ClInclude Include="include\SceneManager.h" />
     <ClInclude Include="include\Collision.h" />
     <ClInclude Include="include\Component.h" />
     <ClInclude Include="include\Entity.h" />
     <ClInclude Include="include\Geometry.h" />
-    <ClInclude Include="include\InputSystem.h" />
+    <ClInclude Include="include\Input.h" />
     <ClInclude Include="include\Log.h" />
     <ClInclude Include="include\Material.h" />
     <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\Model.h" />
     <ClInclude Include="include\NameGenerator.h" />
     <ClInclude Include="include\PhysicalBody.h" />
-    <ClInclude Include="include\PhysicsSystem.h" />
+    <ClInclude Include="include\Physics.h" />
     <ClInclude Include="include\PlayerController.h" />
     <ClInclude Include="include\Profiler.h" />
     <ClInclude Include="include\Resource.h" />
