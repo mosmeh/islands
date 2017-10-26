@@ -187,7 +187,7 @@
     <ClCompile Include="src\Entity.cpp" />
     <ClCompile Include="src\Geometry.cpp" />
     <ClCompile Include="src\Input.cpp" />
-    <ClCompile Include="src\islands.cpp" />
+    <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Material.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Model.cpp" />
