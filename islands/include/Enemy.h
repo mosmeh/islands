@@ -1,5 +1,6 @@
 #include "Component.h"
 #include "PhysicalBody.h"
+#include "Health.h"
 
 namespace islands {
 
@@ -18,6 +19,7 @@ private:
 
 	std::shared_ptr<PhysicalBody> body_;
 	std::shared_ptr<ModelDrawer> drawer_;
+	std::shared_ptr<Health> health_;
 	std::shared_ptr<Entity> playerEntity_;
 	glm::vec3 direction_;
 	glm::quat targetQuat_;

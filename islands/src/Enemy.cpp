@@ -1,8 +1,6 @@
 #include "Enemy.h"
 #include "ResourceSystem.h"
 #include "Chunk.h"
-#include "Input.h"
-#include "Health.h"
 #include "PlayerController.h"
 
 namespace islands {
@@ -31,7 +29,7 @@ void Slime::start() {
 	body_ = getChunk().getPhysics().createBody(collider);
 	getEntity().attachComponent(body_);
 
-	getEntity().createComponent<Health>(30);
+	health_ = getEntity().createComponent<Health>(30);
 
 	playerEntity_ = getChunk().getEntityByName("Player");
 }
@@ -41,11 +39,9 @@ void Slime::update() {
 	static constexpr double MOVE_DURATION_FACTOR = 5.0;
 	static constexpr double CHANGE_DIR_DURATION = 1.0;
 
-	Input::getInstance().registerKeyboardCallback([&](int key, int action) {
-		if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
-			status_ = State::Dying;
-		}
-	});
+	if (health_->isDead()) {
+		status_ = State::Dying;
+	}
 
 	const auto delta = glfwGetTime() - moveStartedAt_;
 	switch (status_) {
@@ -85,6 +81,7 @@ void Slime::update() {
 		}
 		break;
 	case State::Dying: {
+		// TODO
 		status_ = State::Moving;
 		break;
 	}
