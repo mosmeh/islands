@@ -28,17 +28,13 @@ private:
 	void loadImpl() override;
 };
 
-class ModelDrawer :
-	public Drawable,
-	public Resource {
+class ModelDrawer : public Drawable {
 public:
 	ModelDrawer(std::shared_ptr<Model> model);
 	virtual ~ModelDrawer() = default;
 
 	void update() override;
 	void draw() override;
-
-	bool isLoaded() const override;
 
 	void setVisible(bool visible);
 	void setCastShadow(bool castShadow);

@@ -62,7 +62,6 @@ void Model::loadImpl() {
 }
 
 ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
-	Resource(NameGenerator::generate("ModelDrawer")),
 	model_(model),
 	visible_(true),
 	castShadow_(true),
@@ -113,10 +112,6 @@ void ModelDrawer::draw() {
 			mesh->draw();
 		}
 	}
-}
-
-bool ModelDrawer::isLoaded() const {
-	return Resource::isLoaded() && model_->isLoaded() && (!lightmap_ || lightmap_->isLoaded());
 }
 
 void ModelDrawer::setVisible(bool visible) {
