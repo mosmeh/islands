@@ -137,26 +137,27 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	std::ostringstream ss;
 	while (Window::getInstance().update()) {
 		const auto beforeTime = glfwGetTime();
+#ifdef _DEBUG
 		Profiler::getInstance().markFrame();
-
 		Profiler::getInstance().enterSection("update");
+#endif
 		Input::getInstance().update();
 		SceneManager::getInstance().update();
-		Profiler::getInstance().leaveSection("update");
-
-		Profiler::getInstance().enterSection("draw");
-		SceneManager::getInstance().draw();
-		Profiler::getInstance().leaveSection("draw");
-
 #ifdef _DEBUG
+		Profiler::getInstance().leaveSection("update");
+		Profiler::getInstance().enterSection("draw");
+#endif
+		SceneManager::getInstance().draw();
+#ifdef _DEBUG
+		Profiler::getInstance().leaveSection("draw");
 		ss.str("");
 		ss << "FPS: " << Profiler::getInstance().getLastFPS() <<
 			", delta: " << Profiler::getInstance().getLastDeltaTime() <<
 			", update: " << Profiler::getInstance().getElapsedTime("update") <<
 			", draw: " << Profiler::getInstance().getElapsedTime("draw") << std::endl;
 		glfwSetWindowTitle(Window::getInstance().getHandle(), ss.str().c_str());
-#endif
 		Profiler::getInstance().clearSamples();
+#endif
 	}
 
     return EXIT_SUCCESS;

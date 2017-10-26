@@ -2,6 +2,8 @@
 
 namespace islands {
 
+#ifdef _DEBUG
+
 class Profiler {
 public:
 	Profiler(const Profiler&) = delete;
@@ -65,5 +67,7 @@ private:
 		prevTime_(-INFINITY),
 		lastDeltaTime_(NAN) {}
 };
+
+#endif
 
 }
