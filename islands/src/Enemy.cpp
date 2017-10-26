@@ -8,20 +8,22 @@ namespace islands {
 Slime::Slime() : status_(State::Moving) {}
 
 void Slime::start() {
+	getEntity().setSelfMask(Entity::Mask::Enemy);
+	getEntity().setFilterMask(
+		Entity::Mask::StaticObject |
+		Entity::Mask::Player |
+		Entity::Mask::PlayerAttack
+	);
+
 	static constexpr auto MESH_FILENAME = "slime.dae";
 	const auto model = ResourceSystem::getInstance().createOrGet<Model>(MESH_FILENAME, MESH_FILENAME);
 	drawer_ = getEntity().createComponent<ModelDrawer>(model);
 
-	const auto collider = getChunk().getPhysics().createCollider<SphereCollider>(model);
-	collider->setSelfMask(Collider::Mask::Enemy);
-	collider->setFilterMask(
-		Collider::Mask::StaticObject |
-		Collider::Mask::Player |
-		Collider::Mask::PlayerAttack
-	);
-	collider->registerCallback([](Collider::MaskType mask, std::shared_ptr<Collider> opponent) {
-		if (mask & Collider::Mask::Player) {
-			opponent->getEntity().getFirstComponent<Health>()->takeDamage(1);
+	const auto collider = getChunk().getPhysics().createCollider<SphereCollider>(model_);
+	collider->registerCallback([](std::shared_ptr<Collider> opponent) {
+		const auto& entity = opponent->getEntity();
+		if (entity.getSelfMask() & Entity::Mask::Player) {
+			entity.getFirstComponent<Health>()->takeDamage(1);
 		}
 	});
 	getEntity().attachComponent(collider);

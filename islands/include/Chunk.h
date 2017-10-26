@@ -30,10 +30,11 @@ private:
 	const std::string filename_;
 	geometry::AABB aabb_;
 	std::vector<std::shared_ptr<Entity>> entities_;
-	std::vector<std::shared_ptr<Entity>> entitiesToBeAdded_;
+	std::vector<std::shared_ptr<Entity>> newEntities_;
 	Physics physics_;
 
 	void loadImpl() override;
+	void cleanAndAddEntities();
 };
 
 }

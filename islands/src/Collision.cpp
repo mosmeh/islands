@@ -5,10 +5,7 @@
 
 namespace islands {
 
-Collider::Collider(std::shared_ptr<Model> model) :
-	model_(model),
-	selfMask_(0),
-	filterMask_(0) {}
+Collider::Collider(std::shared_ptr<Model> model) : model_(model) {}
 
 void Collider::registerCallback(const Callback& callback) {
 	callbacks_.emplace_back(callback);
@@ -16,16 +13,8 @@ void Collider::registerCallback(const Callback& callback) {
 
 void Collider::notifyCollision(std::shared_ptr<Collider> opponent) const {
 	for (const auto callback : callbacks_) {
-		callback(opponent->selfMask_, opponent);
+		callback(opponent);
 	}
-}
-
-void Collider::setSelfMask(MaskType mask) {
-	selfMask_ = mask;
-}
-
-void Collider::setFilterMask(MaskType mask) {
-	filterMask_ = mask;
 }
 
 void Collider::update() {
@@ -58,7 +47,7 @@ glm::vec3 Collider::getSinkingCorrector(std::shared_ptr<Collider> collider) cons
 }
 
 bool Collider::intersects(std::shared_ptr<Collider> collider) const {
-	if (!(filterMask_ & collider->selfMask_)) {
+	if (!(getEntity().getFilterMask() & collider->getEntity().getSelfMask())) {
 		return false;
 	}
 

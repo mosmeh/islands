@@ -9,6 +9,17 @@ class Chunk;
 
 class Entity : public Resource {
 public:
+	using MaskType = std::uint32_t;
+	enum Mask : MaskType {
+		None          = 0,
+		StaticObject  = 1 << 0,
+		Player        = 1 << 1,
+		PlayerAttack  = 1 << 2,
+		Enemy         = 1 << 3,
+		EnemyAttack   = 1 << 4,
+		DynamicObject = Player | PlayerAttack | Enemy | EnemyAttack
+	};
+
 	Entity(const std::string& name, Chunk& chunk);
 	virtual ~Entity() = default;
 
@@ -46,6 +57,11 @@ public:
 	std::enable_if_t<std::is_base_of<Component, T>::value, std::vector<std::shared_ptr<T>>>
 	getComponents() const;
 
+	void setSelfMask(MaskType mask);
+	MaskType getSelfMask() const;
+	void setFilterMask(MaskType mask);
+	MaskType getFilterMask() const;
+
 private:
 	const std::string name_;
 	Chunk& chunk_;
@@ -53,6 +69,7 @@ private:
 	glm::quat quaternion_;
 	glm::mat4 modelMatrix_;
 	std::vector<std::shared_ptr<Component>> components_;
+	MaskType selfMask_, filterMask_;
 
 	void updateModelMatrix();
 };

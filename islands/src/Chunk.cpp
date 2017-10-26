@@ -67,7 +67,7 @@ void Chunk::update() {
 	aabb_.max = glm::vec3(-INFINITY);
 	for (const auto entity : entities_) {
 		entity->update();
-		if (entity->getName() != "Player" && entity->getName() != "Ball") {
+		if (entity->getSelfMask() & Entity::Mask::StaticObject) {
 			for (const auto collider : entity->getComponents<Collider>()) {
 				aabb_.min = glm::min(aabb_.min, collider->getGlobalAABB().min);
 				aabb_.max = glm::max(aabb_.max, collider->getGlobalAABB().max);
@@ -118,6 +118,8 @@ void Chunk::loadImpl() {
 		entity->setPosition(toVec3(properties.at("position")));
 		entity->setQuaternion(toQuat(properties.at("quaternion")));
 		entity->setScale(toVec3(properties.at("scale")));
+		entity->setSelfMask(Entity::Mask::StaticObject);
+		entity->setFilterMask(Entity::Mask::DynamicObject);
 
 		if (properties.find("model") != properties.end()) {
 			const auto& modelProp = properties.at("model").get<picojson::object>();
@@ -176,8 +178,6 @@ void Chunk::loadImpl() {
 						throw std::exception("not implemented");
 					}
 				}
-				collider->setSelfMask(Collider::Mask::StaticObject);
-				collider->setFilterMask(Collider::Mask::DynamicObject);
 				entity->attachComponent(collider);
 			}
 		}

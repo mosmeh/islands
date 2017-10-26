@@ -13,26 +13,13 @@ class MeshCollider;
 
 class Collider : public Component {
 public:
-	using MaskType = std::uint32_t;
-	enum Mask : MaskType {
-		None          = 0,
-		StaticObject  = 1 << 0,
-		Player        = 1 << 1,
-		PlayerAttack  = 1 << 2,
-		Enemy         = 1 << 3,
-		EnemyAttack   = 1 << 4,
-		DynamicObject = Player | PlayerAttack | Enemy | EnemyAttack
-	};
-
-	using Callback = std::function<void(MaskType, std::shared_ptr<Collider>)>;
+	using Callback = std::function<void(std::shared_ptr<Collider>)>;
 
 	Collider(std::shared_ptr<Model> model);
 	virtual ~Collider() = default;
 
 	void registerCallback(const Callback& callback);
 	void notifyCollision(std::shared_ptr<Collider> opponent) const;
-	void setSelfMask(MaskType mask);
-	void setFilterMask(MaskType mask);
 	const geometry::AABB& getGlobalAABB() const;
 
 	virtual void update() override;
@@ -74,7 +61,6 @@ private:
 	std::shared_ptr<Model> model_;
 	geometry::AABB globalAABB_;
 	std::vector<Callback> callbacks_;
-	MaskType selfMask_, filterMask_;
 };
 
 class AABBCollider : public Collider {

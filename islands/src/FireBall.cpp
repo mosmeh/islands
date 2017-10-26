@@ -10,6 +10,11 @@ FireBall::FireBall() : flying_(false) {}
 void FireBall::start() {
 	entity_ = getChunk().createEntity("Ball");
 	entity_->setScale(glm::vec3(0.9f));
+	entity_->setSelfMask(Entity::Mask::PlayerAttack);
+	entity_->setFilterMask(
+		Entity::Mask::StaticObject |
+		Entity::Mask::Enemy
+	);
 
 	constexpr auto BALL_MODEL = "sphere.obj";
 	const auto model = ResourceSystem::getInstance().createOrGet<Model>(BALL_MODEL, BALL_MODEL);
@@ -17,18 +22,14 @@ void FireBall::start() {
 	drawer_->setVisible(false);
 
 	const auto collider = getChunk().getPhysics().createCollider<SphereCollider>(model);
-	collider->setSelfMask(Collider::Mask::PlayerAttack);
-	collider->setFilterMask(
-		Collider::Mask::StaticObject |
-		Collider::Mask::Enemy
-	);
-	collider->registerCallback([this] (Collider::MaskType mask, std::shared_ptr<Collider> collider) {
+	collider->registerCallback([this] (std::shared_ptr<Collider> collider) {
 		if (flying_) {
 			flying_ = false;
 			drawer_->setVisible(false);
 
-			if (mask & Collider::Mask::Enemy) {
-				collider->getEntity().getFirstComponent<Health>()->takeDamage(10);
+			const auto& entity = collider->getEntity();
+			if (entity.getSelfMask() & Entity::Mask::Enemy) {
+				entity.getFirstComponent<Health>()->takeDamage(10);
 			}
 		}
 	});

@@ -9,7 +9,9 @@ Entity::Entity(const std::string& name, Chunk& chunk) :
 	chunk_(chunk),
 	position_(0),
 	quaternion_(1, 0, 0, 0),
-	scale_(1) {}
+	scale_(1),
+	selfMask_(0),
+	filterMask_(0) {}
 
 bool Entity::isLoaded() const {
 	for (const auto c : components_) {
@@ -75,6 +77,22 @@ void Entity::attachComponent(std::shared_ptr<Component> component) {
 		component->setEntity(this);
 		components_.emplace_back(component);
 	}
+}
+
+void Entity::setSelfMask(MaskType mask) {
+	selfMask_ = mask;
+}
+
+Entity::MaskType Entity::getSelfMask() const {
+	return selfMask_;
+}
+
+void Entity::setFilterMask(MaskType mask) {
+	filterMask_ = mask;
+}
+
+Entity::MaskType Entity::getFilterMask() const {
+	return filterMask_;
 }
 
 void Entity::updateModelMatrix() {

@@ -13,6 +13,12 @@ PlayerController::PlayerController() :
 
 void PlayerController::start() {
 	getEntity().setScale({0.00485f, 0.00485f, 0.006525f});
+	getEntity().setSelfMask(Entity::Mask::Player);
+	getEntity().setFilterMask(
+		Entity::Mask::StaticObject |
+		Entity::Mask::Enemy |
+		Entity::Mask::EnemyAttack
+	);
 
 	constexpr auto PLAYER_MESH_NAME = "player.fbx";
 	const auto model = ResourceSystem::getInstance().createOrGet<Model>(PLAYER_MESH_NAME, PLAYER_MESH_NAME);
@@ -22,12 +28,6 @@ void PlayerController::start() {
 	drawer_->stopAnimation();
 
 	const auto collider = getChunk().getPhysics().createCollider<SphereCollider>(model);
-	collider->setSelfMask(Collider::Mask::Player);
-	collider->setFilterMask(
-		Collider::Mask::StaticObject |
-		Collider::Mask::Enemy |
-		Collider::Mask::EnemyAttack
-	);
 	getEntity().attachComponent(collider);
 
 	body_ = getChunk().getPhysics().createBody(collider);
