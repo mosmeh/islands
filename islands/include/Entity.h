@@ -62,6 +62,9 @@ public:
 	void setFilterMask(MaskType mask);
 	MaskType getFilterMask() const;
 
+	void destroy();
+	bool isDestroyed();
+
 private:
 	const std::string name_;
 	Chunk& chunk_;
@@ -70,6 +73,7 @@ private:
 	glm::mat4 modelMatrix_;
 	std::vector<std::shared_ptr<Component>> components_;
 	MaskType selfMask_, filterMask_;
+	bool destroyed_;
 
 	void updateModelMatrix();
 };

@@ -11,7 +11,8 @@ Entity::Entity(const std::string& name, Chunk& chunk) :
 	quaternion_(1, 0, 0, 0),
 	scale_(1),
 	selfMask_(0),
-	filterMask_(0) {}
+	filterMask_(0),
+	destroyed_(false) {}
 
 bool Entity::isLoaded() const {
 	for (const auto c : components_) {
@@ -93,6 +94,14 @@ void Entity::setFilterMask(MaskType mask) {
 
 Entity::MaskType Entity::getFilterMask() const {
 	return filterMask_;
+}
+
+void Entity::destroy() {
+	destroyed_ = true;
+}
+
+bool Entity::isDestroyed() {
+	return destroyed_;
 }
 
 void Entity::updateModelMatrix() {
