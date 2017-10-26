@@ -5,7 +5,7 @@ namespace islands {
 
 Material::Material(const std::string& name, const aiMaterial* material) :
 	Resource(name),
-	program_(ResourceSystem::getInstance().getDefaultProgram()) {
+	program_(ResourceSystem::getInstance().get<Program>("DefaultProgram")) {
 
 	aiColor4D diffuse;
 	aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
@@ -47,7 +47,7 @@ void Material::use() const {
 
 void Material::setLightmapTexture(std::shared_ptr<Texture2D> texture) {
 	lightmap_ = texture;
-	program_ = ResourceSystem::getInstance().getDefaultProgram(ResourceSystem::ProgramType::Lightmap);
+	program_ = ResourceSystem::getInstance().get<Program>("LightmapProgram");
 }
 
 void Material::setProgram(std::shared_ptr<Program> program) {

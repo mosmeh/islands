@@ -133,12 +133,9 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		}
 	});
 
-	ResourceSystem::getInstance().setDefaultProgram(ResourceSystem::ProgramType::Default,
-		ResourceSystem::getInstance().createOrGet<Program>("DefaultProgram", "default.vert", "default.frag"));
-	ResourceSystem::getInstance().setDefaultProgram(ResourceSystem::ProgramType::Skinning,
-		ResourceSystem::getInstance().createOrGet<Program>("DefaultSkinningProgram", "skinning.vert", "default.frag"));
-	ResourceSystem::getInstance().setDefaultProgram(ResourceSystem::ProgramType::Lightmap,
-	ResourceSystem::getInstance().createOrGet<Program>("LightmapProgram", "default.vert", "lightmap.frag"));
+	ResourceSystem::getInstance().createOrGet<Program>("DefaultProgram", "default.vert", "default.frag");
+	ResourceSystem::getInstance().createOrGet<Program>("SkinningProgram", "skinning.vert", "default.frag");
+	ResourceSystem::getInstance().createOrGet<Program>("LightmapProgram", "default.vert", "lightmap.frag");
 
 	std::ostringstream ss;
 	while (Window::getInstance().update()) {
