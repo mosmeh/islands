@@ -16,7 +16,7 @@ void Health::takeDamage(HealthType damage) {
 	health_ -= damage;
 }
 
-float Health::getNormalizedHealth() const {
+float Health::getNormalized() const {
 	return static_cast<float>(health_) / maxHealth_;
 }
 
