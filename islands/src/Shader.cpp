@@ -10,7 +10,9 @@ Shader::Shader(const std::string& name, const std::string& filename, GLenum type
 	filename_(filename),
 	type_(type) {
 
-	assert(type == GL_VERTEX_SHADER || type == GL_FRAGMENT_SHADER);
+	assert(type == GL_VERTEX_SHADER
+		|| type == GL_GEOMETRY_SHADER
+		|| type == GL_FRAGMENT_SHADER);
 }
 
 Shader::~Shader() {
@@ -60,6 +62,18 @@ Program::Program(const std::string& name, const std::string& vertex, const std::
 	Resource(name),
 	id_(0),
 	vertex_(ResourceSystem::getInstance().createOrGet<Shader>(vertex, vertex, GL_VERTEX_SHADER)),
+	geometry_(nullptr),
+	fragment_(ResourceSystem::getInstance().createOrGet<Shader>(fragment, fragment, GL_FRAGMENT_SHADER)) {}
+
+Program::Program(
+	const std::string& name,
+	const std::string& vertex,
+	const std::string& geometry,
+	const std::string& fragment) :
+	Resource(name),
+	id_(0),
+	vertex_(ResourceSystem::getInstance().createOrGet<Shader>(vertex, vertex, GL_VERTEX_SHADER)),
+	geometry_(ResourceSystem::getInstance().createOrGet<Shader>(geometry, geometry, GL_GEOMETRY_SHADER)),
 	fragment_(ResourceSystem::getInstance().createOrGet<Shader>(fragment, fragment, GL_FRAGMENT_SHADER)) {}
 
 Program::~Program() {
@@ -69,6 +83,9 @@ Program::~Program() {
 }
 
 bool Program::isLoaded() const {
+	if (geometry_ && !geometry_->isLoaded()) {
+		return false;
+	}
 	return Resource::isLoaded() && vertex_->isLoaded() && fragment_->isLoaded();
 }
 
@@ -110,9 +127,15 @@ void Program::setUniform(const char* name, const glm::mat4& value, bool transpos
 void Program::uploadImpl() {
 	id_ = glCreateProgram();
 	glAttachShader(id_, vertex_->getId());
+	if (geometry_) {
+		glAttachShader(id_, geometry_->getId());
+	}
 	glAttachShader(id_, fragment_->getId());
 	glLinkProgram(id_);
 	glDetachShader(id_, vertex_->getId());
+	if (geometry_) {
+		glDetachShader(id_, geometry_->getId());
+	}
 	glDetachShader(id_, fragment_->getId());
 
 	GLint infoLogLength;

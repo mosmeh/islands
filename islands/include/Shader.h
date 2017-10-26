@@ -29,6 +29,10 @@ private:
 class Program : public Resource {
 public:
 	Program(const std::string& name, const std::string& vertex, const std::string& fragment);
+	Program(const std::string& name,
+		const std::string& vertex,
+		const std::string& geometry,
+		const std::string& fragment);
 
 	Program(const Program&) = delete;
 	Program& operator=(const Program&) = delete;
@@ -46,7 +50,7 @@ public:
 	void setUniform(const char* name, const glm::mat4& value, bool transpose = false) const;
 
 private:
-	const std::shared_ptr<Shader> vertex_, fragment_;
+	const std::shared_ptr<Shader> vertex_, geometry_, fragment_;
 	GLuint id_;
 
 	void uploadImpl() override;
