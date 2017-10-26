@@ -1,7 +1,6 @@
 #include "Enemy.h"
 #include "ResourceSystem.h"
 #include "Chunk.h"
-#include "PlayerController.h"
 
 namespace islands {
 

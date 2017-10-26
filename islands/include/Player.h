@@ -8,10 +8,10 @@
 
 namespace islands {
 
-class PlayerController : public Component {
+class Player : public Component {
 public:
-	PlayerController();
-	virtual ~PlayerController() = default;
+	Player();
+	virtual ~Player() = default;
 
 	void update() override;
 

@@ -1,4 +1,4 @@
-#include "PlayerController.h"
+#include "Player.h"
 #include "Camera.h"
 #include "Input.h"
 #include "Chunk.h"
@@ -7,11 +7,11 @@
 
 namespace islands {
 
-PlayerController::PlayerController() :
+Player::Player() :
 	status_(State::Idling),
 	attackAnimStartedAt_(INFINITY) {}
 
-void PlayerController::start() {
+void Player::start() {
 	getEntity().setScale({0.00485f, 0.00485f, 0.006525f});
 	getEntity().setSelfMask(Entity::Mask::Player);
 	getEntity().setFilterMask(
@@ -38,7 +38,7 @@ void PlayerController::start() {
 	fireBall_ = getEntity().createComponent<FireBall>();
 }
 
-void PlayerController::update() {
+void Player::update() {
 	Camera::getInstance().lookAt(getEntity().getPosition());
 
 	if (getEntity().getFirstComponent<Health>()->isDead()) {

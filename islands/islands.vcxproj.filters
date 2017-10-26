@@ -60,9 +60,6 @@
     <ClCompile Include="third_party\glad\glad.c">
       <Filter>third_party</Filter>
     </ClCompile>
-    <ClCompile Include="src\PlayerController.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="src\Camera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -94,6 +91,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\Main.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -143,9 +143,6 @@
     <ClInclude Include="include\Texture.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="include\PlayerController.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="include\Camera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -177,6 +174,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="include\Input.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

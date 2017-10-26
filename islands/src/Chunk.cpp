@@ -2,7 +2,7 @@
 #include "Chunk.h"
 #include "ResourceSystem.h"
 #include "PhysicalBody.h"
-#include "PlayerController.h"
+#include "Player.h"
 #include "Enemy.h"
 
 glm::vec3 toVec3(const picojson::value& v) {
@@ -107,7 +107,7 @@ void Chunk::loadImpl() {
 	const auto& env = json.get("environment").get<picojson::object>();
 	UNUSED(env);
 
-	createEntity("Player")->createComponent<PlayerController>();
+	createEntity("Player")->createComponent<Player>();
 
 	for (const auto& ent : json.get("entities").get<picojson::object>()) {
 		const auto entity = createEntity(ent.first);
