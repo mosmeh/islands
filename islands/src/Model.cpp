@@ -70,23 +70,20 @@ ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
 	animStartTime_(0.f) {}
 
 void ModelDrawer::update() {
+	const auto elapsedTime = static_cast<float>(glfwGetTime() - animStartTime_);
 	if (animPlaying_) {
-		if (!animLoop_ && (glfwGetTime() - animStartTime_) > animDuration_) {
+		if (!animLoop_ && elapsedTime > animDuration_) {
 			animPlaying_ = false;
 		}
 	}
-	if (visible_) {
-		const auto mvp = Camera::getInstance().getProjectionViewMatrix() *
-			getEntity().getModelMatrix();
-		std::stringstream ss;
-		for (const auto mesh : model_->getMeshes()) {
-			if (lightmap_) {
-				mesh->getMaterial()->setLightmapTexture(lightmap_);
-			}
+
+	for (const auto mesh : model_->getMeshes()) {
+		if (visible_ && lightmap_) {
+			mesh->getMaterial()->setLightmapTexture(lightmap_);
+		}
+		if (animPlaying_) {
 			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
-				if (animPlaying_) {
-					skinned->updateBoneTransform(static_cast<float>(glfwGetTime()) - animStartTime_);
-				}
+				skinned->updateBoneTransform(elapsedTime);
 			}
 		}
 	}
@@ -94,13 +91,13 @@ void ModelDrawer::update() {
 
 void ModelDrawer::draw() {
 	if (visible_) {
-		const auto mvp = Camera::getInstance().getProjectionViewMatrix() *
+		const auto MVP = Camera::getInstance().getProjectionViewMatrix() *
 			getEntity().getModelMatrix();
 		std::stringstream ss;
 		for (const auto mesh : model_->getMeshes()) {
 			const auto program = mesh->getMaterial()->getProgram();
 			program->use();
-			program->setUniform("MVP", mvp);
+			program->setUniform("MVP", MVP);
 
 			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
 				for (size_t i = 0; i < skinned->getNumBones(); ++i) {
