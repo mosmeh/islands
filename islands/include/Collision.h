@@ -15,6 +15,7 @@ class Collider : public Component {
 public:
 	using MaskType = std::uint32_t;
 	enum Mask : MaskType {
+		None          = 0,
 		StaticObject  = 1 << 0,
 		Player        = 1 << 1,
 		PlayerAttack  = 1 << 2,
