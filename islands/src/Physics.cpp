@@ -24,7 +24,7 @@ void Physics::update() {
 
 	for (const auto collider : colliders_) {
 		for (const auto c : colliders_) {
-			if (c == collider) {
+			if (&c->getEntity() == &collider->getEntity()) {
 				continue;
 			}
 			if (collider->intersects(c)) {
@@ -38,7 +38,7 @@ void Physics::update() {
 			bool collide = false;
 			const auto collider = body->getCollider();
 			for (const auto c : colliders_) {
-				if (c == collider) {
+				if (&c->getEntity() == &collider->getEntity()) {
 					continue;
 				}
 				if (collider->intersects(c)) {
