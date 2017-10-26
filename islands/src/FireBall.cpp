@@ -1,8 +1,11 @@
 #include "FireBall.h"
 #include "ResourceSystem.h"
 #include "Chunk.h"
+#include "Health.h"
 
 namespace islands {
+
+FireBall::FireBall() : flying_(false) {}
 
 void FireBall::start() {
 	entity_ = getChunk().createEntity("Ball");
@@ -13,14 +16,21 @@ void FireBall::start() {
 	drawer_ = entity_->createComponent<ModelDrawer>(model);
 	drawer_->setVisible(false);
 
-	const auto collider = std::make_shared<SphereCollider>(model);
+	const auto collider = getChunk().getPhysics().createCollider<SphereCollider>(model);
 	collider->setSelfMask(Collider::Mask::PlayerAttack);
 	collider->setFilterMask(
 		Collider::Mask::StaticObject |
 		Collider::Mask::Enemy
 	);
-	collider->registerCallback([this] (Collider::MaskType, std::shared_ptr<Collider>) {
-		entity_->getFirstComponent<ModelDrawer>()->setVisible(false);
+	collider->registerCallback([this] (Collider::MaskType mask, std::shared_ptr<Collider> collider) {
+		if (flying_) {
+			flying_ = false;
+			drawer_->setVisible(false);
+
+			if (mask & Collider::Mask::Enemy) {
+				collider->getEntity().getFirstComponent<Health>()->takeDamage(10);
+			}
+		}
 	});
 	entity_->attachComponent(collider);
 
@@ -31,12 +41,13 @@ void FireBall::start() {
 
 void FireBall::update() {}
 
-void FireBall::fire() const {
-	const auto u = glm::normalize(glm::vec3(body_->getVelocity().xy, 0));
-
-	entity_->setPosition(entity_->getPosition() + 1.3f * u + glm::vec3(0, 0, 2.f));
+void FireBall::fire() {
+	flying_ = true;
+	const auto orientationVec = getEntity().getQuaternion() * glm::vec3(1.f, 0, 0);
+	const auto ballDir = glm::vec3(orientationVec.xy, 0);
+	entity_->setPosition(getEntity().getPosition() + 1.3f * ballDir + glm::vec3(0, 0, 2.f));
 	drawer_->setVisible(true);
-	body_->setVelocity(12.f * u);
+	body_->setVelocity(12.f * ballDir);
 }
 
 }

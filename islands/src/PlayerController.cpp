@@ -7,7 +7,9 @@
 
 namespace islands {
 
-PlayerController::PlayerController() : attacking_(false) {}
+PlayerController::PlayerController() :
+	status_(State::Idling),
+	attackAnimStartedAt_(INFINITY) {}
 
 void PlayerController::start() {
 	getEntity().setScale({0.00485f, 0.00485f, 0.006525f});
@@ -17,6 +19,7 @@ void PlayerController::start() {
 	drawer_ = getEntity().createComponent<ModelDrawer>(model);
 	drawer_->enableAnimation("Walk.002", false);
 	drawer_->update();
+	drawer_->stopAnimation();
 
 	const auto collider = getChunk().getPhysics().createCollider<SphereCollider>(model);
 	collider->setSelfMask(Collider::Mask::Player);
@@ -42,8 +45,8 @@ void PlayerController::update() {
 		std::exit(0);
 	}
 
-	static const float SPEED = 8.f;
-	static const auto THETA = 5 * glm::quarter_pi<float>();
+	static constexpr float SPEED = 8.f;
+	static constexpr auto THETA = 5 * glm::quarter_pi<float>();
 	static const auto ROTATION = glm::mat2(glm::cos(THETA), glm::sin(-THETA),
 		glm::sin(THETA), glm::cos(THETA)) * glm::mat2(-1, 0, 0, 1);
 
@@ -62,37 +65,44 @@ void PlayerController::update() {
 	}
 	body_->setVelocity(v);
 
-	static auto start = INFINITY;
-	static bool playing = false;
-	if (Input::getInstance().isCommandActive(Input::Command::Attack)) {
-		attacking_ = true;
-		start = static_cast<float>(glfwGetTime());
-		playing = true;
-		drawer_->enableAnimation("Armature|Attack", false);
-	}
-
 	const auto u = glm::normalize(glm::vec3(v.xy, 0));
 	if (glm::length(u) > glm::epsilon<float>()) {
-		drawer_->enableAnimation("Walk.002", true, 24 * 3);
-		attacking_ = false;
+		status_ = State::Walking;
+		drawer_->enableAnimation("Walk.002", true, 3.0 * 24);
+	} else if (status_ == State::Walking) {
+		status_ = State::Idling;
+		drawer_->stopAnimation();
+	}
 
+	static constexpr float ATTACK_ANIM_SPEED = 1.5f * 24;
+	switch (status_) {
+	case State::Idling: {
+		if (Input::getInstance().isCommandActive(Input::Command::Attack)) {
+			status_ = State::AnimatingPreFire;
+			attackAnimStartedAt_ = glfwGetTime();
+			drawer_->enableAnimation("Armature|Attack", false, ATTACK_ANIM_SPEED);
+		}
+		break;
+	}
+	case State::Walking:
 		if (glm::dot(u, glm::vec3(-1.f, 0, 0)) < 1.f - glm::epsilon<float>()) {
 			getEntity().setQuaternion(glm::rotation(glm::vec3(1.f, 0, 0), u));
 		} else {
 			getEntity().setQuaternion(glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1.f)));
 		}
-	} else {
-		if (!(attacking_ && drawer_->isPlayingAnimation())) {
-			drawer_->stopAnimation();
-			attacking_ = false;
+		break;
+	case State::AnimatingPreFire:
+		if (glfwGetTime() > attackAnimStartedAt_ + 20.0 / ATTACK_ANIM_SPEED) {
+			status_ = State::AnimatingPostFire;
+			fireBall_->fire();
 		}
-	}
-
-	if (attacking_ && glfwGetTime() > start + 60.f / 72 && playing) {
-		playing = false;
-		start = INFINITY;
-
-		fireBall_->fire();
+		break;
+	case State::AnimatingPostFire:
+		if (glfwGetTime() > attackAnimStartedAt_ + 35.0 / ATTACK_ANIM_SPEED) {
+			status_ = State::Idling;
+			drawer_->stopAnimation();
+		}
+		break;
 	}
 }
 

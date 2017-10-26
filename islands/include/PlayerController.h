@@ -16,10 +16,18 @@ public:
 	void update() override;
 
 private:
+	enum class State {
+		Idling,
+		WalkStarting,
+		Walking,
+		AnimatingPreFire,
+		AnimatingPostFire
+	} status_;
+
 	std::shared_ptr<PhysicalBody> body_;
 	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<FireBall> fireBall_;
-	bool attacking_;
+	double attackAnimStartedAt_;
 
 	void start() override;
 };

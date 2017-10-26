@@ -7,18 +7,19 @@ namespace islands {
 
 class FireBall : public Component {
 public:
-	FireBall() = default;
+	FireBall();
 	virtual ~FireBall() = default;
 
 	void start() override;
 	void update() override;
 
-	void fire() const;
+	void fire();
 
 private:
 	std::shared_ptr<Entity> entity_;
 	std::shared_ptr<PhysicalBody> body_;
 	std::shared_ptr<ModelDrawer> drawer_;
+	bool flying_;
 };
 
 }
