@@ -147,7 +147,6 @@ inline T SkinnedMesh::getValueAt(float time, const std::vector<Key<T>>& keys) {
 	const auto& endKey = *(keyIter + 1);
 
 	const float a = (time - startKey.time) / (endKey.time - startKey.time);
-	assert(0 <= a && a <= 1);
 
 	return interpolate(startKey.value, endKey.value, a);
 }
