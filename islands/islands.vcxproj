@@ -179,6 +179,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Chunk.cpp" />
+    <ClCompile Include="src\Effect.cpp" />
     <ClCompile Include="src\Enemy.cpp" />
     <ClCompile Include="src\FireBall.cpp" />
     <ClCompile Include="src\Health.cpp" />
@@ -250,6 +251,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Chunk.h" />
+    <ClInclude Include="include\Effect.h" />
     <ClInclude Include="include\Enemy.h" />
     <ClInclude Include="include\FireBall.h" />
     <ClInclude Include="include\Health.h" />

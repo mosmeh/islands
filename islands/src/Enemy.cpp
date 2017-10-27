@@ -15,8 +15,8 @@ void Slime::start() {
 	);
 
 	static constexpr auto MESH_FILENAME = "slime.dae";
-	const auto model = ResourceSystem::getInstance().createOrGet<Model>(MESH_FILENAME, MESH_FILENAME);
-	drawer_ = getEntity().createComponent<ModelDrawer>(model);
+	model_ = ResourceSystem::getInstance().createOrGet<Model>(MESH_FILENAME, MESH_FILENAME);
+	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model_);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
@@ -34,6 +34,7 @@ void Slime::start() {
 
 	body_ = getEntity().createComponent<PhysicalBody>(collider);
 	health_ = getEntity().createComponent<Health>(30);
+	damageEffect_ = getEntity().createComponent<DamageEffect>(model_);
 
 	playerEntity_ = getChunk().getEntityByName("Player");
 }
@@ -43,11 +44,18 @@ void Slime::update() {
 	static constexpr double MOVE_DURATION_FACTOR = 5.0;
 	static constexpr double CHANGE_DIR_DURATION = 1.0;
 
-	if (health_->isDead()) {
-		status_ = State::Dying;
+	if (!damageEffect_->isActive()) {
+		drawer_->setVisible(true);
 	}
 
-	const auto delta = glfwGetTime() - moveStartedAt_;
+	if (status_ != State::Dead && health_->isDead()) {
+		status_ = State::Dead;
+		drawer_->destroy();
+		damageEffect_->destroy();
+		dyingEffect_ = getEntity().createComponent<ScatterEffect>(model_);
+	}
+
+	const auto delta = glfwGetTime() - stateChangedAt_;
 	switch (status_) {
 	case State::Moving: {
 		const auto factor = static_cast<float>(std::max(0.0, (1.0 - std::cos(MOVE_DURATION_FACTOR * delta)) / 2.0));
@@ -64,7 +72,7 @@ void Slime::update() {
 
 			drawer_->stopAnimation();
 
-			moveStartedAt_ = glfwGetTime();
+			stateChangedAt_ = glfwGetTime();
 			initPos_ = getEntity().getPosition();
 			status_ = State::ChangingDirection;
 		} else {
@@ -73,23 +81,22 @@ void Slime::update() {
 		}
 		break;
 	}
-	case State::ChangingDirection: {
- 		if (delta <= CHANGE_DIR_DURATION) {
+	case State::ChangingDirection:
+		if (delta < CHANGE_DIR_DURATION) {
 			const auto factor = static_cast<float>(delta / CHANGE_DIR_DURATION / glm::two_pi<double>());
 			getEntity().setQuaternion(glm::slerp(getEntity().getQuaternion(), targetQuat_, factor));
 			const auto d = std::fmod(delta, CHANGE_DIR_DURATION / 2);
 			getEntity().setPosition(initPos_ - glm::vec3(0, 0, 10.f * d * (d - CHANGE_DIR_DURATION / 2)));
 		} else {
-			moveStartedAt_ = glfwGetTime();
+			stateChangedAt_ = glfwGetTime();
 			status_ = State::Moving;
 		}
 		break;
-	case State::Dying: {
-		// TODO
-		status_ = State::Moving;
+	case State::Dead:
+		if (dyingEffect_->isFinished()) {
+			getEntity().destroy();
+		}
 		break;
-	}
-	}
 	}
 }
 

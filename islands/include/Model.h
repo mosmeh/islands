@@ -45,7 +45,7 @@ public:
 	void stopAnimation();
 	bool isPlayingAnimation() const;
 
-private:
+protected:
 	std::shared_ptr<Model> model_;
 	bool visible_, castShadow_, receiveShadow_;
 	std::shared_ptr<Texture2D> lightmap_;

@@ -19,6 +19,7 @@ public:
 	bool isLoaded() const override;
 	void use() const;
 
+	const glm::vec4& getDiffuseColor() const;
 	void setLightmapTexture(std::shared_ptr<Texture2D> texture);
 
 	void setProgram(std::shared_ptr<Program> program);

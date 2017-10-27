@@ -45,6 +45,10 @@ void Material::use() const {
 	}
 }
 
+const glm::vec4& Material::getDiffuseColor() const {
+	return diffuseColor_;
+}
+
 void Material::setLightmapTexture(std::shared_ptr<Texture2D> texture) {
 	lightmap_ = texture;
 	program_ = ResourceSystem::getInstance().get<Program>("LightmapProgram");
