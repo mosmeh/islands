@@ -26,7 +26,6 @@ private:
 
 	std::shared_ptr<PhysicalBody> body_;
 	std::shared_ptr<ModelDrawer> drawer_;
-	std::shared_ptr<FireBall> fireBall_;
 	double attackAnimStartedAt_;
 
 	void start() override;

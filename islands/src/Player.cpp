@@ -31,8 +31,6 @@ void Player::start() {
 	body_ = getEntity().createComponent<PhysicalBody>(collider);
 
 	getEntity().createComponent<Health>(100);
-
-	fireBall_ = getEntity().createComponent<FireBall>();
 }
 
 void Player::update() {
@@ -91,7 +89,8 @@ void Player::update() {
 	case State::AnimatingPreFire:
 		if (glfwGetTime() > attackAnimStartedAt_ + 20.0 / ATTACK_ANIM_SPEED) {
 			status_ = State::AnimatingPostFire;
-			fireBall_->fire();
+			getChunk().createEntity("FireBall")->createComponent<FireBall>(
+				getEntity().getPosition(), getEntity().getQuaternion());
 		}
 		break;
 	case State::AnimatingPostFire:

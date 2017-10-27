@@ -7,19 +7,15 @@ namespace islands {
 
 class FireBall : public Component {
 public:
-	FireBall();
+	FireBall(const glm::vec3& pos, const glm::quat& quat);
 	virtual ~FireBall() = default;
 
 	void start() override;
 	void update() override;
 
-	void fire();
-
 private:
-	std::shared_ptr<Entity> entity_;
-	std::shared_ptr<PhysicalBody> body_;
-	std::shared_ptr<ModelDrawer> drawer_;
-	bool flying_;
+	glm::vec3 pos_;
+	glm::quat quat_;
 };
 
 }
