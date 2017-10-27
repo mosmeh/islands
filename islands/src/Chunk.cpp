@@ -2,6 +2,7 @@
 #include "Chunk.h"
 #include "ResourceSystem.h"
 #include "PhysicalBody.h"
+#include "Physics.h"
 #include "Player.h"
 #include "Enemy.h"
 
@@ -45,6 +46,10 @@ std::shared_ptr<Entity> Chunk::createEntity(const std::string& name) {
 	return entity;
 }
 
+const std::vector<std::shared_ptr<Entity>>& Chunk::getEntities() const {
+	return entities_;
+}
+
 std::shared_ptr<Entity> Chunk::getEntityByName(const std::string& name) const {
 	const auto iter = std::find_if(entities_.begin(), entities_.end(),
 		[&name](std::shared_ptr<Entity> e) {
@@ -78,7 +83,7 @@ void Chunk::update() {
 
 	cleanAndAddEntities();
 
-	physics_.update();
+	physics::update(*this);
 }
 
 void Chunk::draw() {
@@ -87,10 +92,6 @@ void Chunk::draw() {
 	for (const auto entity : entities_) {
 		entity->draw();
 	}
-}
-
-Physics& Chunk::getPhysics() {
-	return physics_;
 }
 
 const geometry::AABB& Chunk::getGlobalAABB() const {
@@ -141,18 +142,14 @@ void Chunk::loadImpl() {
 			}
 
 			if (properties.find("collision") != properties.end()) {
-				std::shared_ptr<Collider> collider;
 				if (properties.at("collision").is<std::string>()) {
 					const auto& type = properties.at("collision").get<std::string>();
 					if (type == "sphere") {
-						collider = physics_.createCollider<SphereCollider>(model);
+						entity->createComponent<SphereCollider>(model);
 					} else if (type == "floor") {
-						const auto planeCollider =
-							physics_.createCollider<PlaneCollider>(model, glm::vec3(0.f, 0.f, 1.f));
-						planeCollider->setOffset(1.5f);
-						collider = planeCollider;
+						entity->createComponent<PlaneCollider>(model, glm::vec3(0.f, 0.f, 1.f))->setOffset(1.5f);
 					} else if (type == "mesh") {
-						collider = physics_.createCollider<MeshCollider>(model);
+						entity->createComponent<MeshCollider>(model);
 					} else {
 						throw std::exception("not implemented");
 					}
@@ -161,21 +158,17 @@ void Chunk::loadImpl() {
 
 					const auto& type = collisionProp.at("type").get<std::string>();
 					if (type == "sphere") {
-						collider = physics_.createCollider<SphereCollider>(model);
+						entity->createComponent<SphereCollider>(model);
 					} else if (type == "floor") {
-						const auto planeCollider =
-							physics_.createCollider<PlaneCollider>(model, glm::vec3(0.f, 0.f, 1.f));
-						planeCollider->setOffset(1.5f);
-						collider = planeCollider;
+						entity->createComponent<PlaneCollider>(model, glm::vec3(0.f, 0.f, 1.f))->setOffset(1.5f);
 					} else if (type == "mesh") {
 						const auto& collisionMeshName = collisionProp.at("mesh_name").get<std::string>();
 						const auto collisionMesh = ResourceSystem::getInstance().createOrGet<Model>(collisionMeshName, collisionMeshName);
-						collider = physics_.createCollider<MeshCollider>(collisionMesh);
+						entity->createComponent<MeshCollider>(collisionMesh);
 					} else {
 						throw std::exception("not implemented");
 					}
 				}
-				entity->attachComponent(collider);
 			}
 		}
 

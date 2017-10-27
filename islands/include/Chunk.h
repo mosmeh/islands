@@ -3,7 +3,6 @@
 #include "Resource.h"
 #include "Entity.h"
 #include "Collision.h"
-#include "Physics.h"
 #include "Geometry.h"
 
 namespace islands {
@@ -18,11 +17,10 @@ public:
 	bool isLoaded() const override;
 
 	std::shared_ptr<Entity> createEntity(const std::string& name);
+	const std::vector<std::shared_ptr<Entity>>& getEntities() const;
 	std::shared_ptr<Entity> getEntityByName(const std::string& name) const;
 	void update();
 	void draw();
-
-	Physics& getPhysics();
 
 	const geometry::AABB& getGlobalAABB() const;
 
@@ -31,7 +29,6 @@ private:
 	geometry::AABB aabb_;
 	std::vector<std::shared_ptr<Entity>> entities_;
 	std::vector<std::shared_ptr<Entity>> newEntities_;
-	Physics physics_;
 
 	void loadImpl() override;
 	void cleanAndAddEntities();

@@ -1,15 +1,29 @@
 #include "Physics.h"
+#include "Collision.h"
+#include "PhysicalBody.h"
 #include "Entity.h"
 #include "Window.h"
 
 namespace islands {
 
-Physics::Physics() :
-	GRAVITY(0, 0, -36.f),
-	FRICTION(3.f) {}
+namespace physics {
 
-void Physics::update() {
-	for (const auto body : bodies_) {
+void update(const Chunk& chunk) {
+	static const glm::vec3 GRAVITY(0, 0, -36.f);
+	static constexpr float FRICTION = 3.f;
+
+	std::vector<std::shared_ptr<PhysicalBody>> bodies;
+	std::vector<std::shared_ptr<Collider>> colliders;
+	for (const auto entity : chunk.getEntities()) {
+		for (const auto body : entity->getComponents<PhysicalBody>()) {
+			bodies.emplace_back(body);
+		}
+		for (const auto collider : entity->getComponents<Collider>()) {
+			colliders.emplace_back(collider);
+		}
+	}
+
+	for (const auto body : bodies) {
 		auto v = body->getVelocity();
 		if (body->getReceiveGravity()) {
 			v += GRAVITY * Window::getInstance().getDeltaTime();
@@ -18,12 +32,12 @@ void Physics::update() {
 		body->stepForward();
 	}
 
-	for (const auto collider : colliders_) {
+	for (const auto collider : colliders) {
 		collider->update();
 	}
 
-	for (const auto collider : colliders_) {
-		for (const auto c : colliders_) {
+	for (const auto collider : colliders) {
+		for (const auto c : colliders) {
 			if (&c->getEntity() == &collider->getEntity()) {
 				continue;
 			}
@@ -33,11 +47,11 @@ void Physics::update() {
 		}
 	}
 
-	for (const auto body : bodies_) {
+	for (const auto body : bodies) {
 		if (body->hasCollider()) {
 			bool collide = false;
 			const auto collider = body->getCollider();
-			for (const auto c : colliders_) {
+			for (const auto c : colliders) {
 				if (&c->getEntity() == &collider->getEntity()) {
 					continue;
 				}
@@ -63,10 +77,6 @@ void Physics::update() {
 	}
 }
 
-std::shared_ptr<PhysicalBody> Physics::createBody(std::shared_ptr<Collider> collider) {
-	const auto body = std::make_shared<PhysicalBody>(collider);
-	bodies_.emplace_back(body);
-	return body;
 }
 
 }

@@ -1,5 +1,6 @@
 #include "SceneManager.h"
 #include "ResourceSystem.h"
+#include "PhysicalBody.h"
 #include "Window.h"
 #include "Log.h"
 

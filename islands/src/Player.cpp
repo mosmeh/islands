@@ -27,11 +27,8 @@ void Player::start() {
 	drawer_->update();
 	drawer_->stopAnimation();
 
-	const auto collider = getChunk().getPhysics().createCollider<SphereCollider>(model);
-	getEntity().attachComponent(collider);
-
-	body_ = getChunk().getPhysics().createBody(collider);
-	getEntity().attachComponent(body_);
+	const auto collider = getEntity().createComponent<SphereCollider>(model);
+	body_ = getEntity().createComponent<PhysicalBody>(collider);
 
 	getEntity().createComponent<Health>(100);
 

@@ -18,18 +18,21 @@ void Slime::start() {
 	const auto model = ResourceSystem::getInstance().createOrGet<Model>(MESH_FILENAME, MESH_FILENAME);
 	drawer_ = getEntity().createComponent<ModelDrawer>(model);
 
-	const auto collider = getChunk().getPhysics().createCollider<SphereCollider>(model_);
-	collider->registerCallback([](std::shared_ptr<Collider> opponent) {
-		const auto& entity = opponent->getEntity();
-		if (entity.getSelfMask() & Entity::Mask::Player) {
-			entity.getFirstComponent<Health>()->takeDamage(1);
+	const auto collider = getEntity().createComponent<SphereCollider>(model_);
+	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
+		if (status_ != State::Dead) {
+			const auto& entity = opponent->getEntity();
+			if (entity.getSelfMask() & Entity::Mask::Player) {
+				entity.getFirstComponent<Health>()->takeDamage(1);
+			}
+			if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
+				drawer_->setVisible(false);
+				damageEffect_->activate();
+			}
 		}
 	});
-	getEntity().attachComponent(collider);
 
-	body_ = getChunk().getPhysics().createBody(collider);
-	getEntity().attachComponent(body_);
-
+	body_ = getEntity().createComponent<PhysicalBody>(collider);
 	health_ = getEntity().createComponent<Health>(30);
 
 	playerEntity_ = getChunk().getEntityByName("Player");
