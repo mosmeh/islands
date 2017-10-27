@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "Component.h"
@@ -18,7 +17,6 @@ public:
 private:
 	enum class State {
 		Idling,
-		WalkStarting,
 		Walking,
 		AnimatingPreFire,
 		AnimatingPostFire
