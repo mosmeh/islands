@@ -42,7 +42,7 @@ bool Chunk::isLoaded() const {
 
 std::shared_ptr<Entity> Chunk::createEntity(const std::string& name) {
 	const auto entity = std::make_shared<Entity>(name, *this);
-	newEntities_.emplace_back(entity);
+	entities_.emplace_back(entity);
 	return entity;
 }
 
@@ -65,12 +65,15 @@ std::shared_ptr<Entity> Chunk::getEntityByName(const std::string& name) const {
 void Chunk::update() {
 	load();
 	
-	cleanAndAddEntities();
+	cleanEntities();
+	for (size_t i = 0; i < entities_.size(); ++i) {
+		entities_.at(i)->update();
+	}
+	cleanEntities();
 
 	aabb_.min = glm::vec3(INFINITY);
 	aabb_.max = glm::vec3(-INFINITY);
 	for (const auto entity : entities_) {
-		entity->update();
 		if (entity->getSelfMask() & Entity::Mask::StaticObject) {
 			for (const auto collider : entity->getComponents<Collider>()) {
 				aabb_.min = glm::min(aabb_.min, collider->getGlobalAABB().min);
@@ -80,8 +83,6 @@ void Chunk::update() {
 	}
 	aabb_.min.z = -INFINITY; // FIXME
 	aabb_.max.z = INFINITY;
-
-	cleanAndAddEntities();
 
 	physics::update(*this);
 }
@@ -185,16 +186,10 @@ void Chunk::loadImpl() {
 	}
 }
 
-void Chunk::cleanAndAddEntities() {
-	for (const auto entity : entities_) {
-		if (entity->isDestroyed()) {
-			entities_.erase(std::remove_if(entities_.begin(), entities_.end(), [](std::shared_ptr<Entity> e) {
-				return e->isDestroyed();
-			}), entities_.end());
-		}
-	}
-	std::copy(newEntities_.begin(), newEntities_.end(), std::back_inserter(entities_));
-	newEntities_.clear();
+void Chunk::cleanEntities() {
+	entities_.erase(std::remove_if(entities_.begin(), entities_.end(), [](std::shared_ptr<Entity> e) {
+		return e->isDestroyed();
+	}), entities_.end());
 }
 
 }

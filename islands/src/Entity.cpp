@@ -56,9 +56,11 @@ const glm::mat4& Entity::getModelMatrix() const {
 }
 
 void Entity::update() {
-	for (const auto c : components_) {
-		c->startAndUpdate();
+	cleanComponents();
+	for (size_t i = 0; i < components_.size(); ++i) {
+		components_.at(i)->startAndUpdate();
 	}
+	cleanComponents();
 }
 
 void Entity::draw() const {
@@ -71,13 +73,6 @@ void Entity::draw() const {
 
 Chunk& Entity::getChunk() const {
 	return chunk_;
-}
-
-void Entity::attachComponent(std::shared_ptr<Component> component) {
-	if (std::find(components_.begin(), components_.end(), component) == components_.end()) {
-		component->setEntity(this);
-		components_.emplace_back(component);
-	}
 }
 
 void Entity::setSelfMask(MaskType mask) {
@@ -112,6 +107,13 @@ void Entity::updateModelMatrix() {
 	const auto rotation = glm::mat4_cast(quaternion_);
 	const auto scaling = glm::scale(glm::mat4(1.f), scale_);
 	modelMatrix_ = translation * rotation * scaling;*/
+}
+
+void Entity::cleanComponents() {
+	components_.erase(std::remove_if(components_.begin(), components_.end(), [](std::shared_ptr<Component> c) {
+		return c->isDestroyed();
+	}), components_.end());
+
 }
 
 }

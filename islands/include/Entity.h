@@ -39,8 +39,6 @@ public:
 
 	Chunk& getChunk() const;
 
-	void attachComponent(std::shared_ptr<Component> component);
-
 	template <class T, class... Args>
 	std::enable_if_t<std::is_base_of<Component, T>::value, std::shared_ptr<T>>
 	createComponent(Args... args);
@@ -76,13 +74,15 @@ private:
 	bool destroyed_;
 
 	void updateModelMatrix();
+	void cleanComponents();
 };
 
 template<class T, class ...Args>
 inline std::enable_if_t<std::is_base_of<Component, T>::value, std::shared_ptr<T>>
 Entity::createComponent(Args ...args) {
 	const auto component = std::make_shared<T>(args...);
-	attachComponent(component);
+	component->setEntity(this);
+	components_.emplace_back(component);
 	return component;
 }
 

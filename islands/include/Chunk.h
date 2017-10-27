@@ -31,7 +31,7 @@ private:
 	std::vector<std::shared_ptr<Entity>> newEntities_;
 
 	void loadImpl() override;
-	void cleanAndAddEntities();
+	void cleanEntities();
 };
 
 }

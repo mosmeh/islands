@@ -10,7 +10,8 @@ class Component {
 public:
 	Component() :
 		entity_(nullptr),
-		isFirstUpdate_(true) {}
+		isFirstUpdate_(true),
+		destroyed_(false) {}
 	virtual ~Component() = default;
 
 	void setEntity(Entity* entity) {
@@ -31,6 +32,14 @@ public:
 		update();
 	}
 
+	void destroy() {
+		destroyed_ = true;
+	}
+
+	bool isDestroyed() const {
+		return destroyed_;
+	}
+
 protected:
 	Chunk& getChunk() const {
 		return getEntity().getChunk();
@@ -42,6 +51,7 @@ protected:
 private:
 	Entity* entity_;
 	bool isFirstUpdate_;
+	bool destroyed_;
 };
 
 class Drawable : public Component {
