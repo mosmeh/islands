@@ -2,9 +2,7 @@
 
 namespace islands {
 
-class Resource : public std::enable_shared_from_this<Resource> {
-	friend class ResourceSystem;
-
+class Resource {
 public:
 	Resource();
 	Resource(const std::string& name);
@@ -29,9 +27,6 @@ private:
 
 	const std::string name_;
 	std::atomic<State> status_;
-
-	State getStatus() const;
-	void setStatus(State status);
 };
 
 }

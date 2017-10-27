@@ -23,14 +23,6 @@ void Resource::load() {
 	}
 }
 
-bool Resource::isLoaded() const {
-	return status_ == State::Loaded || status_ == State::Uploaded;
-}
-
-bool Resource::isUploaded() const {
-	return status_ == State::Uploaded;
-}
-
 void Resource::upload() {
 	if (status_ != State::Uploaded) {
 		load();
@@ -41,12 +33,12 @@ void Resource::upload() {
 	}
 }
 
-Resource::State Resource::getStatus() const {
-	return status_;
+bool Resource::isLoaded() const {
+	return status_ == State::Loaded || status_ == State::Uploaded;
 }
 
-void Resource::setStatus(State status) {
-	status_ = status;
+bool Resource::isUploaded() const {
+	return status_ == State::Uploaded;
 }
 
 }
