@@ -105,10 +105,13 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 
 	glClearColor(0.9f, 0.9f, 0.9f, 1.f);
 	glClearDepth(1.0);
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
+
 	glEnable(GL_MULTISAMPLE);
 
 	Input::getInstance().registerKeyboardCallback([](int key, int action) {
