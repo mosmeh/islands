@@ -91,21 +91,21 @@ void ModelDrawer::update() {
 
 void ModelDrawer::draw() {
 	if (visible_) {
-		const auto MVP = Camera::getInstance().getProjectionViewMatrix() *
-			getEntity().getModelMatrix();
+		const auto MVP = getEntity().calculateMVPMatrix();
 		std::stringstream ss;
 		for (const auto mesh : model_->getMeshes()) {
-			const auto program = mesh->getMaterial()->getProgram();
-			program->use();
-			program->setUniform("MVP", MVP);
+			const auto material = mesh->getMaterial();
+			material->use();
+			material->getProgram()->setUniform("MVP", MVP);
 
 			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
 				for (size_t i = 0; i < skinned->getNumBones(); ++i) {
 					ss.str("");
 					ss << "bones[" << i << "]";
-					program->setUniform(ss.str().c_str(), skinned->getBoneTransform(i));
+					material->getProgram()->setUniform(ss.str().c_str(), skinned->getBoneTransform(i));
 				}
 			}
+
 			mesh->draw();
 		}
 	}

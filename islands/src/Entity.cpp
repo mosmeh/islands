@@ -1,5 +1,6 @@
 #include "Entity.h"
 #include "Component.h"
+#include "Camera.h"
 
 namespace islands {
 
@@ -53,6 +54,10 @@ const glm::vec3& Entity::getScale() const {
 
 const glm::mat4& Entity::getModelMatrix() const {
 	return modelMatrix_;
+}
+
+glm::mat4 Entity::calculateMVPMatrix() const {
+	return Camera::getInstance().getProjectionViewMatrix() * modelMatrix_;
 }
 
 void Entity::update() {

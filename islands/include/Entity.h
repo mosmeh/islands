@@ -33,6 +33,7 @@ public:
 	const glm::vec3& getScale() const;
 
 	const glm::mat4& getModelMatrix() const;
+	glm::mat4 calculateMVPMatrix() const;
 
 	void update();
 	void draw() const;

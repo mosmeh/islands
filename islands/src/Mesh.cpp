@@ -70,7 +70,6 @@ void Mesh::draw() {
 	upload();
 
 	glBindVertexArray(vertexArray_);
-	material_->use();
 	glDrawElements(GL_TRIANGLES, numIndices_, GL_UNSIGNED_INT, nullptr);
 }
 
