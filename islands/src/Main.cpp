@@ -58,9 +58,22 @@ int main() {
 		SLOG << "GLFW: Failed to initialize" << std::endl;
 		throw;
 	}
+
+	SLOG << "PortAudio: Initializing" << std::endl;
+	{
+		const auto error = Pa_Initialize();
+		if (error != paNoError) {
+			SLOG << "PortAudio: " << Pa_GetErrorText(error) << std::endl;
+			throw;
+		}
+	}
+
 	std::atexit([] {
 		SLOG << "GLFW: Terminating" << std::endl;
 		glfwTerminate();
+
+		SLOG << "PortAudio: Terminating" << std::endl;
+		Pa_Terminate();
 	});
 	
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

@@ -41,6 +41,8 @@
 #include <assimp/postprocess.h>
 #pragma warning(pop)
 
-#include "picojson/picojson.h"
+#include <picojson/picojson.h>
+
+#include <portaudio/portaudio.h>
 
 #define UNUSED(x) (static_cast<void>(x))
