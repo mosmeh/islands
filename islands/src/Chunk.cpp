@@ -149,8 +149,6 @@ void Chunk::loadImpl() {
 						entity->createComponent<SphereCollider>(model);
 					} else if (type == "floor") {
 						entity->createComponent<PlaneCollider>(model, glm::vec3(0.f, 0.f, 1.f))->setOffset(1.5f);
-					} else if (type == "mesh") {
-						entity->createComponent<MeshCollider>(model);
 					} else {
 						throw std::exception("not implemented");
 					}
@@ -158,11 +156,7 @@ void Chunk::loadImpl() {
 					const auto& collisionProp = properties.at("collision").get<picojson::object>();
 
 					const auto& type = collisionProp.at("type").get<std::string>();
-					if (type == "sphere") {
-						entity->createComponent<SphereCollider>(model);
-					} else if (type == "floor") {
-						entity->createComponent<PlaneCollider>(model, glm::vec3(0.f, 0.f, 1.f))->setOffset(1.5f);
-					} else if (type == "mesh") {
+					if (type == "mesh") {
 						const auto& collisionMeshName = collisionProp.at("mesh_name").get<std::string>();
 						const auto collisionMesh = ResourceSystem::getInstance().createOrGet<Model>(collisionMeshName, collisionMeshName);
 						entity->createComponent<MeshCollider>(collisionMesh);
