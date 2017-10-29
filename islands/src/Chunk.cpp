@@ -74,7 +74,8 @@ void Chunk::update() {
 	aabb_.min = glm::vec3(INFINITY);
 	aabb_.max = glm::vec3(-INFINITY);
 	for (const auto entity : entities_) {
-		if (entity->getSelfMask() & Entity::Mask::StaticObject) {
+		if ((entity->getSelfMask() & Entity::Mask::StaticObject) &&
+			entity->hasComponent<MeshCollider>()) {
 			for (const auto collider : entity->getComponents<Collider>()) {
 				aabb_.min = glm::min(aabb_.min, collider->getGlobalAABB().min);
 				aabb_.max = glm::max(aabb_.max, collider->getGlobalAABB().max);
