@@ -5,13 +5,9 @@
 
 namespace islands {
 
-class MeshCollider;
-class SphereCollider;
-
 class Mesh : public Resource {
 	friend class Model;
 	friend class MeshCollider;
-	friend class SphereCollider;
 
 public:
 	Mesh(const aiMesh* mesh, const aiMaterial* material);
@@ -28,7 +24,6 @@ public:
 	std::shared_ptr<Material> getMaterial() const;
 
 protected:
-	GLuint vertexArray_;
 	const size_t numVertices_;
 
 	void uploadImpl() override;
@@ -40,7 +35,7 @@ private:
 		UV = 2
 	};
 
-	GLuint vertexBuffer_, indexBuffer_, normalBuffer_, uvBuffer_;
+	GLuint vertexArray_, vertexBuffer_, indexBuffer_, normalBuffer_, uvBuffer_;
 	std::unique_ptr<glm::vec3[]> vertices_, normals_;
 	std::unique_ptr<glm::vec2[]> uvs_;
 	std::unique_ptr<GLuint[]> indices_;
@@ -60,8 +55,7 @@ public:
 	void setPlayingAnimationTicksPerSecond(float tps);
 	float getPlayingAnimationDurationInSeconds() const;
 	void updateBoneTransform(float time_s);
-	const glm::mat4& getBoneTransform(size_t index) const;
-	const size_t getNumBones() const;
+	void applyBoneTransform(std::shared_ptr<Program> program) const;
 
 private:
 	struct Bone {

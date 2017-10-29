@@ -99,11 +99,7 @@ void ModelDrawer::draw() {
 			material->getProgram()->setUniform("MVP", MVP);
 
 			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
-				for (size_t i = 0; i < skinned->getNumBones(); ++i) {
-					ss.str("");
-					ss << "bones[" << i << "]";
-					material->getProgram()->setUniform(ss.str().c_str(), skinned->getBoneTransform(i));
-				}
+				skinned->applyBoneTransform(material->getProgram());
 			}
 
 			mesh->draw();

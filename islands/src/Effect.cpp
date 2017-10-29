@@ -22,13 +22,7 @@ void DamageEffect::draw() {
 
 			const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh);
 			assert(skinned);
-
-			for (size_t i = 0; i < skinned->getNumBones(); ++i) {
-				ss.str("");
-				ss << "bones[" << i << "]";
-				program_->setUniform(ss.str().c_str(), skinned->getBoneTransform(i));
-			}
-
+			skinned->applyBoneTransform(program_);
 			mesh->draw();
 		}
 	}
@@ -71,13 +65,7 @@ void ScatterEffect::draw() {
 	for (const auto mesh : model_->getMeshes()) {
 		const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh);
 		assert(skinned);
-
-		for (size_t i = 0; i < skinned->getNumBones(); ++i) {
-			ss.str("");
-			ss << "bones[" << i << "]";
-			program_->setUniform(ss.str().c_str(), skinned->getBoneTransform(i));
-		}
-
+		skinned->applyBoneTransform(program_);
 		mesh->draw();
 	}
 

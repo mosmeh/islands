@@ -214,12 +214,14 @@ void SkinnedMesh::updateBoneTransform(float time_s) {
 	processNodeTree(time, playingAnim_->rootNode, glm::mat4(1.f));
 }
 
-const glm::mat4& SkinnedMesh::getBoneTransform(size_t index) const {
-	return bones_.at(index)->transform;
-}
-
-const size_t SkinnedMesh::getNumBones() const {
-	return bones_.size();
+void SkinnedMesh::applyBoneTransform(std::shared_ptr<Program> program) const {
+	std::stringstream ss;
+	program->use();
+	for (size_t i = 0; i < bones_.size(); ++i) {
+		ss.str("");
+		ss << "bones[" << i << "]";
+		program->setUniform(ss.str().c_str(), bones_.at(i)->transform);
+	}
 }
 
 void SkinnedMesh::uploadImpl() {
