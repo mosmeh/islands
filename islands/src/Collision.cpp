@@ -166,6 +166,15 @@ MeshCollider::MeshCollider(std::shared_ptr<Model> model) : Collider(model) {
 	for (auto mesh : model->getMeshes()) {
 		assert(mesh->numIndices_ % 3 == 0);
 		numTriangles += mesh->numIndices_ / 3;
+
+		for (size_t i = 0; i < mesh->numIndices_ / 3; ++i) {
+			const geometry::Triangle triangle{
+				mesh->vertices_[mesh->indices_[3 * i + 0]],
+				mesh->vertices_[mesh->indices_[3 * i + 1]],
+				mesh->vertices_[mesh->indices_[3 * i + 2]]
+			};
+			assert(!triangle.isDegenerate());
+		}
 	}
 	collisionMesh_.triangles.reserve(numTriangles);
 }
