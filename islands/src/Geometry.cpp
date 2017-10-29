@@ -137,10 +137,8 @@ bool intersect(const Sphere& sphere, const Plane& plane) {
 bool intersect(CollisionMesh& mesh, const Sphere& sphere) {
 	bool intersected = false;
 	auto minDistance = INFINITY;
-	auto s = sphere;
-	s.radius = 1.f; // FIXME
 	for (const auto& triangle : mesh.triangles) {
-		if (intersect(triangle, s)) {
+		if (intersect(triangle, sphere)) {
 			intersected = true;
 
 			const auto distance = glm::distance2(sphere.center, triangle.getCenter());
@@ -158,7 +156,7 @@ float getSinking(const Triangle& triangle, const Sphere& sphere) {
 	assert(!triangle.isDegenerate());
 	assert(sphere.radius >= 0.f);
 	const auto dist = glm::dot(triangle.getNormal(), sphere.center - triangle.getCenter());
-	return std::max(0.f, 1.f - dist); // FIXME
+	return sphere.radius - dist;
 }
 
 float getSinking(const Sphere& a, const Sphere& b) {

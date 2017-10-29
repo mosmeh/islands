@@ -27,7 +27,7 @@ void Player::start() {
 	drawer_->update();
 	drawer_->stopAnimation();
 
-	const auto collider = getEntity().createComponent<SphereCollider>(model);
+	const auto collider = getEntity().createComponent<SphereCollider>(model, 1.f);
 	body_ = getEntity().createComponent<PhysicalBody>(collider);
 
 	getEntity().createComponent<Health>(100);

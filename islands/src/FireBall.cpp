@@ -21,7 +21,7 @@ void FireBall::start() {
 	const auto model = ResourceSystem::getInstance().createOrGet<Model>(BALL_MODEL, BALL_MODEL);
 	getEntity().createComponent<ModelDrawer>(model);
 
-	const auto collider = getEntity().createComponent<SphereCollider>(model);
+	const auto collider = getEntity().createComponent<SphereCollider>(model, 2.f);
 	collider->registerCallback([this] (std::shared_ptr<Collider> collider) {
 		const auto& entity = collider->getEntity();
 		if (entity.getSelfMask() & Entity::Mask::Enemy) {

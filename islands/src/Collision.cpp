@@ -77,15 +77,23 @@ bool AABBCollider::intersectsImpl(std::shared_ptr<AABBCollider> collider) const 
 
 SphereCollider::SphereCollider(std::shared_ptr<Model> model) :
 	Collider(model),
+	radiusFixed_(false),
 	sphere_{glm::zero<glm::vec3>(), 0.f}  {}
+
+SphereCollider::SphereCollider(std::shared_ptr<Model> model, float radius) :
+	Collider(model),
+	radiusFixed_(true),
+	sphere_{glm::zero<glm::vec3>(), radius}  {}
 
 void SphereCollider::update() {
 	Collider::update();
 
 	const auto& aabb = getGlobalAABB();
-	const auto d = aabb.max - aabb.min;
-	sphere_.radius = std::max(0.f, std::min({d.x, d.y, d.z}) / 2.f);
 	sphere_.center = (aabb.max + aabb.min) / 2.f;
+	if (!radiusFixed_) {
+		const auto d = aabb.max - aabb.min;
+		sphere_.radius = std::max(0.f, std::min({d.x, d.y, d.z}) / 2.f);
+	}
 }
 
 glm::vec3 SphereCollider::getNormal(const glm::vec3& refPos) const {

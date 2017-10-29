@@ -79,6 +79,7 @@ private:
 class SphereCollider : public Collider {
 public:
 	SphereCollider(std::shared_ptr<Model> model);
+	SphereCollider(std::shared_ptr<Model> model, float radius);
 	virtual ~SphereCollider() = default;
 
 	void update() override;
@@ -86,6 +87,7 @@ public:
 	const geometry::Sphere& getGlobalSphere() const;
 
 private:
+	bool radiusFixed_;
 	geometry::Sphere sphere_;
 
 	bool intersectsImpl(std::shared_ptr<SphereCollider>) const override;
