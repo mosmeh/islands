@@ -107,12 +107,21 @@ public:
 	const geometry::Plane& getGlobalPlane() const;
 	void setOffset(float offset);
 
-private:
+protected:
 	geometry::Plane globalPlane_;
 	float offset_;
 
+private:
 	bool intersectsImpl(std::shared_ptr<SphereCollider>) const override;
 	float getSinking(std::shared_ptr<SphereCollider>) const override;
+};
+
+class FloorCollider : public PlaneCollider {
+public:
+	FloorCollider(std::shared_ptr<Model> model);
+	virtual ~FloorCollider() = default;
+
+	void update() override;
 };
 
 class MeshCollider : public Collider {

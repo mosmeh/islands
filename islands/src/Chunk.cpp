@@ -114,18 +114,25 @@ void Chunk::loadImpl() {
 
 	for (const auto& ent : json.get("entities").get<picojson::object>()) {
 		const auto entity = createEntity(ent.first);
-		const auto& properties = ent.second.get<picojson::object>();
-		entity->setPosition(toVec3(properties.at("position")));
-		entity->setQuaternion(toQuat(properties.at("quaternion")));
-		entity->setScale(toVec3(properties.at("scale")));
+		const auto& prop = ent.second.get<picojson::object>();
+		if (prop.find("position") != prop.end()) {
+			entity->setPosition(toVec3(prop.at("position")));
+		}
+		if (prop.find("quaternion") != prop.end()) {
+			entity->setQuaternion(toQuat(prop.at("quaternion")));
+		}
+		if (prop.find("scale") != prop.end()) {
+			entity->setScale(toVec3(prop.at("scale")));
+		}
 		entity->setSelfMask(Entity::Mask::StaticObject);
 		entity->setFilterMask(Entity::Mask::DynamicObject);
 
-		if (properties.find("model") != properties.end()) {
-			const auto& modelProp = properties.at("model").get<picojson::object>();
+		std::shared_ptr<Model> model(nullptr);
+		if (prop.find("model") != prop.end()) {
+			const auto& modelProp = prop.at("model").get<picojson::object>();
 
 			const auto& meshName = modelProp.at("mesh").get<std::string>();
-			const auto model = ResourceSystem::getInstance().createOrGet<Model>(meshName, meshName);
+			model = ResourceSystem::getInstance().createOrGet<Model>(meshName, meshName);
 			const auto drawer = entity->createComponent<ModelDrawer>(model);
 
 			if (modelProp.find("visible") != modelProp.end()) {
@@ -142,34 +149,35 @@ void Chunk::loadImpl() {
 				drawer->setLightmapTexture(ResourceSystem::getInstance().createOrGet<Texture2D>(
 					lightmapName, lightmapName));
 			}
+		}
 
-			if (properties.find("collision") != properties.end()) {
-				if (properties.at("collision").is<std::string>()) {
-					const auto& type = properties.at("collision").get<std::string>();
-					if (type == "sphere") {
-						entity->createComponent<SphereCollider>(model);
-					} else if (type == "floor") {
-						entity->createComponent<PlaneCollider>(model, glm::vec3(0.f, 0.f, 1.f))->setOffset(1.5f);
-					} else {
-						throw std::exception("not implemented");
-					}
+		if (prop.find("collision") != prop.end()) {
+			if (prop.at("collision").is<std::string>()) {
+				const auto& type = prop.at("collision").get<std::string>();
+				if (type == "sphere") {
+					assert(model);
+					entity->createComponent<SphereCollider>(model);
 				} else {
-					const auto& collisionProp = properties.at("collision").get<picojson::object>();
-
-					const auto& type = collisionProp.at("type").get<std::string>();
-					if (type == "mesh") {
-						const auto& collisionMeshName = collisionProp.at("mesh_name").get<std::string>();
-						const auto collisionMesh = ResourceSystem::getInstance().createOrGet<Model>(collisionMeshName, collisionMeshName);
-						entity->createComponent<MeshCollider>(collisionMesh);
-					} else {
-						throw std::exception("not implemented");
-					}
+					throw std::exception("not implemented");
+				}
+			} else {
+				const auto& collisionProp = prop.at("collision").get<picojson::object>();
+				const auto& type = collisionProp.at("type").get<std::string>();
+				const auto& meshName = collisionProp.at("mesh_name").get<std::string>();
+				const auto collisionMesh = ResourceSystem::getInstance().createOrGet<Model>(
+					meshName, meshName);
+				if (type == "mesh") {
+					entity->createComponent<MeshCollider>(collisionMesh);
+				} else if (type == "floor") {
+					entity->createComponent<FloorCollider>(collisionMesh);
+				} else {
+					throw std::exception("not implemented");
 				}
 			}
 		}
 
-		if (properties.find("enemy") != properties.end()) {
-			const auto& enemyProp = properties.at("enemy").get<picojson::object>();
+		if (prop.find("enemy") != prop.end()) {
+			const auto& enemyProp = prop.at("enemy").get<picojson::object>();
 			
 			const auto& type = enemyProp.at("type").get<std::string>();
 			if (type == "slime") {

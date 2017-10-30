@@ -157,6 +157,14 @@ float PlaneCollider::getSinking(std::shared_ptr<SphereCollider> collider) const 
 	return geometry::getSinking(collider->getGlobalSphere(), globalPlane_);
 }
 
+FloorCollider::FloorCollider(std::shared_ptr<Model> model) :
+	PlaneCollider(model, glm::vec3(0, 0, 1)) {}
+
+void FloorCollider::update() {
+	Collider::update();
+	globalPlane_.d = -offset_;
+}
+
 MeshCollider::MeshCollider(std::shared_ptr<Model> model) : Collider(model) {
 	size_t numTriangles = 0;
 	for (auto mesh : model->getMeshes()) {
