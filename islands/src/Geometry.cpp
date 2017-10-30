@@ -136,16 +136,12 @@ bool intersect(const Sphere& sphere, const Plane& plane) {
 
 bool intersect(CollisionMesh& mesh, const Sphere& sphere) {
 	bool intersected = false;
-	auto minDistance = INFINITY;
+	mesh.collisionTriangles.clear();
 	for (const auto& triangle : mesh.triangles) {
 		if (intersect(triangle, sphere)) {
 			intersected = true;
 
-			const auto distance = glm::distance2(sphere.center, triangle.getCenter());
-			if (distance < minDistance) {
-				mesh.nearestTriangle = triangle;
-				minDistance = distance;
-			}
+			mesh.collisionTriangles.emplace_back(triangle);
 		}
 	}
 	

@@ -95,7 +95,6 @@ private:
 	bool intersectsImpl(std::shared_ptr<MeshCollider>) const override;
 	float getSinking(std::shared_ptr<SphereCollider>) const override;
 	float getSinking(std::shared_ptr<PlaneCollider>) const override;
-	float getSinking(std::shared_ptr<MeshCollider>) const override;
 };
 
 class PlaneCollider : public Collider {

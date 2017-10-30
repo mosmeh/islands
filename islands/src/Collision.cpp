@@ -120,10 +120,6 @@ bool SphereCollider::intersectsImpl(std::shared_ptr<MeshCollider> collider) cons
 	return geometry::intersect(collider->getCollisionMesh(), sphere_);
 }
 
-float SphereCollider::getSinking(std::shared_ptr<MeshCollider> collider) const {
-	return geometry::getSinking(collider->getCollisionMesh().nearestTriangle, sphere_);
-}
-
 const geometry::Sphere& SphereCollider::getGlobalSphere() const {
 	return sphere_;
 }
@@ -197,7 +193,11 @@ void MeshCollider::update() {
 }
 
 glm::vec3 MeshCollider::getNormal(const glm::vec3&) const {
-	return collisionMesh_.nearestTriangle.getNormal();
+	auto sum = glm::zero<glm::vec3>();
+	for (const auto& triangle : collisionMesh_.collisionTriangles) {
+		sum += triangle.getNormal();
+	}
+	return sum / static_cast<float>(collisionMesh_.collisionTriangles.size());
 }
 
 bool MeshCollider::intersectsImpl(std::shared_ptr<SphereCollider> collider) const {
@@ -209,7 +209,11 @@ geometry::CollisionMesh& MeshCollider::getCollisionMesh() const {
 }
 
 float MeshCollider::getSinking(std::shared_ptr<SphereCollider> collider) const {
-	return geometry::getSinking(collisionMesh_.nearestTriangle, collider->getGlobalSphere());
+	float sum = 0.f;
+	for (const auto& triangle : collisionMesh_.collisionTriangles) {
+		sum += geometry::getSinking(triangle, collider->getGlobalSphere());
+	}
+	return sum / static_cast<float>(collisionMesh_.collisionTriangles.size());
 }
 
 }

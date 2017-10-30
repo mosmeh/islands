@@ -35,8 +35,7 @@ struct Capsule {
 };
 
 struct CollisionMesh {
-	std::vector<Triangle> triangles;
-	Triangle nearestTriangle;
+	std::vector<Triangle> triangles, collisionTriangles;
 };
 
 bool intersect(const AABB& a, const AABB& b);

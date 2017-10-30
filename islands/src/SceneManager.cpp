@@ -123,7 +123,7 @@ void SceneManager::update() {
 			const auto destCoord = currentCoord_ + offset;
 			if (chunks_.find(destCoord) != chunks_.end()) {
 				const auto& destAABB = chunks_.at(destCoord)->getGlobalAABB();
-				if (glm::dot(playerVelocity, glm::vec3(offset)) > glm::inversesqrt(2.f) &&
+				if (glm::dot(playerVelocity, glm::vec3(offset)) > 0.f &&
 					geometry::intersect(destAABB, playerAABB)) {
 
 					jumpTo(destCoord);
@@ -163,7 +163,10 @@ void SceneManager::jumpTo(const glm::ivec3& dest) {
 	if (currentChunk_) {
 		const auto currentPlayer = currentChunk_->getEntityByName("Player");
 		const auto nextPlayer = chunks_.at(dest)->getEntityByName("Player");
-		nextPlayer->setPosition(currentPlayer->getPosition());
+
+		static constexpr float JUMP_STEP = 2.f;
+		nextPlayer->setPosition(currentPlayer->getPosition()
+			+ JUMP_STEP * glm::vec3(dest - currentCoord_));
 		nextPlayer->setQuaternion(currentPlayer->getQuaternion());
 	}
 
