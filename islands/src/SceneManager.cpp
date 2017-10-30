@@ -38,12 +38,12 @@ SceneManager::SceneManager() :
 		glm::ivec3(0, -1, 0), glm::ivec3(0, 1, 0),
 		glm::ivec3(0, 0, -1), glm::ivec3(0, 0, 1)
 	},
-	fullScreenProgram_(ResourceSystem::getInstance().createOrGet<Program>(
+	blackOutProgram_(ResourceSystem::getInstance().createOrGet<Program>(
 		"blackOut", "full_screen.vert", "black_out.frag")),
 	transitioning_(false) {
 
-	fullScreenProgram_->use();
-	fullScreenProgram_->setUniform("tex", static_cast<GLuint>(0));
+	blackOutProgram_->use();
+	blackOutProgram_->setUniform("tex", static_cast<GLuint>(0));
 
 	glGenFramebuffers(1, &frameBuffer_);
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer_);
@@ -146,10 +146,10 @@ void SceneManager::draw() {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	fullScreenProgram_->use();
+	blackOutProgram_->use();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, fbTexture_);
-	fullScreenProgram_->setUniform("progress", static_cast<float>(glfwGetTime() - transitionStartedAt_));
+	blackOutProgram_->setUniform("progress", static_cast<float>(glfwGetTime() - transitionStartedAt_));
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 

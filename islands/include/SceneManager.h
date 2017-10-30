@@ -45,7 +45,7 @@ private:
 	std::unordered_map<glm::ivec3, std::shared_ptr<Chunk>> chunks_;
 	glm::ivec3 currentCoord_;
 	std::shared_ptr<Chunk> currentChunk_;
-	std::shared_ptr<Program> fullScreenProgram_;
+	std::shared_ptr<Program> blackOutProgram_;
 	GLuint frameBuffer_, fbTexture_, renderBuffer_;
 	bool transitioning_;
 	double transitionStartedAt_;
