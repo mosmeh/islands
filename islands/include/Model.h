@@ -37,8 +37,6 @@ public:
 	void draw() override;
 
 	void setVisible(bool visible);
-	void setCastShadow(bool castShadow);
-	void setReceiveShadow(bool receiveShadow);
 	void setLightmapTexture(std::shared_ptr<Texture2D> texture);
 
 	void enableAnimation(const std::string& name, bool loop = true, float tps = 24.f);
@@ -47,7 +45,7 @@ public:
 
 protected:
 	std::shared_ptr<Model> model_;
-	bool visible_, castShadow_, receiveShadow_;
+	bool visible_;
 	std::shared_ptr<Texture2D> lightmap_;
 	bool animPlaying_, animLoop_;
 	std::string animName_;

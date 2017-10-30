@@ -64,8 +64,6 @@ void Model::loadImpl() {
 ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
 	model_(model),
 	visible_(true),
-	castShadow_(true),
-	receiveShadow_(true),
 	animPlaying_(false),
 	animStartTime_(0.f) {}
 
@@ -109,14 +107,6 @@ void ModelDrawer::draw() {
 
 void ModelDrawer::setVisible(bool visible) {
 	visible_ = visible;
-}
-
-void ModelDrawer::setCastShadow(bool castShadow) {
-	castShadow_ = castShadow;
-}
-
-void ModelDrawer::setReceiveShadow(bool receiveShadow) {
-	receiveShadow_ = receiveShadow;
 }
 
 void ModelDrawer::setLightmapTexture(std::shared_ptr<Texture2D> texture) {

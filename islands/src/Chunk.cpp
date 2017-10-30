@@ -107,9 +107,6 @@ void Chunk::loadImpl() {
 		ifs >> json;
 	}
 
-	const auto& env = json.get("environment").get<picojson::object>();
-	UNUSED(env);
-
 	createEntity("Player")->createComponent<Player>();
 
 	for (const auto& ent : json.get("entities").get<picojson::object>()) {
@@ -137,12 +134,6 @@ void Chunk::loadImpl() {
 
 			if (modelProp.find("visible") != modelProp.end()) {
 				drawer->setVisible(modelProp.at("visible").get<bool>());
-			}
-			if (modelProp.find("cast_shadow") != modelProp.end()) {
-				drawer->setCastShadow(modelProp.at("cast_shadow").get<bool>());
-			}
-			if (modelProp.find("receive_shadow") != modelProp.end()) {
-				drawer->setReceiveShadow(modelProp.at("receive_shadow").get<bool>());
 			}
 			if (modelProp.find("lightmap") != modelProp.end()) {
 				const auto& lightmapName = modelProp.at("lightmap").get<std::string>();
