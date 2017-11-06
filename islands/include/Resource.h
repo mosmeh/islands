@@ -26,7 +26,7 @@ private:
 	};
 
 	const std::string name_;
-	std::atomic<State> status_;
+	State status_;
 };
 
 }
