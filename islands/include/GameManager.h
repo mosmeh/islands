@@ -2,6 +2,7 @@
 
 #include "Chunk.h"
 #include "Geometry.h"
+#include "Sprite.h"
 
 namespace islands {
 namespace detail {
@@ -26,31 +27,34 @@ struct hash<glm::ivec3> {
 
 namespace islands {
 
-class SceneManager {
+class GameManager {
 public:
-	SceneManager(const SceneManager&) = delete;
-	SceneManager& operator=(const SceneManager&) = delete;
-	virtual ~SceneManager();
+	GameManager();
+	virtual ~GameManager() = default;
 
-	static SceneManager& getInstance();
+	static GameManager& getInstance();
 
+	void init();
 	void update();
 	void draw();
 
-	void jumpTo(const glm::ivec3& destination);
+	void stopBGM() const;
 
 private:
 	const std::array<glm::ivec3, 6> NEIGHBOR_OFFSETS;
 
+	std::shared_ptr<Program> backgroundProgram_;
+	Sprite filledHeart_, emptyHeart_;
+
 	std::unordered_map<glm::ivec3, std::shared_ptr<Chunk>> chunks_;
 	glm::ivec3 currentCoord_;
 	std::shared_ptr<Chunk> currentChunk_;
-	std::shared_ptr<Program> blackOutProgram_;
-	GLuint frameBuffer_, fbTexture_, renderBuffer_;
-	bool transitioning_;
-	double transitionStartedAt_;
+	std::shared_ptr<Entity> playerEntity_;
 
-	SceneManager();
+	std::shared_ptr<Sound> currentBGM_;
+	std::shared_ptr<Sound::Instance> currentBGMInstance_;
+
+	void jumpTo(const glm::ivec3& destination);
 };
 
 }
