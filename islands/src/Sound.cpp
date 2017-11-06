@@ -26,12 +26,18 @@ Sound::Sound(const std::string& name, const std::string& filename) :
 Sound::~Sound() {
 	if (isLoaded()) {
 		instances_.clear();
-		std::free(buffer_);
+		if (buffer_) {
+			std::free(buffer_);
+		}
 	}
 }
 
 std::shared_ptr<Sound::Instance> Sound::createInstance() {
 	load();
+
+	instances_.erase(std::remove_if(instances_.begin(), instances_.end(), [](std::shared_ptr<Instance> inst) {
+		return !inst->isPlaying() && inst.use_count() == 1;
+	}), instances_.end());
 
 	const auto instance = std::make_shared<Sound::Instance>(*this);
 	instances_.emplace_back(instance);
@@ -48,7 +54,8 @@ void Sound::loadImpl() {
 
 Sound::Instance::Instance(const Sound& sound) :
 	sound_(sound),
-	playing_(false) {
+	playing_(false),
+	stream_(nullptr) {
 
 	CHECK_PA(Pa_OpenDefaultStream(&stream_, 0, sound_.numChannels_,
 		paInt16, sound_.sampleRate_, FRAMES_PER_BUFFER, nullptr, nullptr));
@@ -79,11 +86,9 @@ void Sound::Instance::play(bool loop) {
 }
 
 void Sound::Instance::stop() {
-	if (playing_) {
-		playing_ = false;
-		if (thread_.joinable()) {
-			thread_.join();
-		}
+	playing_ = false;
+	if (thread_.joinable()) {
+		thread_.join();
 	}
 }
 
