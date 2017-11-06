@@ -11,18 +11,6 @@ public:
 
 	using KeyboardCallback = std::function<void(int, int)>;
 
-	Input(const Input&) = delete;
-	Input& operator=(const Input&) = delete;
-	virtual ~Input();
-
-	static Input& getInstance();
-
-	void update();
-	void registerKeyboardCallback(const KeyboardCallback& callback);
-	const glm::vec2 getDirection() const;
-	bool isCommandActive(Command command) const;
-
-private:
 	class Device {
 	public:
 		Device() = default;
@@ -32,22 +20,27 @@ private:
 		virtual void update() = 0;
 		virtual glm::vec2 getDirection() const = 0;
 		virtual bool isCommandActive(Command command) const = 0;
+		virtual bool anyButtonPressed() const = 0;
+		virtual bool anyButtonExceptArrowPressed() const = 0;
 	};
 
 	class Keyboard : public Device {
 	public:
+		Keyboard() = default;
 		virtual ~Keyboard() = default;
 
 		bool isPresent() const override;
 		void update() override;
 		glm::vec2 getDirection() const override;
 		bool isCommandActive(Command command) const override;
+		bool anyButtonPressed() const override;
+		bool anyButtonExceptArrowPressed() const override;
 
 	private:
 		glm::vec2 direction_;
 
 		bool isKeyPressed(int key) const;
-	} keyboard_;
+	};
 
 	class Gamepad : public Device {
 	public:
@@ -58,6 +51,10 @@ private:
 		void update() override;
 		glm::vec2 getDirection() const override;
 		bool isCommandActive(Command command) const override;
+		bool anyButtonPressed() const override;
+		bool anyButtonExceptArrowPressed() const override;
+		std::string getName() const;
+		bool isDualShock4() const;
 
 	private:
 		int id_;
@@ -66,11 +63,30 @@ private:
 		glm::vec2 direction_;
 
 		bool isButtonPressed(int button) const;
-	} gamepad_;
+	};
 
+	Input(const Input&) = delete;
+	Input& operator=(const Input&) = delete;
+	virtual ~Input();
+
+	static Input& getInstance();
+
+	void update();
+	void registerKeyboardCallback(const KeyboardCallback& callback);
+	const glm::vec2 getDirection() const;
+	bool isCommandActive(Command command) const;
+	bool anyButtonPressed() const;
+	bool anyButtonExceptArrowPressed() const;
+	const Keyboard& getKeyboard() const;
+	const Gamepad& getGamepad() const;
+
+private:
 	GLFWwindow* window_;
 	std::vector<KeyboardCallback> keyboardCallbacks_;
+	Keyboard keyboard_;
+	Gamepad gamepad_;
 	glm::vec2 direction_;
+	std::set<int> pressedKeys_;
 
 	Input();
 };
