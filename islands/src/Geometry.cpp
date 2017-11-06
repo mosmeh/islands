@@ -166,5 +166,13 @@ float getSinking(const Sphere& sphere, const Plane& plane) {
 	return a - glm::dot(plane.normal, sphere.center);
 }
 
+glm::quat directionToQuaternion(const glm::vec3& dir, const glm::vec3& front) {
+	if (glm::dot(dir, -front) < 1.f - glm::epsilon<float>()) {
+		return glm::rotation(front, dir);
+	} else {
+		return glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1.f));
+	}
+}
+
 }
 }
