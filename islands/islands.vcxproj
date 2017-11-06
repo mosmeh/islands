@@ -252,6 +252,7 @@
     <ClInclude Include="include\Effect.h" />
     <ClInclude Include="include\Enemy.h" />
     <ClInclude Include="include\FireBall.h" />
+    <ClInclude Include="include\GLObjects.h" />
     <ClInclude Include="include\Health.h" />
     <ClInclude Include="include\SceneManager.h" />
     <ClInclude Include="include\Collision.h" />

@@ -2,6 +2,7 @@
 
 #include "Resource.h"
 #include "Material.h"
+#include "GLObjects.h"
 
 namespace islands {
 
@@ -35,7 +36,8 @@ private:
 		UV = 2
 	};
 
-	GLuint vertexArray_, vertexBuffer_, indexBuffer_, normalBuffer_, uvBuffer_;
+	VertexArray vertexArray_;
+	GLuint vertexBuffer_, indexBuffer_, normalBuffer_, uvBuffer_;
 	std::unique_ptr<glm::vec3[]> vertices_, normals_;
 	std::unique_ptr<glm::vec2[]> uvs_;
 	std::unique_ptr<GLuint[]> indices_;

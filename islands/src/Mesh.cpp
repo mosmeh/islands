@@ -58,7 +58,6 @@ Mesh::~Mesh() {
 		if (hasUV_) {
 			glDeleteBuffers(1, &uvBuffer_);
 		}
-		glDeleteVertexArrays(1, &vertexArray_);
 	}
 }
 
@@ -69,7 +68,7 @@ bool Mesh::isLoaded() const {
 void Mesh::draw() {
 	upload();
 
-	glBindVertexArray(vertexArray_);
+	vertexArray_.bind();
 	glDrawElements(GL_TRIANGLES, numIndices_, GL_UNSIGNED_INT, nullptr);
 }
 
@@ -82,8 +81,7 @@ std::shared_ptr<Material> Mesh::getMaterial() const {
 }
 
 void Mesh::uploadImpl() {
-	glGenVertexArrays(1, &vertexArray_);
-	glBindVertexArray(vertexArray_);
+	vertexArray_.bind();
 
 	glGenBuffers(1, &vertexBuffer_);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
