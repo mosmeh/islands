@@ -26,4 +26,20 @@ private:
 	void uploadImpl() override;
 };
 
+class RenderTexture {
+public:
+	RenderTexture();
+	RenderTexture(const RenderTexture&) = delete;
+	RenderTexture& operator=(const RenderTexture&) = delete;
+	RenderTexture(RenderTexture&&) = default;
+	virtual ~RenderTexture();
+
+	GLuint getId() const;
+	void setSize(const glm::uvec2& size);
+	void bind(unsigned int textureUnit);
+
+private:
+	GLuint id_;
+};
+
 }

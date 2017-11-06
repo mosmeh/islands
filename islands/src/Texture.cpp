@@ -60,4 +60,31 @@ void Texture2D::uploadImpl() {
 	glGenerateMipmap(GL_TEXTURE_2D);
 }
 
+RenderTexture::RenderTexture() {
+	glGenTextures(1, &id_);
+	glBindTexture(GL_TEXTURE_2D, id_);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
+
+RenderTexture::~RenderTexture() {
+	glDeleteTextures(1, &id_);
+}
+
+GLuint RenderTexture::getId() const {
+	return id_;
+}
+
+void RenderTexture::setSize(const glm::uvec2& size) {
+	glBindTexture(GL_TEXTURE_2D, id_);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+}
+
+void RenderTexture::bind(unsigned int textureUnit) {
+	assert(textureUnit < 32);
+
+	glActiveTexture(GL_TEXTURE0 + textureUnit);
+	glBindTexture(GL_TEXTURE_2D, id_);
+}
+
 }
