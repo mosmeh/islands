@@ -1,6 +1,7 @@
-#include "System.h"
 #include "Chunk.h"
+#include "System.h"
 #include "ResourceSystem.h"
+#include "Camera.h"
 #include "PhysicalBody.h"
 #include "Physics.h"
 #include "Player.h"
@@ -29,7 +30,8 @@ namespace islands {
 
 Chunk::Chunk(const std::string& name, const std::string& filename) :
 	Resource(name),
-	filename_(filename) {}
+	filename_(filename),
+	cameraOffset_(15.f) {}
 
 bool Chunk::isLoaded() const {
 	for (const auto entity : entities_) {
@@ -91,6 +93,7 @@ void Chunk::update() {
 void Chunk::draw() {
 	upload();
 
+	Camera::getInstance().setOffset(cameraOffset_);
 	for (const auto entity : entities_) {
 		entity->draw();
 	}
@@ -108,6 +111,13 @@ void Chunk::loadImpl() {
 	}
 
 	createEntity("Player")->createComponent<Player>();
+
+	if (json.contains("camera")) {
+		const auto& cameraProp = json.get("camera").get<picojson::object>();
+		if (cameraProp.find("offset") != cameraProp.end()) {
+			cameraOffset_ = static_cast<float>(cameraProp.at("offset").get<double>());
+		}
+	}
 
 	for (const auto& ent : json.get("entities").get<picojson::object>()) {
 		const auto entity = createEntity(ent.first);

@@ -4,7 +4,7 @@ namespace islands {
 
 Camera::Camera() :
 	PROJECTION(glm::perspective(glm::radians(30.f), 16.f / 9, 0.1f, 100.f)),
-	CAMERA_OFFSET(15.f * glm::vec3(-1.f, -1.f, 1.f)) {}
+	offset_(15.f) {}
 
 Camera& Camera::getInstance() {
 	static Camera instance;
@@ -13,6 +13,12 @@ Camera& Camera::getInstance() {
 
 void Camera::lookAt(const glm::vec3& position) {
 	targetPos_ = position;
+	updateProjectionViewMatrix();
+}
+
+void Camera::setOffset(float offset) {
+	assert(offset > 0.f);
+	offset_ = offset;
 	updateProjectionViewMatrix();
 }
 
@@ -29,7 +35,8 @@ const glm::mat4& Camera::getProjectionViewMatrix() const {
 }
 
 void Camera::updateProjectionViewMatrix() {
-	view_ = glm::lookAt(targetPos_ + CAMERA_OFFSET, targetPos_, glm::vec3(0, 0, 1));
+	const auto eye = targetPos_ + offset_ * glm::vec3(-1.f, -1.f, 1.f);
+	view_ = glm::lookAt(eye, targetPos_, glm::vec3(0, 0, 1));
 	projView_ = PROJECTION * view_;
 }
 
