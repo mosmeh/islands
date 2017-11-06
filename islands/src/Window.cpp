@@ -17,7 +17,7 @@ Window::Window() :
 	SLOG << "glad: Loading" << std::endl;
 	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
 		SLOG << "glad: Failed to load" << std::endl;
-		throw;
+		std::exit(EXIT_FAILURE);
 	}
 
 	glfwGetFramebufferSize(window_, &width_, &height_);

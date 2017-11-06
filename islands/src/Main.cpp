@@ -50,13 +50,13 @@ int main() {
 
 	glfwSetErrorCallback([](int code, const char* msg) {
 		SLOG << "GLFW: " << code << " " << msg << std::endl;
-		throw;
+		std::exit(EXIT_FAILURE);
 	});
 
 	SLOG << "GLFW: Initializing" << std::endl;
 	if (!glfwInit()) {
 		SLOG << "GLFW: Failed to initialize" << std::endl;
-		throw;
+		std::exit(EXIT_FAILURE);
 	}
 
 	SLOG << "PortAudio: Initializing" << std::endl;
@@ -64,7 +64,7 @@ int main() {
 		const auto error = Pa_Initialize();
 		if (error != paNoError) {
 			SLOG << "PortAudio: " << Pa_GetErrorText(error) << std::endl;
-			throw;
+			std::exit(EXIT_FAILURE);
 		}
 	}
 
@@ -78,7 +78,6 @@ int main() {
 	
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 #ifdef _DEBUG
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
@@ -176,5 +175,5 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 #endif
 	}
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }

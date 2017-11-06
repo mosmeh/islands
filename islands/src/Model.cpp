@@ -32,7 +32,7 @@ void Model::loadImpl() {
 		aiProcess_Triangulate);
 	if (!scene) {
 		SLOG << "Assimp: " << importer.GetErrorString() << std::endl;
-		throw;
+		std::exit(EXIT_FAILURE);
 	}
 
 	assert(scene->HasMaterials());
