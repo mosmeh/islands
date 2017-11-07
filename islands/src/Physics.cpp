@@ -49,7 +49,7 @@ void update(const Chunk& chunk) {
 
 	for (const auto body : bodies) {
 		if (body->hasCollider()) {
-			bool collide = false;
+			bool frictionCollide = false;
 			const auto collider = body->getCollider();
 			for (const auto c : colliders) {
 				if (&c->getEntity() == &collider->getEntity()) {
@@ -57,9 +57,13 @@ void update(const Chunk& chunk) {
 				}
 				if (!c->isGhost() && collider->intersects(c) ) {
 					body->moveBy(c->getSinkingCorrector(collider));
+
+					if (c->getEntity().getSelfMask() != Entity::Mask::CollisionWall) {
+						frictionCollide = true;
+					}
 				}
 			}
-			if (collide) {
+			if (frictionCollide) {
 				auto v = body->getVelocity();
 				for (glm::length_t i = 0; i < v.length(); ++i) {
 					if (v[i] > FRICTION) {

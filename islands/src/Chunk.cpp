@@ -143,8 +143,8 @@ void Chunk::loadImpl() {
 		if (prop.find("scale") != prop.end()) {
 			entity->setScale(toVec3(prop.at("scale")));
 		}
-		entity->setSelfMask(Entity::Mask::StaticObject);
 		entity->setFilterMask(Entity::Mask::DynamicObject);
+		entity->setSelfMask(Entity::Mask::StageObject);
 
 		std::shared_ptr<Model> model(nullptr);
 		if (prop.find("model") != prop.end()) {
@@ -164,6 +164,7 @@ void Chunk::loadImpl() {
 			}
 		}
 
+
 		if (prop.find("collision") != prop.end()) {
 			if (prop.at("collision").is<std::string>()) {
 				const auto& type = prop.at("collision").get<std::string>();
@@ -181,6 +182,9 @@ void Chunk::loadImpl() {
 					meshName, meshName);
 				if (type == "mesh") {
 					entity->createComponent<MeshCollider>(collisionMesh);
+				}  else if (type == "wall") {
+					entity->createComponent<MeshCollider>(collisionMesh);
+					entity->setSelfMask(Entity::Mask::CollisionWall);
 				} else if (type == "floor") {
 					entity->createComponent<FloorCollider>(collisionMesh);
 				} else {

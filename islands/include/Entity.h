@@ -12,11 +12,13 @@ public:
 	using MaskType = std::uint32_t;
 	enum Mask : MaskType {
 		None          = 0,
-		StaticObject  = 1 << 0,
-		Player        = 1 << 1,
-		PlayerAttack  = 1 << 2,
-		Enemy         = 1 << 3,
-		EnemyAttack   = 1 << 4,
+		StageObject   = 1 << 1,
+		CollisionWall = 1 << 2,
+		Player        = 1 << 3,
+		PlayerAttack  = 1 << 4,
+		Enemy         = 1 << 5,
+		EnemyAttack   = 1 << 6,
+		StaticObject  = StageObject | CollisionWall,
 		DynamicObject = Player | PlayerAttack | Enemy | EnemyAttack
 	};
 

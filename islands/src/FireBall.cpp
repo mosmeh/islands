@@ -13,7 +13,7 @@ void FireBall::start() {
 	getEntity().setScale(glm::vec3(0.9f));
 	getEntity().setSelfMask(Entity::Mask::PlayerAttack);
 	getEntity().setFilterMask(
-		Entity::Mask::StaticObject |
+		Entity::Mask::StageObject |
 		Entity::Mask::Enemy
 	);
 
