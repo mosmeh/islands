@@ -55,8 +55,7 @@ void update(const Chunk& chunk) {
 				if (&c->getEntity() == &collider->getEntity()) {
 					continue;
 				}
-				if (collider->intersects(c)) {
-					collide = true;
+				if (!c->isGhost() && collider->intersects(c) ) {
 					body->moveBy(c->getSinkingCorrector(collider));
 				}
 			}

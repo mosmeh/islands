@@ -5,7 +5,11 @@
 
 namespace islands {
 
-Collider::Collider(std::shared_ptr<Model> model) : model_(model) {}
+Collider::Collider(std::shared_ptr<Model> model) :
+	model_(model),
+	isGhost_(false) {}
+
+Collider::Collider() : Collider(nullptr) {}
 
 void Collider::registerCallback(const Callback& callback) {
 	callbacks_.emplace_back(callback);
@@ -69,6 +73,14 @@ std::shared_ptr<Model> Collider::getModel() const {
 
 const geometry::AABB& Collider::getGlobalAABB() const {
 	return globalAABB_;
+}
+
+void Collider::setGhost(bool isGhost) {
+	isGhost_ = isGhost;
+}
+
+bool Collider::isGhost() const {
+	return isGhost_;
 }
 
 bool AABBCollider::intersectsImpl(std::shared_ptr<AABBCollider> collider) const {

@@ -21,6 +21,8 @@ public:
 	void registerCallback(const Callback& callback);
 	void notifyCollision(std::shared_ptr<Collider> opponent) const;
 	const geometry::AABB& getGlobalAABB() const;
+	void setGhost(bool isGhost);
+	bool isGhost() const;
 
 	virtual void update() override;
 	virtual glm::vec3 getNormal(const glm::vec3& refPos) const = 0;
@@ -61,6 +63,7 @@ private:
 	std::shared_ptr<Model> model_;
 	geometry::AABB globalAABB_;
 	std::vector<Callback> callbacks_;
+	bool isGhost_;
 };
 
 class AABBCollider : public Collider {
