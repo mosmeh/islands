@@ -38,7 +38,7 @@ void Material::use() const {
 	program_->setUniform("diffuse", diffuseColor_);
 	if (lightmap_) {
 		lightmap_->bind(0);
-		program_->setUniform("lightmap", static_cast<GLuint>(0));
+		program_->setUniform("tex", static_cast<GLuint>(0));
 	}
 	for (size_t i = 0; i < diffuseTextures_.size(); ++i) {
 		diffuseTextures_.at(i)->bind(i + 1);
@@ -51,7 +51,8 @@ const glm::vec4& Material::getDiffuseColor() const {
 
 void Material::setLightmapTexture(std::shared_ptr<Texture2D> texture) {
 	lightmap_ = texture;
-	program_ = ResourceSystem::getInstance().get<Program>("LightmapProgram");
+	program_ = 	ResourceSystem::getInstance().createOrGet<Program>(
+		"TextureProgram", "default.vert", "texture.frag");
 }
 
 void Material::setProgram(std::shared_ptr<Program> program) {
