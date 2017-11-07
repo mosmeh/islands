@@ -63,7 +63,8 @@ void Model::loadImpl() {
 
 ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
 	model_(model),
-	visible_(true) {}
+	visible_(true),
+	cullFaceEnabled_(true) {}
 
 void ModelDrawer::update() {
 	const auto elapsedTime = static_cast<float>(glfwGetTime() - anim_.startTime)
@@ -89,6 +90,12 @@ void ModelDrawer::update() {
 
 void ModelDrawer::draw() {
 	if (visible_) {
+		if (cullFaceEnabled_) {
+			glEnable(GL_CULL_FACE);
+		} else {
+			glDisable(GL_CULL_FACE);
+		}
+
 		const auto MVP = getEntity().calculateMVPMatrix();
 		std::stringstream ss;
 		for (const auto mesh : model_->getMeshes()) {
@@ -101,6 +108,10 @@ void ModelDrawer::draw() {
 			}
 
 			mesh->draw();
+		}
+
+		if (!cullFaceEnabled_) {
+			glEnable(GL_CULL_FACE);
 		}
 	}
 }
