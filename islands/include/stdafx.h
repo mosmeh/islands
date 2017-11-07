@@ -17,6 +17,7 @@
 #include <set>
 #include <memory>
 #include <functional>
+#include <random>
 #include <future>
 
 #define NOMINMAX

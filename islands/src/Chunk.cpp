@@ -199,6 +199,16 @@ void Chunk::loadImpl() {
 			const auto& type = enemyProp.at("type").get<std::string>();
 			if (type == "slime") {
 				entity->createComponent<Slime>();
+			} else if (type == "big_slime") {
+				entity->createComponent<BigSlime>();
+			} else if (type == "rabbit") {
+				entity->createComponent<Rabbit>();
+			} else if (type == "crab") {
+				entity->createComponent<Crab>();
+			} else if (type == "dragon") {
+				entity->createComponent<Dragon>();
+			} else if (type == "totem_poll") {
+				entity->createComponent<TotemPoll>();
 			} else {
 				throw std::exception("not implemented");
 			}

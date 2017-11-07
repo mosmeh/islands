@@ -5,6 +5,7 @@
 #include "Input.h"
 #include "Scene.h"
 #include "GameManager.h"
+#include "Sound.h"
 
 namespace islands {
 
@@ -151,6 +152,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	});
 
 	ResourceSystem::getInstance().createOrGet<Sound>("DecideSound", "decide.ogg");
+	ResourceSystem::getInstance().createOrGet<Sound>("EnemyDieSound", "enemy_die.ogg");
 
 	SceneManager::getInstance().add<TitleScene>(SceneKey::Title);
 	SceneManager::getInstance().add<IntroductionScene>(SceneKey::Introduction);
