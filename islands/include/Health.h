@@ -12,7 +12,11 @@ public:
 	void update() override;
 	bool isDead() const;
 	void takeDamage(HealthType damage);
+	HealthType get() const;
 	float getNormalized() const;
+	HealthType getMaxHealth() const;
+	void setMaxHealth(HealthType maxHealth);
+	void set(HealthType health);
 
 private:
 	using SignedHealthType = std::make_signed<HealthType>::type;
