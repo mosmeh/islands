@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "Log.h"
+#include "Version.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
@@ -11,7 +12,9 @@ Window::Window() :
 	deltaTime_(0.0) {
 
 	SLOG << "GLFW: Creating window" << std::endl;
-	window_ = glfwCreateWindow(1280, 720, u8"“V‹ó‚Ì“‡", nullptr, nullptr);
+	std::stringstream ss;
+	ss << APP_NAME << " v" << VERSION_MAJOR << "." << VERSION_MINOR;
+	window_ = glfwCreateWindow(1280, 720, ss.str().c_str(), nullptr, nullptr);
 	glfwMakeContextCurrent(window_);
 
 	SLOG << "glad: Loading" << std::endl;

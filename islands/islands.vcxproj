@@ -282,6 +282,7 @@
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\System.h" />
     <ClInclude Include="include\Texture.h" />
+    <ClInclude Include="include\Version.h" />
     <ClInclude Include="include\Window.h" />
   </ItemGroup>
   <ItemGroup>
