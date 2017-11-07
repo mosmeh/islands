@@ -54,9 +54,9 @@ public:
 	virtual ~SkinnedMesh();
 
 	void setPlayingAnimation(const std::string& name);
-	void setPlayingAnimationTicksPerSecond(float tps);
-	float getPlayingAnimationDurationInSeconds() const;
-	void updateBoneTransform(float time_s);
+	void setPlayingAnimationTicksPerSecond(double tps);
+	double getPlayingAnimationTicks() const;
+	void updateBoneTransform(double time_s);
 	void applyBoneTransform(std::shared_ptr<Program> program) const;
 
 private:
@@ -95,8 +95,8 @@ private:
 	};
 
 	struct Animation {
-		float ticksPerSecond;
-		float duration;
+		double ticksPerSecond;
+		double duration;
 		std::shared_ptr<Node> rootNode;
 
 		Animation() = default;
@@ -114,17 +114,17 @@ private:
 
 	std::shared_ptr<Node> constructNodeTree(const aiNode* aNode, const aiAnimation* animation,
 		const std::unordered_map<std::string, std::shared_ptr<Bone>>& nameToBone);
-	void processNodeTree(float time, std::shared_ptr<Node> node, const glm::mat4& parentTranform);
+	void processNodeTree(double time, std::shared_ptr<Node> node, const glm::mat4& parentTranform);
 
 	template <typename T>
-	T getValueAt(float time, const std::vector<Key<T>>& keys);
+	T getValueAt(double time, const std::vector<Key<T>>& keys);
 
 	template <typename T>
 	T interpolate(const T& x, const T& y, float a);
 };
 
 template <typename T>
-inline T SkinnedMesh::getValueAt(float time, const std::vector<Key<T>>& keys) {
+inline T SkinnedMesh::getValueAt(double time, const std::vector<Key<T>>& keys) {
 	assert(keys.size() > 0);
 
 	if (keys.size() == 1) {
@@ -138,13 +138,16 @@ inline T SkinnedMesh::getValueAt(float time, const std::vector<Key<T>>& keys) {
 			break;
 		}
 	}
-	assert(keyIter + 1 < keys.end());
+
+	if (keyIter == keys.end()) {
+		return (keys.end() - 1)->value;
+	}
+
 	const auto& startKey = *keyIter;
 	const auto& endKey = *(keyIter + 1);
 
-	const float a = (time - startKey.time) / (endKey.time - startKey.time);
-
-	return interpolate(startKey.value, endKey.value, a);
+	const auto a = (time - startKey.time) / (endKey.time - startKey.time);
+	return interpolate(startKey.value, endKey.value, static_cast<float>(a));
 }
 
 template <>

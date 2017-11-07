@@ -63,15 +63,15 @@ void Model::loadImpl() {
 
 ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
 	model_(model),
-	visible_(true),
-	animPlaying_(false),
-	animStartTime_(0.f) {}
+	visible_(true) {}
 
 void ModelDrawer::update() {
-	const auto elapsedTime = static_cast<float>(glfwGetTime() - animStartTime_);
-	if (animPlaying_) {
-		if (!animLoop_ && elapsedTime > animDuration_) {
-			animPlaying_ = false;
+	const auto elapsedTime = static_cast<float>(glfwGetTime() - anim_.startTime)
+		+ anim_.startFrame / (24.0 * anim_.tps);
+
+	if (anim_.playing) {
+		if (!anim_.loop && elapsedTime > anim_.duration) {
+			anim_.playing = false;
 		}
 	}
 
@@ -79,7 +79,7 @@ void ModelDrawer::update() {
 		if (visible_ && lightmap_) {
 			mesh->getMaterial()->setLightmapTexture(lightmap_);
 		}
-		if (animPlaying_) {
+		if (anim_.playing) {
 			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
 				skinned->updateBoneTransform(elapsedTime);
 			}
@@ -113,30 +113,42 @@ void ModelDrawer::setLightmapTexture(std::shared_ptr<Texture2D> texture) {
 	lightmap_ = texture;
 }
 
-void ModelDrawer::enableAnimation(const std::string& name, bool loop, float tps) {
-	if (!animPlaying_ || name != animName_) {
+void ModelDrawer::setCullFaceEnabled(bool enabled) {
+	cullFaceEnabled_ = enabled;
+}
+
+void ModelDrawer::enableAnimation(const std::string& name, bool loop, double tps, size_t startFrame) {
+	if (!anim_.playing || name != anim_.name) {
+		//anim_ = Animation{name, true, loop, 0.0, tps, glfwGetTime(), startFrame};
+		anim_.name = name;
+		anim_.playing = true;
+		anim_.loop = loop;
+		anim_.tps = tps;
+		anim_.startTime = glfwGetTime();
+		anim_.startFrame = startFrame;
 		for (const auto mesh : model_->getMeshes()) {
 			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
 				skinned->setPlayingAnimation(name);
 				skinned->setPlayingAnimationTicksPerSecond(tps);
-				animDuration_ = skinned->getPlayingAnimationDurationInSeconds();
+				anim_.duration = skinned->getPlayingAnimationTicks() / tps;
 			}
 		}
-		animPlaying_ = true;
-		animName_ = name;
-		animLoop_ = loop;
-		animStartTime_ = float(glfwGetTime());
-	} else if (loop != animLoop_) {
-		animLoop_ = loop;
+	} else if (loop != anim_.loop) {
+		anim_.loop = loop;
 	}
 }
 
 void ModelDrawer::stopAnimation() {
-	animPlaying_ = false;
+	anim_.playing = false;
 }
 
 bool ModelDrawer::isPlayingAnimation() const {
-	return animPlaying_;
+	return anim_.playing;
+}
+
+size_t ModelDrawer::getCurrentAnimationFrame() const {
+	return anim_.startFrame
+		+ static_cast<size_t>(24.0 * anim_.tps * (glfwGetTime() - anim_.startTime));
 }
 
 };

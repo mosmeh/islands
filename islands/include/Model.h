@@ -39,17 +39,23 @@ public:
 	void setVisible(bool visible);
 	void setLightmapTexture(std::shared_ptr<Texture2D> texture);
 
-	void enableAnimation(const std::string& name, bool loop = true, float tps = 24.f);
+	void enableAnimation(const std::string& name, bool loop = true, double tps = 24.0, size_t startFrame = 0);
 	void stopAnimation();
 	bool isPlayingAnimation() const;
+	size_t getCurrentAnimationFrame() const;
 
 protected:
 	std::shared_ptr<Model> model_;
 	bool visible_;
 	std::shared_ptr<Texture2D> lightmap_;
-	bool animPlaying_, animLoop_;
-	std::string animName_;
-	float animStartTime_, animDuration_;
+
+	struct Animation {
+		std::string name;
+		bool playing = false, loop;
+		double duration, tps;
+		double startTime;
+		size_t startFrame;
+	} anim_;
 };
 
 }

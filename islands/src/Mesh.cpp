@@ -169,9 +169,8 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 	for (size_t i = 0; i < numAnimations; ++i) {
 		const auto animation = animations[i];
 		const auto anim = std::make_shared <Animation>();
-		anim->ticksPerSecond = static_cast<float>(animation->mTicksPerSecond == 0 ?
-			24.f : animation->mTicksPerSecond);
-		anim->duration = static_cast<float>(animation->mDuration);
+		anim->ticksPerSecond = animation->mTicksPerSecond == 0 ? 24.0 : animation->mTicksPerSecond;
+		anim->duration = animation->mDuration;
 		anim->rootNode = constructNodeTree(root, animation, nameToBone);
 		animations_.emplace(animation->mName.C_Str(), anim);
 	}
@@ -196,17 +195,17 @@ void SkinnedMesh::setPlayingAnimation(const std::string& name) {
 	playingAnim_ = animations_.at(name);
 }
 
-void SkinnedMesh::setPlayingAnimationTicksPerSecond(float tps) {
+void SkinnedMesh::setPlayingAnimationTicksPerSecond(double tps) {
 	assert(playingAnim_);
 	playingAnim_->ticksPerSecond = tps;
 }
 
-float SkinnedMesh::getPlayingAnimationDurationInSeconds() const {
+double SkinnedMesh::getPlayingAnimationTicks() const {
 	assert(playingAnim_);
-	return playingAnim_->duration / playingAnim_->ticksPerSecond;
+	return playingAnim_->duration;
 }
 
-void SkinnedMesh::updateBoneTransform(float time_s) {
+void SkinnedMesh::updateBoneTransform(double time_s) {
 	assert(playingAnim_);
 	const auto time = std::fmod(time_s * playingAnim_->ticksPerSecond, playingAnim_->duration);
 	processNodeTree(time, playingAnim_->rootNode, glm::mat4(1.f));
@@ -279,7 +278,7 @@ std::shared_ptr<SkinnedMesh::Node> SkinnedMesh::constructNodeTree(const aiNode* 
 	return node;
 }
 
-void SkinnedMesh::processNodeTree(float time, std::shared_ptr<Node> node, const glm::mat4& parentTranform) {
+void SkinnedMesh::processNodeTree(double time, std::shared_ptr<Node> node, const glm::mat4& parentTranform) {
 	auto local = node->transform;
 	if (node->hasKeys) {
 		const auto& pos = getValueAt(time, node->positionKeys);
