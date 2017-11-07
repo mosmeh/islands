@@ -17,7 +17,7 @@ void FireBall::start() {
 		Entity::Mask::Enemy
 	);
 
-	constexpr auto BALL_MODEL = "sphere.obj";
+	constexpr auto BALL_MODEL = "fire_ball.obj";
 	const auto model = ResourceSystem::getInstance().createOrGet<Model>(BALL_MODEL, BALL_MODEL);
 	getEntity().createComponent<ModelDrawer>(model);
 
@@ -25,7 +25,7 @@ void FireBall::start() {
 	collider->registerCallback([this] (std::shared_ptr<Collider> collider) {
 		const auto& entity = collider->getEntity();
 		if (entity.getSelfMask() & Entity::Mask::Enemy) {
-			entity.getFirstComponent<Health>()->takeDamage(10);
+			entity.getFirstComponent<Health>()->takeDamage(1);
 		}
 		getEntity().destroy();
 	});
@@ -37,6 +37,7 @@ void FireBall::start() {
 	const auto ballDir = glm::vec3(orientationVec.xy, 0);
 	getEntity().setPosition(pos_ + 1.3f * ballDir + glm::vec3(0, 0, 2.f));
 	body->setVelocity(12.f * ballDir);
+	getEntity().setQuaternion(geometry::directionToQuaternion(ballDir, {0, -1.f, 0}));
 }
 
 void FireBall::update() {}

@@ -3,7 +3,8 @@
 #include "Input.h"
 #include "Chunk.h"
 #include "ResourceSystem.h"
-#include "Health.h"
+#include "Scene.h"
+#include "Sound.h"
 
 namespace islands {
 
@@ -21,23 +22,47 @@ void Player::start() {
 	);
 
 	constexpr auto PLAYER_MESH_NAME = "player.fbx";
-	const auto model = ResourceSystem::getInstance().createOrGet<Model>(PLAYER_MESH_NAME, PLAYER_MESH_NAME);
-	drawer_ = getEntity().createComponent<ModelDrawer>(model);
+	model_ = ResourceSystem::getInstance().createOrGet<Model>(PLAYER_MESH_NAME, PLAYER_MESH_NAME);
+	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
 	drawer_->enableAnimation("Walk.002", false);
 	drawer_->update();
 	drawer_->stopAnimation();
 
-	const auto collider = getEntity().createComponent<SphereCollider>(model, 1.f);
+	const auto collider = getEntity().createComponent<SphereCollider>(model_, 0.7f);
+	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
+		const auto& entity = opponent->getEntity();
+		if (entity.getSelfMask() & (Entity::Mask::Enemy | Entity::Mask::EnemyAttack)) {
+			if (!health_->isInvincible()) {
+				drawer_->setVisible(false);
+				damageEffect_->activate();
+				ResourceSystem::getInstance().createOrGet<Sound>("PlayerDamageSound", "player_damage.ogg")->createInstance()->play();
+			}
+		}
+	});
 	body_ = getEntity().createComponent<PhysicalBody>(collider);
 
-	getEntity().createComponent<Health>(100);
+	health_ = getEntity().createComponent<Health>(10, 2.0);
+	damageEffect_ = getEntity().createComponent<DamageEffect>(model_, 2.0);
 }
 
 void Player::update() {
 	Camera::getInstance().lookAt(getEntity().getPosition());
 
-	if (getEntity().getFirstComponent<Health>()->isDead()) {
-		std::exit(0);
+	if (status_ == State::Dead) {
+		if (dyingEffect_->isFinished()) {
+			SceneManager::getInstance().changeScene(SceneKey::GameOver, false);
+		}
+		return;
+	} else if (health_->isDead()) {
+		status_ = State::Dead;
+		drawer_->destroy();
+		damageEffect_->destroy();
+		dyingEffect_ = getEntity().createComponent<ScatterEffect>(model_);
+		return;
+	}
+
+	if (!damageEffect_->isActive()) {
+		drawer_->setVisible(true);
 	}
 
 	static constexpr float SPEED = 8.f;
@@ -45,22 +70,18 @@ void Player::update() {
 	static const auto ROTATION = glm::mat2(glm::cos(THETA), glm::sin(-THETA),
 		glm::sin(THETA), glm::cos(THETA)) * glm::mat2(-1, 0, 0, 1);
 
-	glm::vec3 v = body_->getVelocity();
 	const auto dir = ROTATION * Input::getInstance().getDirection();
-	if (dir.x != 0) {
-		v.x = SPEED * dir.x;
-	}
-	if (dir.y != 0) {
-		v.y = SPEED * dir.y;
-	}
-	if (std::abs(v.z) < glm::epsilon<float>() &&
+	glm::vec3 velocity(SPEED * dir, body_->getVelocity().z);
+
+	if (std::abs(velocity.z) < glm::epsilon<float>() &&
 		Input::getInstance().isCommandActive(Input::Command::Jump)) {
 
-		v.z = 10.f;
+		velocity.z = 10.f;
 	}
-	body_->setVelocity(v);
 
-	const auto u = glm::normalize(glm::vec3(v.xy, 0));
+	body_->setVelocity(velocity);
+
+	const auto u = glm::normalize(glm::vec3(velocity.xy, 0));
 	if (glm::length(u) > glm::epsilon<float>()) {
 		status_ = State::Walking;
 		drawer_->enableAnimation("Walk.002", true, 3.0 * 24);
@@ -69,31 +90,27 @@ void Player::update() {
 		drawer_->stopAnimation();
 	}
 
-	static constexpr float ATTACK_ANIM_SPEED = 1.5f * 24;
+	static constexpr float ATTACK_ANIM_SPEED = 1.5 * 24;
 	switch (status_) {
 	case State::Idling: {
 		if (Input::getInstance().isCommandActive(Input::Command::Attack)) {
-			status_ = State::AnimatingPreFire;
+			status_ = State::PreFire;
 			attackAnimStartedAt_ = glfwGetTime();
 			drawer_->enableAnimation("Armature|Attack", false, ATTACK_ANIM_SPEED);
 		}
 		break;
 	}
 	case State::Walking:
-		if (glm::dot(u, glm::vec3(-1.f, 0, 0)) < 1.f - glm::epsilon<float>()) {
-			getEntity().setQuaternion(glm::rotation(glm::vec3(1.f, 0, 0), u));
-		} else {
-			getEntity().setQuaternion(glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1.f)));
-		}
+		getEntity().setQuaternion(geometry::directionToQuaternion(u, {1.f, 0, 0}));
 		break;
-	case State::AnimatingPreFire:
+	case State::PreFire:
 		if (glfwGetTime() > attackAnimStartedAt_ + 20.0 / ATTACK_ANIM_SPEED) {
-			status_ = State::AnimatingPostFire;
+			status_ = State::PostFire;
 			getChunk().createEntity("FireBall")->createComponent<FireBall>(
 				getEntity().getPosition(), getEntity().getQuaternion());
 		}
 		break;
-	case State::AnimatingPostFire:
+	case State::PostFire:
 		if (glfwGetTime() > attackAnimStartedAt_ + 35.0 / ATTACK_ANIM_SPEED) {
 			status_ = State::Idling;
 			drawer_->stopAnimation();
