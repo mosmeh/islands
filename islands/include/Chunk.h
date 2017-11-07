@@ -4,6 +4,7 @@
 #include "Entity.h"
 #include "Collision.h"
 #include "Geometry.h"
+#include "Sound.h"
 
 namespace islands {
 
@@ -25,9 +26,12 @@ public:
 
 	const geometry::AABB& getGlobalAABB() const;
 
+	std::shared_ptr<Sound> getBGM() const;
+
 private:
 	const std::string filename_;
 	float cameraOffset_;
+	std::shared_ptr<Sound> bgm_;
 	geometry::AABB aabb_;
 	std::vector<std::shared_ptr<Entity>> entities_;
 

@@ -103,6 +103,10 @@ const geometry::AABB& Chunk::getGlobalAABB() const {
 	return aabb_;
 }
 
+std::shared_ptr<Sound> Chunk::getBGM() const {
+	return bgm_;
+}
+
 void Chunk::loadImpl() {
 	picojson::value json;
 	{
@@ -117,6 +121,14 @@ void Chunk::loadImpl() {
 		if (cameraProp.find("offset") != cameraProp.end()) {
 			cameraOffset_ = static_cast<float>(cameraProp.at("offset").get<double>());
 		}
+	}
+
+	if (json.contains("bgm")) {
+		const auto& name = json.get("bgm").get<std::string>();
+		bgm_ = ResourceSystem::getInstance().createOrGet<Sound>(name, name);
+	} else {
+		static constexpr auto DEFAULT_BGM_NAME = "bgm.ogg";
+		bgm_ = ResourceSystem::getInstance().createOrGet<Sound>(DEFAULT_BGM_NAME, DEFAULT_BGM_NAME);
 	}
 
 	for (const auto& ent : json.get("entities").get<picojson::object>()) {
