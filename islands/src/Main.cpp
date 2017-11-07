@@ -1,9 +1,10 @@
-﻿#include "Window.h"
+﻿#include "Log.h"
+#include "Profiler.h"
+#include "Window.h"
 #include "ResourceSystem.h"
 #include "Input.h"
-#include "SceneManager.h"
-#include "Log.h"
-#include "Profiler.h"
+#include "Scene.h"
+#include "GameManager.h"
 
 namespace islands {
 
@@ -115,7 +116,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	Window::getInstance().update();
 	printSystemInformation();
 
-	glClearColor(0.9f, 0.9f, 0.9f, 1.f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 	glClearDepth(1.0);
 
 	glEnable(GL_DEPTH_TEST);
@@ -145,9 +146,16 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		}
 	});
 
-	ResourceSystem::getInstance().createOrGet<Program>("DefaultProgram", "default.vert", "default.frag");
-	ResourceSystem::getInstance().createOrGet<Program>("SkinningProgram", "skinning.vert", "default.frag");
-	ResourceSystem::getInstance().createOrGet<Program>("LightmapProgram", "default.vert", "lightmap.frag");
+	ResourceSystem::getInstance().createOrGet<Sound>("DecideSound", "decide.ogg");
+
+	SceneManager::getInstance().add<TitleScene>(SceneKey::Title);
+	SceneManager::getInstance().add<IntroductionScene>(SceneKey::Introduction);
+	SceneManager::getInstance().add<CreditScene>(SceneKey::Credit);
+	SceneManager::getInstance().add<GameScene>(SceneKey::Game);
+	SceneManager::getInstance().add<GameOverScene>(SceneKey::GameOver);
+	SceneManager::getInstance().add<GameClearScene>(SceneKey::GameClear);
+
+	SceneManager::getInstance().changeScene(SceneKey::Title);
 
 	std::ostringstream ss;
 	while (Window::getInstance().update()) {
