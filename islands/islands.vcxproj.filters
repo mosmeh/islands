@@ -216,4 +216,9 @@
   <ItemGroup>
     <Manifest Include="app.manifest" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="islands.rc">
+      <Filter>リソース ファイル</Filter>
+    </ResourceCompile>
+  </ItemGroup>
 </Project>
