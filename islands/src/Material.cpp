@@ -5,7 +5,8 @@ namespace islands {
 
 Material::Material(const std::string& name, const aiMaterial* material) :
 	Resource(name),
-	program_(ResourceSystem::getInstance().get<Program>("DefaultProgram")) {
+	program_(ResourceSystem::getInstance().createOrGet<Program>(
+		"DefaultProgram", "default.vert", "default.frag")) {
 
 	aiColor4D diffuse;
 	aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
