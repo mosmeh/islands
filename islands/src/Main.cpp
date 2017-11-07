@@ -127,6 +127,10 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 
 	glEnable(GL_MULTISAMPLE);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_BLEND);
+
 	Input::getInstance().registerKeyboardCallback([](int key, int action) {
 		switch (key) {
 		case GLFW_KEY_ESCAPE:

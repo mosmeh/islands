@@ -8,7 +8,7 @@ namespace islands {
 
 class DamageEffect : public ModelDrawer {
 public:
-	DamageEffect(std::shared_ptr<Model> model);
+	DamageEffect(std::shared_ptr<Model> model, double duration = 0.3);
 	virtual ~DamageEffect() = default;
 
 	void draw() override;
@@ -17,6 +17,7 @@ public:
 	bool isActive() const;
 
 private:
+	const double duration_;
 	std::shared_ptr<Program> program_;
 	double startedAt_;
 };

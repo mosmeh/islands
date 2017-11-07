@@ -4,8 +4,9 @@
 
 namespace islands {
 
-DamageEffect::DamageEffect(std::shared_ptr<Model> model) :
+DamageEffect::DamageEffect(std::shared_ptr<Model> model, double duration) :
 	ModelDrawer(model),
+	duration_(duration),
 	program_(ResourceSystem::getInstance().createOrGet<Program>(
 		"DamageProgram", "skinning.vert", "damage.frag")),
 	startedAt_(-INFINITY) {}
@@ -33,7 +34,7 @@ void DamageEffect::activate() {
 }
 
 bool DamageEffect::isActive() const {
-	return glfwGetTime() - startedAt_ < 0.3;
+	return glfwGetTime() - startedAt_ < duration_;
 }
 
 ScatterEffect::ScatterEffect(std::shared_ptr<Model> model) :
@@ -59,7 +60,6 @@ void ScatterEffect::draw() {
 
 	glDisable(GL_CULL_FACE);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	std::stringstream ss;
 	for (const auto mesh : model_->getMeshes()) {
@@ -74,7 +74,7 @@ void ScatterEffect::draw() {
 }
 
 bool ScatterEffect::isFinished() const {
-	return glfwGetTime() - startedAt_ > 2.0;
+	return glfwGetTime() - startedAt_ > 1.0;
 }
 
 }
