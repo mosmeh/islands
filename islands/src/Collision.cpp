@@ -21,8 +21,14 @@ void Collider::notifyCollision(std::shared_ptr<Collider> opponent) const {
 	}
 }
 
+bool Collider::hasModel() const {
+	return model_ != nullptr;
+}
+
 void Collider::update() {
-	globalAABB_ = getModel()->getLocalAABB().transform(getEntity().getModelMatrix());
+	if (hasModel()) {
+		globalAABB_ = model_->getLocalAABB().transform(getEntity().getModelMatrix());
+	}
 }
 
 glm::vec3 Collider::getSinkingCorrector(std::shared_ptr<Collider> collider) const {
@@ -68,6 +74,7 @@ bool Collider::intersects(std::shared_ptr<Collider> collider) const {
 }
 
 std::shared_ptr<Model> Collider::getModel() const {
+	assert(model_);
 	return model_;
 }
 
@@ -90,50 +97,62 @@ bool AABBCollider::intersectsImpl(std::shared_ptr<AABBCollider> collider) const 
 SphereCollider::SphereCollider(std::shared_ptr<Model> model) :
 	Collider(model),
 	radiusFixed_(false),
-	sphere_{glm::zero<glm::vec3>(), 0.f}  {}
+	globalSphere_{glm::zero<glm::vec3>(), 0.f}  {}
 
 SphereCollider::SphereCollider(std::shared_ptr<Model> model, float radius) :
 	Collider(model),
 	radiusFixed_(true),
-	sphere_{glm::zero<glm::vec3>(), radius}  {}
+	globalSphere_{glm::zero<glm::vec3>(), radius}  {}
+
+SphereCollider::SphereCollider(float radius) :
+	radiusFixed_(true),
+	globalSphere_{glm::zero<glm::vec3>(), radius}  {}
 
 void SphereCollider::update() {
 	Collider::update();
 
-	const auto& aabb = getGlobalAABB();
-	sphere_.center = (aabb.max + aabb.min) / 2.f;
-	if (!radiusFixed_) {
-		const auto d = aabb.max - aabb.min;
-		sphere_.radius = std::max(0.f, std::min({d.x, d.y, d.z}) / 2.f);
+	if (hasModel()) {
+		const auto& aabb = getGlobalAABB();
+		globalSphere_.center = (aabb.max + aabb.min) / 2.f;
+
+		if (!radiusFixed_) {
+			const auto d = aabb.max - aabb.min;
+			globalSphere_.radius = std::max(0.f, std::min({d.x, d.y, d.z}) / 2.f);
+		}
+	} else {
+		globalSphere_.center = getEntity().getPosition();
+
+		const auto rv = glm::vec3(globalSphere_.radius);
+		globalAABB_ = {globalSphere_.center - rv, globalSphere_.center + rv};
 	}
 }
 
 glm::vec3 SphereCollider::getNormal(const glm::vec3& refPos) const {
-	return glm::normalize(refPos - sphere_.center);
+	return glm::normalize(refPos - globalSphere_.center);
 }
 
 bool SphereCollider::intersectsImpl(std::shared_ptr<SphereCollider> collider) const {
-	return geometry::intersect(sphere_, collider->getGlobalSphere());
+	return geometry::intersect(globalSphere_, collider->getGlobalSphere());
 }
 
 float SphereCollider::getSinking(std::shared_ptr<SphereCollider> collider) const {
-	return geometry::getSinking(sphere_, collider->getGlobalSphere());
+	return geometry::getSinking(globalSphere_, collider->getGlobalSphere());
 }
 
 bool SphereCollider::intersectsImpl(std::shared_ptr<PlaneCollider> collider) const {
-	return geometry::intersect(sphere_, collider->getGlobalPlane());
+	return geometry::intersect(globalSphere_, collider->getGlobalPlane());
 }
 
 float SphereCollider::getSinking(std::shared_ptr<PlaneCollider> collider) const {
-	return geometry::getSinking(sphere_, collider->getGlobalPlane());
+	return geometry::getSinking(globalSphere_, collider->getGlobalPlane());
 }
 
 bool SphereCollider::intersectsImpl(std::shared_ptr<MeshCollider> collider) const {
-	return geometry::intersect(collider->getCollisionMesh(), sphere_);
+	return geometry::intersect(collider->getCollisionMesh(), globalSphere_);
 }
 
 const geometry::Sphere& SphereCollider::getGlobalSphere() const {
-	return sphere_;
+	return globalSphere_;
 }
 
 PlaneCollider::PlaneCollider(std::shared_ptr<Model> model, const glm::vec3& normal) :

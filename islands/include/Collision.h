@@ -15,11 +15,13 @@ class Collider : public Component {
 public:
 	using Callback = std::function<void(std::shared_ptr<Collider>)>;
 
+	Collider();
 	Collider(std::shared_ptr<Model> model);
 	virtual ~Collider() = default;
 
 	void registerCallback(const Callback& callback);
 	void notifyCollision(std::shared_ptr<Collider> opponent) const;
+	bool hasModel() const;
 	const geometry::AABB& getGlobalAABB() const;
 	void setGhost(bool isGhost);
 	bool isGhost() const;
@@ -31,6 +33,8 @@ public:
 	bool intersects(std::shared_ptr<Collider>) const;
 
 protected:
+	geometry::AABB globalAABB_;
+
 	std::shared_ptr<Model> getModel() const;
 
 	virtual bool intersectsImpl(std::shared_ptr<AABBCollider>) const {
@@ -61,7 +65,6 @@ protected:
 
 private:
 	std::shared_ptr<Model> model_;
-	geometry::AABB globalAABB_;
 	std::vector<Callback> callbacks_;
 	bool isGhost_;
 };
@@ -83,6 +86,7 @@ class SphereCollider : public Collider {
 public:
 	SphereCollider(std::shared_ptr<Model> model);
 	SphereCollider(std::shared_ptr<Model> model, float radius);
+	SphereCollider(float radius);
 	virtual ~SphereCollider() = default;
 
 	void update() override;
@@ -91,7 +95,7 @@ public:
 
 private:
 	bool radiusFixed_;
-	geometry::Sphere sphere_;
+	geometry::Sphere globalSphere_;
 
 	bool intersectsImpl(std::shared_ptr<SphereCollider>) const override;
 	bool intersectsImpl(std::shared_ptr<PlaneCollider>) const override;
