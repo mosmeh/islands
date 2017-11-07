@@ -161,10 +161,12 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 
 	SceneManager::getInstance().changeScene(SceneKey::Title);
 
-	std::ostringstream ss;
-	while (Window::getInstance().update()) {
-		const auto beforeTime = glfwGetTime();
 #ifdef _DEBUG
+	std::ostringstream ss;
+#endif
+	while (Window::getInstance().update()) {
+#ifdef _DEBUG
+		const auto beforeTime = glfwGetTime();
 		Profiler::getInstance().markFrame();
 		Profiler::getInstance().enterSection("update");
 #endif
