@@ -28,7 +28,7 @@ public:
 
 	template<class T, class... Args>
 	std::enable_if_t<std::is_base_of<Scene, T>::value, void>
-	changeScene(bool fade = true, Args... args);
+	changeScene(bool fade = true, Args&&... args);
 
 	std::shared_ptr<Scene> getPreviousScene() const;
 
@@ -56,7 +56,7 @@ private:
 
 template<class T, class... Args>
 inline std::enable_if_t<std::is_base_of<Scene, T>::value, void>
-SceneManager::changeScene(bool fade, Args... args) {
+SceneManager::changeScene(bool fade, Args&&... args) {
 	if (current_) {
 		prev_ = current_;
 		prev_->onLeave();

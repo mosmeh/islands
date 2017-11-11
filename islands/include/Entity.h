@@ -46,7 +46,7 @@ public:
 
 	template <class T, class... Args>
 	std::enable_if_t<std::is_base_of<Component, T>::value, std::shared_ptr<T>>
-	createComponent(Args... args);
+	createComponent(Args&&... args);
 
 	template <class T>
 	std::enable_if_t<std::is_base_of<Component, T>::value, bool>
@@ -84,7 +84,7 @@ private:
 
 template<class T, class ...Args>
 inline std::enable_if_t<std::is_base_of<Component, T>::value, std::shared_ptr<T>>
-Entity::createComponent(Args ...args) {
+Entity::createComponent(Args&& ...args) {
 	const auto component = std::make_shared<T>(args...);
 	component->setEntity(shared_from_this());
 	components_.emplace_back(component);

@@ -14,7 +14,7 @@ public:
 
 	template <class T, class... Args>
 	std::enable_if_t<std::is_base_of<Resource, T>::value, std::shared_ptr<T>>
-	createOrGet(const std::string& name, Args... args);
+	createOrGet(const std::string& name, Args&&... args);
 
 	template <class T>
 	std::enable_if_t<std::is_base_of<Resource, T>::value, std::shared_ptr<T>>
@@ -28,7 +28,7 @@ private:
 
 template<class T, class... Args>
 inline std::enable_if_t<std::is_base_of<Resource, T>::value, std::shared_ptr<T>>
-ResourceSystem::createOrGet(const std::string& name, Args... args) {
+ResourceSystem::createOrGet(const std::string& name, Args&&... args) {
 	if (resources_.find(name) == resources_.end()) {
 		const auto resource = std::make_shared<T>(name, std::forward<Args>(args)...);
 		resources_.emplace(name, resource);
