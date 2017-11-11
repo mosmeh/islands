@@ -41,15 +41,7 @@ GameManager::GameManager() :
 	},
 	backgroundProgram_(ResourceSystem::getInstance().createOrGet<Program>(
 		"backgroundProgram", "full_screen.vert", "background.frag")),
-	filledHeart_(ResourceSystem::getInstance().createOrGet<Texture2D>(
-		"FilledHeartImage", "heart_filled.png")),
-	emptyHeart_(ResourceSystem::getInstance().createOrGet<Texture2D>(
-		"EmptyHeartImage", "heart_empty.png")),
-	currentChunk_(nullptr) {
-
-	filledHeart_.setSize({0.04, 0.065});
-	emptyHeart_.setSize({0.04, 0.065});
-}
+	currentChunk_(nullptr) {}
 
 GameManager& GameManager::getInstance() {
 	static GameManager instance;
@@ -124,18 +116,7 @@ void GameManager::draw() {
 
 		currentChunk_->draw();
 
-		static const glm::vec2 MARGIN(0.04, 0.05);
-		static const float STRIDE = 0.042f;
-
-		const auto health = playerEntity_->getFirstComponent<Health>();
-		float xPos = 0;
-		for (Health::HealthType i = 0; i < health->getMaxHealth(); ++i) {
-			auto& heart = (i < health->get()) ? filledHeart_ : emptyHeart_;
-			heart.setPosition(glm::vec2(xPos, 0) + MARGIN);
-			heart.draw();
-
-			xPos += STRIDE;
-		}
+		healthIndicator_.draw(playerEntity_->getFirstComponent<Health>());
 	}
 }
 

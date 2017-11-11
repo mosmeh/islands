@@ -2,7 +2,7 @@
 
 #include "Chunk.h"
 #include "Geometry.h"
-#include "Sprite.h"
+#include "HealthIndicator.h"
 
 namespace islands {
 namespace detail {
@@ -44,7 +44,7 @@ private:
 	const std::array<glm::ivec3, 6> NEIGHBOR_OFFSETS;
 
 	std::shared_ptr<Program> backgroundProgram_;
-	Sprite filledHeart_, emptyHeart_;
+	HealthIndicator healthIndicator_;
 
 	std::unordered_map<glm::ivec3, std::shared_ptr<Chunk>> chunks_;
 	glm::ivec3 currentCoord_;

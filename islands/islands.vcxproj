@@ -181,6 +181,7 @@
     <ClCompile Include="src\Enemy.cpp" />
     <ClCompile Include="src\FireBall.cpp" />
     <ClCompile Include="src\Health.cpp" />
+    <ClCompile Include="src\HealthIndicator.cpp" />
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\GameManager.cpp" />
     <ClCompile Include="src\Collision.cpp" />
@@ -257,6 +258,7 @@
     <ClInclude Include="include\FireBall.h" />
     <ClInclude Include="include\GLObjects.h" />
     <ClInclude Include="include\Health.h" />
+    <ClInclude Include="include\HealthIndicator.h" />
     <ClInclude Include="include\Scene.h" />
     <ClInclude Include="include\GameManager.h" />
     <ClInclude Include="include\Collision.h" />
