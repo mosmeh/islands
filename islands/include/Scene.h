@@ -12,6 +12,7 @@ public:
 
 	virtual void update() = 0;
 	virtual void draw() = 0;
+	virtual void onLeave() {}
 };
 
 class SceneManager {
@@ -22,6 +23,8 @@ public:
 
 	void update();
 	void draw();
+
+	void fadeInOut();
 
 	template<class T, class... Args>
 	std::enable_if_t<std::is_base_of<Scene, T>::value, void>
@@ -51,13 +54,21 @@ private:
 	virtual ~SceneManager();
 };
 
-template<class T, class ...Args>
+template<class T, class... Args>
 inline std::enable_if_t<std::is_base_of<Scene, T>::value, void>
-SceneManager::changeScene(bool fade, Args ...args) {
-	prev_ = current_;
-	current_ = std::make_shared<T>(std::forward(args)...);
-	transition_.status = fade ? TransitionState::FadeOut : TransitionState::None;
-	transition_.startedAt = glfwGetTime();
+SceneManager::changeScene(bool fade, Args... args) {
+	if (current_) {
+		prev_ = current_;
+		prev_->onLeave();
+	}
+	current_ = std::make_shared<T>(std::forward<Args>(args)...);
+
+	if (fade) {
+		fadeInOut();
+	} else {
+		transition_.status = TransitionState::None;
+		transition_.startedAt = glfwGetTime();
+	}
 }
 
 class TitleScene : public Scene {
@@ -98,15 +109,6 @@ public:
 
 private:
 	Sprite creditImage_;
-};
-
-class GameScene : public Scene {
-public:
-	GameScene();
-	virtual ~GameScene() = default;
-
-	void update() override;
-	void draw() override;
 };
 
 class GameOverScene : public Scene {

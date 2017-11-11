@@ -2,8 +2,8 @@
 #include "Input.h"
 #include "ResourceSystem.h"
 #include "Window.h"
-#include "GameManager.h"
 #include "Sound.h"
+#include "GameScene.h"
 
 namespace islands {
 
@@ -93,7 +93,13 @@ void SceneManager::draw() {
 	}
 }
 
+void SceneManager::fadeInOut() {
+	transition_.status = TransitionState::FadeOut;
+	transition_.startedAt = glfwGetTime();
+}
+
 std::shared_ptr<Scene> SceneManager::getPreviousScene() const {
+	assert(prev_);
 	return prev_;
 }
 
@@ -107,10 +113,7 @@ TitleScene::TitleScene() :
 	titleTexture_(ResourceSystem::getInstance().createOrGet<Texture2D>(
 		"TitleImage", "title.png")),
 	selectedItem_(0),
-	repeated_(false) {
-
-	GameManager::getInstance().init();
-}
+	repeated_(false) {}
 
 void TitleScene::update() {
 	if (Input::getInstance().anyButtonExceptArrowPressed()) {
@@ -195,21 +198,10 @@ void CreditScene::draw() {
 	creditImage_.draw();
 }
 
-GameScene::GameScene() {}
-
-void GameScene::update() {
-	GameManager::getInstance().update();
-}
-
-void GameScene::draw() {
-	GameManager::getInstance().draw();
-}
-
 GameOverScene::GameOverScene() : gameOverImage_(
 	ResourceSystem::getInstance().createOrGet<Texture2D>("GameOverImage", "game_over.png")),
 	startedAt_(glfwGetTime()) {
 
-	GameManager::getInstance().stopBGM();
 	ResourceSystem::getInstance().createOrGet<Sound>("GameOverSound", "game_over.ogg")->createInstance()->play();
 }
 
@@ -229,7 +221,6 @@ GameClearScene::GameClearScene() : gameClearImage_(
 	ResourceSystem::getInstance().createOrGet<Texture2D>("GameClearImage", "game_clear.png")),
 	startedAt_(glfwGetTime()) {
 
-	GameManager::getInstance().stopBGM();
 	ResourceSystem::getInstance().createOrGet<Sound>("GameClearSound", "game_clear.ogg")->createInstance()->play();
 }
 

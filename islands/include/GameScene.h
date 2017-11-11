@@ -3,6 +3,7 @@
 #include "Chunk.h"
 #include "Geometry.h"
 #include "HealthIndicator.h"
+#include "Scene.h"
 
 namespace islands {
 namespace detail {
@@ -27,18 +28,14 @@ struct hash<glm::ivec3> {
 
 namespace islands {
 
-class GameManager {
+class GameScene : public Scene {
 public:
-	GameManager();
-	virtual ~GameManager() = default;
+	GameScene();
+	virtual ~GameScene() = default;
 
-	static GameManager& getInstance();
-
-	void init();
 	void update();
 	void draw();
-
-	void stopBGM() const;
+	void onLeave();
 
 private:
 	const std::array<glm::ivec3, 6> NEIGHBOR_OFFSETS;

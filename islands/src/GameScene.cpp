@@ -1,4 +1,4 @@
-#include "GameManager.h"
+#include "GameScene.h"
 #include "ResourceSystem.h"
 #include "PhysicalBody.h"
 #include "Health.h"
@@ -34,7 +34,7 @@ std::uint64_t cantorPair(std::uint64_t a, std::uint64_t b) {
 
 }
 
-GameManager::GameManager() :
+GameScene::GameScene() :
 	NEIGHBOR_OFFSETS{
 		glm::ivec3(-1, 0, 0), glm::ivec3(1, 0, 0),
 		glm::ivec3(0, -1, 0), glm::ivec3(0, 1, 0),
@@ -42,20 +42,7 @@ GameManager::GameManager() :
 	},
 	backgroundProgram_(ResourceSystem::getInstance().createOrGet<Program>(
 		"backgroundProgram", "full_screen.vert", "background.frag")),
-	currentChunk_(nullptr) {}
-
-GameManager& GameManager::getInstance() {
-	static GameManager instance;
-	return instance;
-}
-
-void GameManager::init() {
-	playerEntity_.reset();
-	currentChunk_.reset();
-	stopBGM();
-	currentBGMInstance_.reset();
-	currentBGM_.reset();
-	chunks_.clear();
+	currentChunk_(nullptr) {
 
 	static const auto LEVEL_LIST_FILENAME = "levels.json";
 	picojson::value json;
@@ -88,14 +75,12 @@ void GameManager::init() {
 		chunk->update();
 		chunks_.emplace(coord, chunk);
 	}
+
+	jumpTo(glm::ivec3(0));
+	playerEntity_->setPosition({0.f, 0.f, 1.f});
 }
 
-void GameManager::update() {
-	if (!currentChunk_) {
-		jumpTo(glm::ivec3(0));
-		playerEntity_->setPosition({0.f, 0.f, 1.f});
-	}
-
+void GameScene::update() {
 	currentChunk_->update();
 
 	const auto& playerAABB = playerEntity_->getFirstComponent<Collider>()->getGlobalAABB();
@@ -108,13 +93,13 @@ void GameManager::update() {
 				geometry::intersect(destAABB, playerAABB)) {
 
 				jumpTo(destCoord);
-				SceneManager::getInstance().changeScene<GameScene>();
+				SceneManager::getInstance().fadeInOut();
 			}
 		}
 	}
 }
 
-void GameManager::draw() {
+void GameScene::draw() {
 	if (currentChunk_) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -129,13 +114,13 @@ void GameManager::draw() {
 	}
 }
 
-void GameManager::stopBGM() const {
+void GameScene::onLeave() {
 	if (currentBGMInstance_) {
 		currentBGMInstance_->stop();
 	}
 }
 
-void GameManager::jumpTo(const glm::ivec3& dest) {
+void GameScene::jumpTo(const glm::ivec3& dest) {
 	SLOG << "Jump to " << dest << std::endl;
 	assert(chunks_.find(dest) != chunks_.end());
 
