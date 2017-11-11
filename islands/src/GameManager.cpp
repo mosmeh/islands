@@ -108,7 +108,7 @@ void GameManager::update() {
 				geometry::intersect(destAABB, playerAABB)) {
 
 				jumpTo(destCoord);
-				SceneManager::getInstance().changeScene(SceneKey::Game);
+				SceneManager::getInstance().changeScene<GameScene>();
 			}
 		}
 	}

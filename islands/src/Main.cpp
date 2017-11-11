@@ -154,14 +154,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 	ResourceSystem::getInstance().createOrGet<Sound>("DecideSound", "decide.ogg");
 	ResourceSystem::getInstance().createOrGet<Sound>("EnemyDieSound", "enemy_die.ogg");
 
-	SceneManager::getInstance().add<TitleScene>(SceneKey::Title);
-	SceneManager::getInstance().add<IntroductionScene>(SceneKey::Introduction);
-	SceneManager::getInstance().add<CreditScene>(SceneKey::Credit);
-	SceneManager::getInstance().add<GameScene>(SceneKey::Game);
-	SceneManager::getInstance().add<GameOverScene>(SceneKey::GameOver);
-	SceneManager::getInstance().add<GameClearScene>(SceneKey::GameClear);
-
-	SceneManager::getInstance().changeScene(SceneKey::Title);
+	SceneManager::getInstance().changeScene<TitleScene>();
 
 #ifdef _DEBUG
 	std::ostringstream ss;

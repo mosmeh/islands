@@ -14,15 +14,6 @@ public:
 	virtual void draw() = 0;
 };
 
-enum class SceneKey {
-	Title,
-	Introduction,
-	Credit,
-	Game,
-	GameOver,
-	GameClear
-};
-
 class SceneManager {
 public:
 	SceneManager(const SceneManager&) = delete;
@@ -32,11 +23,10 @@ public:
 	void update();
 	void draw();
 
-	template <class T>
-	std::enable_if_t<std::is_base_of<Scene, T>::value, bool>
-	add(const SceneKey& key);
+	template<class T, class... Args>
+	std::enable_if_t<std::is_base_of<Scene, T>::value, void>
+	changeScene(bool fade = true, Args... args);
 
-	bool changeScene(const SceneKey& key, bool fade = true);
 	std::shared_ptr<Scene> getPreviousScene() const;
 
 private:
@@ -46,7 +36,6 @@ private:
 		FadeIn
 	};
 
-	std::unordered_map<SceneKey, std::function<std::shared_ptr<Scene>(void)>> factories_;
 	std::shared_ptr<Scene> prev_, current_;
 
 	std::shared_ptr<Program> blackOutProgram_;
@@ -62,17 +51,13 @@ private:
 	virtual ~SceneManager();
 };
 
-template<class T>
-inline std::enable_if_t<std::is_base_of<Scene, T>::value, bool>
-SceneManager::add(const SceneKey& key) {
-	if (factories_.find(key) != factories_.end()) {
-		return false;
-	}
-
-	factories_.emplace(key, []() {
-		return std::make_shared<T>();
-	});
-	return true;
+template<class T, class ...Args>
+inline std::enable_if_t<std::is_base_of<Scene, T>::value, void>
+SceneManager::changeScene(bool fade, Args ...args) {
+	prev_ = current_;
+	current_ = std::make_shared<T>(std::forward(args)...);
+	transition_.status = fade ? TransitionState::FadeOut : TransitionState::None;
+	transition_.startedAt = glfwGetTime();
 }
 
 class TitleScene : public Scene {

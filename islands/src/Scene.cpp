@@ -93,19 +93,6 @@ void SceneManager::draw() {
 	}
 }
 
-bool SceneManager::changeScene(const SceneKey& key, bool fade) {
-	if (factories_.find(key) == factories_.end()) {
-		return false;
-	}
-
-	prev_ = current_;
-	current_ = factories_.at(key)();
-	transition_.status = fade ? TransitionState::FadeOut : TransitionState::None;
-	transition_.startedAt = glfwGetTime();
-
-	return true;
-}
-
 std::shared_ptr<Scene> SceneManager::getPreviousScene() const {
 	return prev_;
 }
@@ -128,9 +115,9 @@ TitleScene::TitleScene() :
 void TitleScene::update() {
 	if (Input::getInstance().anyButtonExceptArrowPressed()) {
 		if (selectedItem_ == 0) {
-			SceneManager::getInstance().changeScene(SceneKey::Introduction);
+			SceneManager::getInstance().changeScene<IntroductionScene>();
 		} else {
-			SceneManager::getInstance().changeScene(SceneKey::Credit);
+			SceneManager::getInstance().changeScene<CreditScene>();
 		}
 		ResourceSystem::getInstance().get<Sound>("DecideSound")->createInstance()->play();
 	} else {
@@ -175,7 +162,7 @@ IntroductionScene::IntroductionScene() :
 
 void IntroductionScene::update() {
 	if (Input::getInstance().anyButtonPressed()) {
-		SceneManager::getInstance().changeScene(SceneKey::Game);
+		SceneManager::getInstance().changeScene<GameScene>();
 		ResourceSystem::getInstance().get<Sound>("DecideSound")->createInstance()->play();
 	}
 }
@@ -198,7 +185,7 @@ CreditScene::CreditScene() : creditImage_(
 
 void CreditScene::update() {
 	if (Input::getInstance().anyButtonPressed()) {
-		SceneManager::getInstance().changeScene(SceneKey::Title);
+		SceneManager::getInstance().changeScene<TitleScene>();
 		ResourceSystem::getInstance().get<Sound>("DecideSound")->createInstance()->play();
 	}
 }
@@ -228,7 +215,7 @@ GameOverScene::GameOverScene() : gameOverImage_(
 
 void GameOverScene::update() {
 	if (Input::getInstance().anyButtonPressed()) {
-		SceneManager::getInstance().changeScene(SceneKey::Title);
+		SceneManager::getInstance().changeScene<TitleScene>();
 	}
 	gameOverImage_.setAlpha(static_cast<float>(glfwGetTime() - startedAt_));
 }
@@ -248,7 +235,7 @@ GameClearScene::GameClearScene() : gameClearImage_(
 
 void GameClearScene::update() {
 	if (Input::getInstance().anyButtonPressed()) {
-		SceneManager::getInstance().changeScene(SceneKey::Title);
+		SceneManager::getInstance().changeScene<TitleScene>();
 	}
 	gameClearImage_.setAlpha(static_cast<float>(glfwGetTime() - startedAt_));
 }

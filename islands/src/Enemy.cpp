@@ -454,7 +454,7 @@ void Dragon::update() {
 		}
 		getEntity().createComponent<ScatterEffect>([this] {
 			getEntity().destroy();
-			SceneManager::getInstance().changeScene(SceneKey::GameClear, false);
+			SceneManager::getInstance().changeScene<GameClearScene>(false);
 		});
 		ResourceSystem::getInstance().get<Sound>("EnemyDieSound")->createInstance()->play();
 		return;

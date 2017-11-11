@@ -55,7 +55,7 @@ void Player::update() {
 		}
 		getEntity().createComponent<ScatterEffect>([this] {
 			getEntity().destroy();
-			SceneManager::getInstance().changeScene(SceneKey::GameOver, false);
+			SceneManager::getInstance().changeScene<GameOverScene>(false);
 		});
 		return;
 	}
