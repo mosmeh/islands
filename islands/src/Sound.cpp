@@ -9,6 +9,7 @@
 #pragma warning(pop)
 
 #include "Sound.h"
+#include "AssetArchive.h"
 #include "Log.h"
 
 namespace islands {
@@ -46,9 +47,16 @@ std::shared_ptr<Sound::Instance> Sound::createInstance() {
 
 void Sound::loadImpl() {
 	static const std::string SOUND_DIR = "sound";
-	const auto filePath = SOUND_DIR + sys::getFilePathSeperator() + filename_;
 
+#ifdef ENABLE_ASSET_ARCHIVE
+	const auto filePath = SOUND_DIR + '/' + filename_;
+	auto rawData = AssetArchive::getInstance().readFile(filePath);
+	length_ = stb_vorbis_decode_memory(reinterpret_cast<uint8*>(rawData.data()), rawData.size(),
+		&numChannels_, &sampleRate_, &buffer_);
+#else
+	const auto filePath = SOUND_DIR + sys::getFilePathSeperator() + filename_;
 	length_ = stb_vorbis_decode_filename(filePath.c_str(), &numChannels_, &sampleRate_, &buffer_);
+#endif
 	assert(length_ > 0);
 }
 

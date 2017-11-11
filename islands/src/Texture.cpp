@@ -6,6 +6,7 @@
 #pragma warning(pop)
 
 #include "Texture.h"
+#include "AssetArchive.h"
 #include "Log.h"
 
 namespace islands {
@@ -33,11 +34,20 @@ void Texture2D::bind(unsigned int textureUnit) {
 
 void Texture2D::loadImpl() {
 	static const std::string TEXTURE_DIR = "texture";
-	const auto filePath = TEXTURE_DIR + sys::getFilePathSeperator() + filename_;
 
 	stbi_set_flip_vertically_on_load(TRUE);
 	int numComponents;
+
+#ifdef ENABLE_ASSET_ARCHIVE
+	const auto filePath = TEXTURE_DIR + '/' + filename_;
+
+	auto rawData = AssetArchive::getInstance().readFile(filePath);
+	data_ = stbi_load_from_memory(reinterpret_cast<stbi_uc*>(rawData.data()), rawData.size(),
+		&width_, &height_, &numComponents, STBI_rgb_alpha);
+#else
+	const auto filePath = TEXTURE_DIR + sys::getFilePathSeperator() + filename_;
 	data_ = stbi_load(filePath.c_str(), &width_, &height_, &numComponents, STBI_rgb_alpha);
+#endif
 	if (!data_) {
 		SLOG << "stbi: " << stbi_failure_reason() << std::endl;
 		std::exit(EXIT_FAILURE);

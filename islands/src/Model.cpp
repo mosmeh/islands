@@ -1,6 +1,7 @@
 #include "Model.h"
 #include "Entity.h"
 #include "Camera.h"
+#include "AssetArchive.h"
 #include "Log.h"
 #include "NameGenerator.h"
 
@@ -22,14 +23,21 @@ const geometry::AABB& Model::getLocalAABB() {
 
 void Model::loadImpl() {
 	static const std::string MESH_DIR = "mesh";
-
+	static const auto FLAGS = aiProcess_GenNormals | aiProcess_ImproveCacheLocality |
+		aiProcess_JoinIdenticalVertices | aiProcess_LimitBoneWeights | aiProcess_OptimizeMeshes |
+		aiProcess_RemoveComponent |	aiProcess_Triangulate;
 	static Assimp::Importer importer;
 	importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, SkinnedMesh::NUM_BONES_PER_VERTEX);
 	importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
-	const auto scene = importer.ReadFile(MESH_DIR + sys::getFilePathSeperator() + filename_,
-		aiProcess_GenNormals | aiProcess_ImproveCacheLocality | aiProcess_JoinIdenticalVertices |
-		aiProcess_LimitBoneWeights | aiProcess_OptimizeMeshes | aiProcess_RemoveComponent |
-		aiProcess_Triangulate);
+
+#ifdef ENABLE_ASSET_ARCHIVE
+	const auto filePath = MESH_DIR + '/' + filename_;
+	auto rawData = AssetArchive::getInstance().readFile(filePath);
+	const auto scene = importer.ReadFileFromMemory(rawData.data(), rawData.size(), FLAGS);
+#else
+	const auto filePath = MESH_DIR + sys::getFilePathSeperator() + filename_;
+	const auto scene = importer.ReadFile(filePath, FLAGS);
+#endif
 	if (!scene) {
 		SLOG << "Assimp: " << importer.GetErrorString() << std::endl;
 		std::exit(EXIT_FAILURE);

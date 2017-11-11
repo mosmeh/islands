@@ -1,5 +1,6 @@
 #include "Shader.h"
 #include "ResourceSystem.h"
+#include "AssetArchive.h"
 #include "Log.h"
 
 namespace islands {
@@ -28,10 +29,14 @@ GLuint Shader::getId() {
 
 void Shader::loadImpl() {
 	static const std::string SHADER_DIR = "shader";
+#ifdef ENABLE_ASSET_ARCHIVE
+	source_ = AssetArchive::getInstance().readTextFile(SHADER_DIR + '/' + filename_);
+#else
 	std::ifstream ifs(SHADER_DIR + sys::getFilePathSeperator() + filename_, std::ios::in);
 	std::ostringstream ss;
 	ss << ifs.rdbuf();
 	source_ = ss.str();
+#endif
 }
 
 void Shader::uploadImpl() {

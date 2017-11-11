@@ -243,8 +243,11 @@ ModelManifest.xml
 
 desktop.ini
 
+islands/include/AssetArchivePassword.inc
+
 islands/Icon.ico
 
+islands/assets
 islands/level
 islands/mesh
 islands/texture

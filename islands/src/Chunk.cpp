@@ -6,6 +6,7 @@
 #include "Physics.h"
 #include "Player.h"
 #include "Enemy.h"
+#include "AssetArchive.h"
 
 glm::vec3 toVec3(const picojson::value& v) {
 	const auto& obj = v.get<picojson::object>();
@@ -110,8 +111,14 @@ std::shared_ptr<Sound> Chunk::getBGM() const {
 void Chunk::loadImpl() {
 	picojson::value json;
 	{
-		std::ifstream ifs(LEVEL_DIR + sys::getFilePathSeperator() + filename_);
+#ifdef ENABLE_ASSET_ARCHIVE
+		const auto filePath = LEVEL_DIR + '/' + filename_;
+		picojson::parse(json, AssetArchive::getInstance().readTextFile(filePath));
+#else
+		const auto filePath = LEVEL_DIR + sys::getFilePathSeperator() + filename_;
+		std::ifstream ifs(filePath);
 		ifs >> json;
+#endif
 	}
 
 	createEntity("Player")->createComponent<Player>();

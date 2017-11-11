@@ -44,7 +44,7 @@
 #pragma warning(pop)
 
 #include <picojson/picojson.h>
-
 #include <portaudio/portaudio.h>
+#include <zip.h>
 
 #define UNUSED(x) (static_cast<void>(x))

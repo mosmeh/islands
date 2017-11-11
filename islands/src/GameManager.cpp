@@ -3,6 +3,7 @@
 #include "PhysicalBody.h"
 #include "Health.h"
 #include "Scene.h"
+#include "AssetArchive.h"
 #include "Log.h"
 
 namespace islands {
@@ -56,11 +57,19 @@ void GameManager::init() {
 	currentBGM_.reset();
 	chunks_.clear();
 
+	static const auto LEVEL_LIST_FILENAME = "levels.json";
 	picojson::value json;
 	{
-		std::ifstream ifs(LEVEL_DIR + sys::getFilePathSeperator() + "levels.json");
+#ifdef ENABLE_ASSET_ARCHIVE
+		const auto filePath = LEVEL_DIR + '/' + LEVEL_LIST_FILENAME;
+		picojson::parse(json, AssetArchive::getInstance().readTextFile(filePath));
+#else
+		const auto filePath = LEVEL_DIR + sys::getFilePathSeperator() + LEVEL_LIST_FILENAME;
+		std::ifstream ifs(filePath);
 		ifs >> json;
+#endif
 	}
+
 	for (const auto& item : json.get<picojson::array>()) {
 		const auto& obj = item.get<picojson::object>();
 
