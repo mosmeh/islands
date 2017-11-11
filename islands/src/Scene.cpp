@@ -154,7 +154,8 @@ void TitleScene::draw() {
 	titleProgram_->setUniform("pos", glm::zero<glm::vec2>());
 	titleProgram_->setUniform("size", glm::one<glm::vec2>());
 	titleProgram_->setUniform("tex", static_cast<GLuint>(0));
-	titleProgram_->setUniform("selectedItem", 1 - selectedItem_);
+	titleProgram_->setUniform("selectedItem", selectedItem_);
+	titleProgram_->setUniform("time", static_cast<glm::float32>(glfwGetTime()));
 	titleTexture_->bind(0);
 
 	glDisable(GL_DEPTH_TEST);
