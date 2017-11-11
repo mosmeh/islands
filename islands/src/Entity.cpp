@@ -71,7 +71,7 @@ void Entity::update() {
 void Entity::draw() const {
 	for (const auto c : components_) {
 		if (const auto drawable = std::dynamic_pointer_cast<Drawable>(c)) {
-			drawable->draw();
+			drawable->startAndDraw();
 		}
 	}
 }

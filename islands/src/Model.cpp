@@ -116,6 +116,10 @@ void ModelDrawer::draw() {
 	}
 }
 
+std::shared_ptr<Model> ModelDrawer::getModel() const {
+	return model_;
+}
+
 void ModelDrawer::setVisible(bool visible) {
 	visible_ = visible;
 }

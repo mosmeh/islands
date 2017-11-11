@@ -6,34 +6,36 @@
 
 namespace islands {
 
-class DamageEffect : public ModelDrawer {
+class DamageEffect : public Drawable {
 public:
-	DamageEffect(std::shared_ptr<Model> model, double duration = 0.3);
+	DamageEffect(double duration = 0.3);
 	virtual ~DamageEffect() = default;
 
+	void start() override;
+	void update() override;
 	void draw() override;
-
-	void activate();
-	bool isActive() const;
 
 private:
 	const double duration_;
+	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<Program> program_;
 	double startedAt_;
 };
 
-class ScatterEffect : public ModelDrawer {
+class ScatterEffect : public Drawable {
 public:
-	ScatterEffect(std::shared_ptr<Model> model);
+	using FinishCallback = std::function<void(void)>;
+
+	ScatterEffect(const FinishCallback& callback);
 	virtual ~ScatterEffect() = default;
 
 	void start() override;
 	void update() override;
 	void draw() override;
 
-	bool isFinished() const;
-
 private:
+	const FinishCallback callback_;
+	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<Program> program_;
 	double startedAt_;
 };

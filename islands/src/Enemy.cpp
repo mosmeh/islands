@@ -31,15 +31,13 @@ void Slime::start() {
 				entity.getFirstComponent<Health>()->takeDamage(1);
 			}
 			if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-				drawer_->setVisible(false);
-				damageEffect_->activate();
+				getEntity().createComponent<DamageEffect>();
 			}
 		}
 	});
 
 	body_ = getEntity().createComponent<PhysicalBody>(collider);
 	health_ = getEntity().createComponent<Health>(3);
-	damageEffect_ = getEntity().createComponent<DamageEffect>(model_);
 
 	playerEntity_ = getChunk().getEntityByName("Player");
 }
@@ -49,15 +47,14 @@ void Slime::update() {
 	static constexpr double MOVE_DURATION_FACTOR = 5.0;
 	static constexpr double CHANGE_DIR_DURATION = 1.0;
 
-	if (!damageEffect_->isActive()) {
-		drawer_->setVisible(true);
-	}
-
 	if (status_ != State::Dead && health_->isDead()) {
 		status_ = State::Dead;
-		drawer_->destroy();
-		damageEffect_->destroy();
-		dyingEffect_ = getEntity().createComponent<ScatterEffect>(model_);
+		if (getEntity().hasComponent<DamageEffect>()) {
+			getEntity().getFirstComponent<DamageEffect>()->destroy();
+		}
+		getEntity().createComponent<ScatterEffect>([this] {
+			getEntity().destroy();
+		});
 		ResourceSystem::getInstance().get<Sound>("EnemyDieSound")->createInstance()->play();
 		return;
 	}
@@ -99,11 +96,6 @@ void Slime::update() {
 			status_ = State::Moving;
 		}
 		break;
-	case State::Dead:
-		if (dyingEffect_->isFinished()) {
-			getEntity().destroy();
-		}
-		break;
 	}
 }
 
@@ -132,15 +124,13 @@ void BigSlime::start() {
 				entity.getFirstComponent<Health>()->takeDamage(1);
 			}
 			if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-				drawer_->setVisible(false);
-				damageEffect_->activate();
+				getEntity().createComponent<DamageEffect>();
 			}
 		}
 	});
 
 	body_ = getEntity().createComponent<PhysicalBody>(collider);
 	health_ = getEntity().createComponent<Health>(5);
-	damageEffect_ = getEntity().createComponent<DamageEffect>(model_);
 
 	playerEntity_ = getChunk().getEntityByName("Player");
 
@@ -148,15 +138,14 @@ void BigSlime::start() {
 }
 
 void BigSlime::update() {
-	if (!damageEffect_->isActive()) {
-		drawer_->setVisible(true);
-	}
-
 	if (status_ != State::Dead && health_->isDead()) {
 		status_ = State::Dead;
-		drawer_->destroy();
-		damageEffect_->destroy();
-		dyingEffect_ = getEntity().createComponent<ScatterEffect>(model_);
+		if (getEntity().hasComponent<DamageEffect>()) {
+			getEntity().getFirstComponent<DamageEffect>()->destroy();
+		}
+		getEntity().createComponent<ScatterEffect>([this] {
+			getEntity().destroy();
+		});
 		ResourceSystem::getInstance().get<Sound>("EnemyDieSound")->createInstance()->play();
 		return;
 	}
@@ -186,11 +175,6 @@ void BigSlime::update() {
 			stateChangedAt_ = glfwGetTime();
 		}
 		break;
-	case State::Dead:
-		if (dyingEffect_->isFinished()) {
-			getEntity().destroy();
-		}
-		break;
 	}
 }
 
@@ -218,29 +202,26 @@ void Rabbit::start() {
 				entity.getFirstComponent<Health>()->takeDamage(1);
 			}
 			if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-				drawer_->setVisible(false);
-				damageEffect_->activate();
+				getEntity().createComponent<DamageEffect>();
 			}
 		}
 	});
 
 	body_ = getEntity().createComponent<PhysicalBody>(collider);
 	health_ = getEntity().createComponent<Health>(3);
-	damageEffect_ = getEntity().createComponent<DamageEffect>(model_);
 
 	playerEntity_ = getChunk().getEntityByName("Player");
 }
 
 void Rabbit::update() {
-	if (!damageEffect_->isActive()) {
-		drawer_->setVisible(true);
-	}
-
 	if (status_ != State::Dead && health_->isDead()) {
 		status_ = State::Dead;
-		drawer_->destroy();
-		damageEffect_->destroy();
-		dyingEffect_ = getEntity().createComponent<ScatterEffect>(model_);
+		if (getEntity().hasComponent<DamageEffect>()) {
+			getEntity().getFirstComponent<DamageEffect>()->destroy();
+		}
+		getEntity().createComponent<ScatterEffect>([this] {
+			getEntity().destroy();
+		});
 		ResourceSystem::getInstance().get<Sound>("EnemyDieSound")->createInstance()->play();
 		return;
 	}
@@ -305,11 +286,6 @@ void Rabbit::update() {
 			stateChangedAt_ = glfwGetTime();
 		}
 		break;
-	case State::Dead:
-		if (dyingEffect_->isFinished()) {
-			getEntity().destroy();
-		}
-		break;
 	}
 }
 
@@ -337,8 +313,7 @@ void Crab::start() {
 				entity.getFirstComponent<Health>()->takeDamage(1);
 			}
 			if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-				drawer_->setVisible(false);
-				damageEffect_->activate();
+				getEntity().createComponent<DamageEffect>();
 			}
 		}
 	});
@@ -346,21 +321,19 @@ void Crab::start() {
 	body_ = getEntity().createComponent<PhysicalBody>(collider);
 
 	health_ = getEntity().createComponent<Health>(3);
-	damageEffect_ = getEntity().createComponent<DamageEffect>(model_);
 
 	playerEntity_ = getChunk().getEntityByName("Player");
 }
 
 void Crab::update() {
-	if (!damageEffect_->isActive()) {
-		drawer_->setVisible(true);
-	}
-
 	if (status_ != State::Dead && health_->isDead()) {
 		status_ = State::Dead;
-		drawer_->destroy();
-		damageEffect_->destroy();
-		dyingEffect_ = getEntity().createComponent<ScatterEffect>(model_);
+		if (getEntity().hasComponent<DamageEffect>()) {
+			getEntity().getFirstComponent<DamageEffect>()->destroy();
+		}
+		getEntity().createComponent<ScatterEffect>([this] {
+			getEntity().destroy();
+		});
 		ResourceSystem::getInstance().get<Sound>("EnemyDieSound")->createInstance()->play();
 		return;
 	}
@@ -426,11 +399,6 @@ void Crab::update() {
 			stateChangedAt_ = glfwGetTime();
 		}
 		break;
-	case State::Dead:
-		if (dyingEffect_->isFinished()) {
-			getEntity().destroy();
-		}
-		break;
 	}
 }
 
@@ -463,8 +431,7 @@ void Dragon::start() {
 				entity.getFirstComponent<Health>()->takeDamage(1);
 			}
 			if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-				drawer_->setVisible(false);
-				damageEffect_->activate();
+				getEntity().createComponent<DamageEffect>();
 			}
 		}
 	});
@@ -473,7 +440,6 @@ void Dragon::start() {
 	body_->setReceiveGravity(false);
 
 	health_ = getEntity().createComponent<Health>(15);
-	damageEffect_ = getEntity().createComponent<DamageEffect>(model_);
 
 	playerEntity_ = getChunk().getEntityByName("Player");
 
@@ -481,15 +447,15 @@ void Dragon::start() {
 }
 
 void Dragon::update() {
-	if (!damageEffect_->isActive()) {
-		drawer_->setVisible(true);
-	}
-
 	if (status_ != State::Dead && health_->isDead()) {
 		status_ = State::Dead;
-		drawer_->destroy();
-		damageEffect_->destroy();
-		dyingEffect_ = getEntity().createComponent<ScatterEffect>(model_);
+		if (getEntity().hasComponent<DamageEffect>()) {
+			getEntity().getFirstComponent<DamageEffect>()->destroy();
+		}
+		getEntity().createComponent<ScatterEffect>([this] {
+			getEntity().destroy();
+			SceneManager::getInstance().changeScene(SceneKey::GameClear, false);
+		});
 		ResourceSystem::getInstance().get<Sound>("EnemyDieSound")->createInstance()->play();
 		return;
 	}
@@ -639,11 +605,6 @@ void Dragon::update() {
 
 			status_ = State::Hovering;
 			stateChangedAt_ = glfwGetTime();
-		}
-		break;
-	case State::Dead:
-		if (dyingEffect_->isFinished()) {
-			SceneManager::getInstance().changeScene(SceneKey::GameClear, false);
 		}
 		break;
 	}

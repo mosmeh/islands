@@ -48,9 +48,10 @@ protected:
 	virtual void start() {}
 	virtual void update() = 0;
 
+	bool isFirstUpdate_;
+
 private:
 	Entity* entity_;
-	bool isFirstUpdate_;
 	bool destroyed_;
 };
 
@@ -59,6 +60,16 @@ public:
 	Drawable() = default;
 	virtual ~Drawable() = default;
 
+	void startAndDraw() {
+		if (isFirstUpdate_) {
+			start();
+			isFirstUpdate_ = false;
+		}
+
+		draw();
+	}
+
+protected:
 	virtual void update() {}
 	virtual void draw() = 0;
 };

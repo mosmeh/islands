@@ -29,8 +29,6 @@ private:
 	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<Model> model_;
 	std::shared_ptr<Health> health_;
-	std::shared_ptr<DamageEffect> damageEffect_;
-	std::shared_ptr<ScatterEffect> dyingEffect_;
 	double attackAnimStartedAt_;
 
 	void start() override;

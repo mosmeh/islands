@@ -26,8 +26,6 @@ private:
 	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<Health> health_;
 	std::shared_ptr<Entity> playerEntity_;
-	std::shared_ptr<DamageEffect> damageEffect_;
-	std::shared_ptr<ScatterEffect> dyingEffect_;
 	glm::vec3 direction_;
 	glm::quat targetQuat_;
 	double stateChangedAt_;
@@ -54,8 +52,6 @@ private:
 	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<Health> health_;
 	std::shared_ptr<Entity> playerEntity_;
-	std::shared_ptr<DamageEffect> damageEffect_;
-	std::shared_ptr<ScatterEffect> dyingEffect_;
 	double stateChangedAt_;
 };
 
@@ -81,8 +77,6 @@ private:
 	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<Health> health_;
 	std::shared_ptr<Entity> playerEntity_;
-	std::shared_ptr<DamageEffect> damageEffect_;
-	std::shared_ptr<ScatterEffect> dyingEffect_;
 	std::shared_ptr<Entity> attackEntity_;
 	double stateChangedAt_;
 	glm::vec3 direction_;
@@ -110,8 +104,6 @@ private:
 	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<Health> health_;
 	std::shared_ptr<Entity> playerEntity_;
-	std::shared_ptr<DamageEffect> damageEffect_;
-	std::shared_ptr<ScatterEffect> dyingEffect_;
 	std::shared_ptr<Entity> attackEntity_;
 	double stateChangedAt_;
 	glm::vec3 direction_;
@@ -143,8 +135,6 @@ private:
 	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<Health> health_;
 	std::shared_ptr<Entity> playerEntity_;
-	std::shared_ptr<DamageEffect> damageEffect_;
-	std::shared_ptr<ScatterEffect> dyingEffect_;
 	std::shared_ptr<Entity> attackEntity_;
 	double stateChangedAt_;
 	glm::vec3 direction_;

@@ -33,8 +33,7 @@ void Player::start() {
 		const auto& entity = opponent->getEntity();
 		if (entity.getSelfMask() & (Entity::Mask::Enemy | Entity::Mask::EnemyAttack)) {
 			if (!health_->isInvincible()) {
-				drawer_->setVisible(false);
-				damageEffect_->activate();
+				getEntity().createComponent<DamageEffect>(2.0);
 				ResourceSystem::getInstance().createOrGet<Sound>("PlayerDamageSound", "player_damage.ogg")->createInstance()->play();
 			}
 		}
@@ -42,27 +41,23 @@ void Player::start() {
 	body_ = getEntity().createComponent<PhysicalBody>(collider);
 
 	health_ = getEntity().createComponent<Health>(10, 2.0);
-	damageEffect_ = getEntity().createComponent<DamageEffect>(model_, 2.0);
 }
 
 void Player::update() {
 	Camera::getInstance().lookAt(getEntity().getPosition());
 
 	if (status_ == State::Dead) {
-		if (dyingEffect_->isFinished()) {
-			SceneManager::getInstance().changeScene(SceneKey::GameOver, false);
-		}
 		return;
 	} else if (health_->isDead()) {
 		status_ = State::Dead;
-		drawer_->destroy();
-		damageEffect_->destroy();
-		dyingEffect_ = getEntity().createComponent<ScatterEffect>(model_);
+		if (getEntity().hasComponent<DamageEffect>()) {
+			getEntity().getFirstComponent<DamageEffect>()->destroy();
+		}
+		getEntity().createComponent<ScatterEffect>([this] {
+			getEntity().destroy();
+			SceneManager::getInstance().changeScene(SceneKey::GameOver, false);
+		});
 		return;
-	}
-
-	if (!damageEffect_->isActive()) {
-		drawer_->setVisible(true);
 	}
 
 	static constexpr float SPEED = 8.f;

@@ -36,6 +36,8 @@ public:
 	void update() override;
 	void draw() override;
 
+	std::shared_ptr<Model> getModel() const;
+
 	void setVisible(bool visible);
 	void setLightmapTexture(std::shared_ptr<Texture2D> texture);
 	void setCullFaceEnabled(bool enabled);

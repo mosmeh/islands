@@ -4,51 +4,59 @@
 
 namespace islands {
 
-DamageEffect::DamageEffect(std::shared_ptr<Model> model, double duration) :
-	ModelDrawer(model),
+DamageEffect::DamageEffect(double duration) :
 	duration_(duration),
 	program_(ResourceSystem::getInstance().createOrGet<Program>(
-		"DamageProgram", "skinning.vert", "damage.frag")),
-	startedAt_(-INFINITY) {}
+		"DamageProgram", "skinning.vert", "damage.frag")) {}
 
-void DamageEffect::draw() {
-	if (isActive()) {
-		program_->use();
-		program_->setUniform("MVP", getEntity().calculateMVPMatrix());
-		program_->setUniform("time", static_cast<glm::float32>(glfwGetTime() - startedAt_));
-
-		std::stringstream ss;
-		for (const auto mesh : model_->getMeshes()) {
-			program_->setUniform("diffuse", mesh->getMaterial()->getDiffuseColor());
-
-			const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh);
-			assert(skinned);
-			skinned->applyBoneTransform(program_);
-			mesh->draw();
-		}
-	}
-}
-
-void DamageEffect::activate() {
+void DamageEffect::start() {
+	drawer_ = getEntity().getFirstComponent<ModelDrawer>();
 	startedAt_ = glfwGetTime();
 }
 
-bool DamageEffect::isActive() const {
-	return glfwGetTime() - startedAt_ < duration_;
+void DamageEffect::update() {
+	if (glfwGetTime() - startedAt_ < duration_) {
+		drawer_->setVisible(false);
+	} else {
+		drawer_->setVisible(true);
+		destroy();
+	}
 }
 
-ScatterEffect::ScatterEffect(std::shared_ptr<Model> model) :
-	ModelDrawer(model),
+void DamageEffect::draw() {
+	program_->use();
+	program_->setUniform("MVP", getEntity().calculateMVPMatrix());
+	program_->setUniform("time", static_cast<glm::float32>(glfwGetTime() - startedAt_));
+
+	std::stringstream ss;
+	for (const auto mesh : drawer_->getModel()->getMeshes()) {
+		program_->setUniform("diffuse", mesh->getMaterial()->getDiffuseColor());
+
+		const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh);
+		assert(skinned);
+		skinned->applyBoneTransform(program_);
+		mesh->draw();
+	}
+}
+
+ScatterEffect::ScatterEffect(const FinishCallback& callback) :
+	callback_(callback),
 	program_(ResourceSystem::getInstance().createOrGet<Program>(
-		"ScatterProgram", "scatter.vert", "scatter.geom", "scatter.frag")),
-	startedAt_(INFINITY) {}
+		"ScatterProgram", "scatter.vert", "scatter.geom", "scatter.frag")) {}
 
 void ScatterEffect::start() {
+	drawer_ = getEntity().getFirstComponent<ModelDrawer>();
 	startedAt_ = glfwGetTime();
 }
 
 void ScatterEffect::update() {
-	ModelDrawer::update();
+	if (glfwGetTime() - startedAt_ <= 1.0) {
+		drawer_->setVisible(false);
+	} else {
+		drawer_->setVisible(true);
+		callback_();
+		destroy();
+	}
 }
 
 void ScatterEffect::draw() {
@@ -62,7 +70,7 @@ void ScatterEffect::draw() {
     glEnable(GL_BLEND);
 
 	std::stringstream ss;
-	for (const auto mesh : model_->getMeshes()) {
+	for (const auto mesh : drawer_->getModel()->getMeshes()) {
 		const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh);
 		assert(skinned);
 		skinned->applyBoneTransform(program_);
@@ -71,10 +79,6 @@ void ScatterEffect::draw() {
 
 	glEnable(GL_CULL_FACE);
     glDisable(GL_BLEND);
-}
-
-bool ScatterEffect::isFinished() const {
-	return glfwGetTime() - startedAt_ > 1.0;
 }
 
 }
