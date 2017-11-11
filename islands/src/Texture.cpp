@@ -45,7 +45,7 @@ void Texture2D::loadImpl() {
 	data_ = stbi_load_from_memory(reinterpret_cast<stbi_uc*>(rawData.data()), rawData.size(),
 		&width_, &height_, &numComponents, STBI_rgb_alpha);
 #else
-	const auto filePath = TEXTURE_DIR + sys::getFilePathSeperator() + filename_;
+	const auto filePath = TEXTURE_DIR + sys::getFilePathSeparator() + filename_;
 	data_ = stbi_load(filePath.c_str(), &width_, &height_, &numComponents, STBI_rgb_alpha);
 #endif
 	if (!data_) {

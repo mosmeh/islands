@@ -64,7 +64,7 @@ void GameManager::init() {
 		const auto filePath = LEVEL_DIR + '/' + LEVEL_LIST_FILENAME;
 		picojson::parse(json, AssetArchive::getInstance().readTextFile(filePath));
 #else
-		const auto filePath = LEVEL_DIR + sys::getFilePathSeperator() + LEVEL_LIST_FILENAME;
+		const auto filePath = LEVEL_DIR + sys::getFilePathSeparator() + LEVEL_LIST_FILENAME;
 		std::ifstream ifs(filePath);
 		ifs >> json;
 #endif

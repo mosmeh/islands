@@ -35,7 +35,7 @@ void Model::loadImpl() {
 	auto rawData = AssetArchive::getInstance().readFile(filePath);
 	const auto scene = importer.ReadFileFromMemory(rawData.data(), rawData.size(), FLAGS);
 #else
-	const auto filePath = MESH_DIR + sys::getFilePathSeperator() + filename_;
+	const auto filePath = MESH_DIR + sys::getFilePathSeparator() + filename_;
 	const auto scene = importer.ReadFile(filePath, FLAGS);
 #endif
 	if (!scene) {

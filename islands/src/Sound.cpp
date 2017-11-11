@@ -54,7 +54,7 @@ void Sound::loadImpl() {
 	length_ = stb_vorbis_decode_memory(reinterpret_cast<uint8*>(rawData.data()), rawData.size(),
 		&numChannels_, &sampleRate_, &buffer_);
 #else
-	const auto filePath = SOUND_DIR + sys::getFilePathSeperator() + filename_;
+	const auto filePath = SOUND_DIR + sys::getFilePathSeparator() + filename_;
 	length_ = stb_vorbis_decode_filename(filePath.c_str(), &numChannels_, &sampleRate_, &buffer_);
 #endif
 	assert(length_ > 0);

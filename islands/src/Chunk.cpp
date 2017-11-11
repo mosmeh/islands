@@ -115,7 +115,7 @@ void Chunk::loadImpl() {
 		const auto filePath = LEVEL_DIR + '/' + filename_;
 		picojson::parse(json, AssetArchive::getInstance().readTextFile(filePath));
 #else
-		const auto filePath = LEVEL_DIR + sys::getFilePathSeperator() + filename_;
+		const auto filePath = LEVEL_DIR + sys::getFilePathSeparator() + filename_;
 		std::ifstream ifs(filePath);
 		ifs >> json;
 #endif

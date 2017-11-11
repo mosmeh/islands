@@ -9,7 +9,7 @@ namespace sys {
 
 namespace {
 
-constexpr char getFilePathSeperator() {
+constexpr char getFilePathSeparator() {
 #ifdef _WIN32
 	return  '\\';
 #else
@@ -18,7 +18,7 @@ constexpr char getFilePathSeperator() {
 }
 
 constexpr const char* basenameImpl(const char* dp, const char* p) {
-	return *p == '\0' ? dp : *p == getFilePathSeperator() ?
+	return *p == '\0' ? dp : *p == getFilePathSeparator() ?
 		basenameImpl(p + 1, p + 1) : basenameImpl(dp, p + 1);
 }
 
