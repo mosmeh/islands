@@ -14,7 +14,7 @@ public:
 		destroyed_(false) {}
 	virtual ~Component() = default;
 
-	void setEntity(Entity* entity) {
+	void setEntity(std::shared_ptr<Entity> entity) {
 		entity_ = entity;
 	}
 
@@ -51,7 +51,7 @@ protected:
 	bool isFirstUpdate_;
 
 private:
-	Entity* entity_;
+	std::shared_ptr<Entity> entity_;
 	bool destroyed_;
 };
 

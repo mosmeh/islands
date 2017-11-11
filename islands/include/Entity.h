@@ -7,7 +7,9 @@ namespace islands {
 class Component;
 class Chunk;
 
-class Entity : public Resource {
+class Entity :
+	public Resource,
+	public std::enable_shared_from_this<Entity> {
 public:
 	using MaskType = std::uint32_t;
 	enum Mask : MaskType {
@@ -84,7 +86,7 @@ template<class T, class ...Args>
 inline std::enable_if_t<std::is_base_of<Component, T>::value, std::shared_ptr<T>>
 Entity::createComponent(Args ...args) {
 	const auto component = std::make_shared<T>(args...);
-	component->setEntity(this);
+	component->setEntity(shared_from_this());
 	components_.emplace_back(component);
 	return component;
 }
