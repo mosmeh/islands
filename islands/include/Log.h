@@ -31,6 +31,10 @@ private:
 		}
 
 		int sync() override {
+			if (str() == "") {
+				return 0;
+			}
+
 			const auto time = sys::getTime();
 			static char buf[32];
 			strftime(buf, sizeof(buf), "%Y/%m/%d %I:%M:%S", &time);
