@@ -177,7 +177,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		ss << "FPS: " << Profiler::getInstance().getLastFPS() <<
 			", delta: " << Profiler::getInstance().getLastDeltaTime() <<
 			", update: " << Profiler::getInstance().getElapsedTime("update") <<
-			", draw: " << Profiler::getInstance().getElapsedTime("draw") << std::endl;
+			", draw: " << Profiler::getInstance().getElapsedTime("draw");
 		glfwSetWindowTitle(Window::getInstance().getHandle(), ss.str().c_str());
 		Profiler::getInstance().clearSamples();
 #endif
