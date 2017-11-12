@@ -2,7 +2,11 @@
 
 #include "System.h"
 
+#define ENABLE_LOG
+
 namespace islands {
+
+#ifdef ENABLE_LOG
 
 class Logger : public std::ostream {
 public:
@@ -59,5 +63,28 @@ private:
 #define SLOG ::islands::Logger::lock(), ::islands::Logger::getInstance() << \
 	" [" << ::islands::sys::basename(__FILE__) << ":" << __LINE__ << "] "
 
+
+
+#else
+
+class Logger : public std::ostream {
+public:
+	Logger(const Logger&) = delete;
+	Logger& operator=(const Logger&) = delete;
+
+	virtual ~Logger() = default;
+
+	static Logger& getInstance() {
+		static Logger instance;
+		return instance;
+	}
+
+private:
+	Logger(): std::ostream(nullptr) {}
+};
+
+#define SLOG ::islands::Logger::getInstance()
+
+#endif
 
 }
