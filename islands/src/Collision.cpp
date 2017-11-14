@@ -15,6 +15,10 @@ void Collider::registerCallback(const Callback& callback) {
 	callbacks_.emplace_back(callback);
 }
 
+void Collider::clearCallbacks() {
+	callbacks_.clear();
+}
+
 void Collider::notifyCollision(std::shared_ptr<Collider> opponent) const {
 	for (const auto callback : callbacks_) {
 		callback(opponent);

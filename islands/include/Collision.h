@@ -20,6 +20,7 @@ public:
 	virtual ~Collider() = default;
 
 	void registerCallback(const Callback& callback);
+	void clearCallbacks();
 	void notifyCollision(std::shared_ptr<Collider> opponent) const;
 	bool hasModel() const;
 	const geometry::AABB& getGlobalAABB() const;
