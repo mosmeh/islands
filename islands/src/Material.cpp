@@ -11,23 +11,9 @@ Material::Material(const std::string& name, const aiMaterial* material) :
 	aiColor4D diffuse;
 	aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
 	diffuseColor_ = {diffuse.r, diffuse.g, diffuse.b, diffuse.a};
-
-	const auto numDiffuseTextures = material->GetTextureCount(aiTextureType_DIFFUSE);
-	aiString path;
-	for (unsigned int i = 0; i < numDiffuseTextures; ++i) {
-		material->GetTexture(aiTextureType_DIFFUSE, 0, &path);
-
-		diffuseTextures_.emplace_back(
-			ResourceSystem::getInstance().createOrGet<Texture2D>(path.C_Str(), path.C_Str()));
-	}
 }
 
 bool Material::isLoaded() const {
-	for (const auto texture : diffuseTextures_) {
-		if (!texture->isLoaded()) {
-			return false;
-		}
-	}
 	if (lightmap_ && !lightmap_->isLoaded()) {
 		return false;
 	}
@@ -40,9 +26,6 @@ void Material::use() const {
 	if (lightmap_) {
 		lightmap_->bind(0);
 		program_->setUniform("tex", static_cast<GLuint>(0));
-	}
-	for (size_t i = 0; i < diffuseTextures_.size(); ++i) {
-		diffuseTextures_.at(i)->bind(i + 1);
 	}
 }
 
