@@ -199,17 +199,16 @@ void FloorCollider::update() {
 MeshCollider::MeshCollider(std::shared_ptr<Model> model) : Collider(model) {
 	size_t numTriangles = 0;
 	for (auto mesh : model->getMeshes()) {
-		assert(mesh->numIndices_ % 3 == 0);
-		numTriangles += mesh->numIndices_ / 3;
+		const auto& indices = mesh->getIndices();
 
-		for (size_t i = 0; i < mesh->numIndices_ / 3; ++i) {
-			const geometry::Triangle triangle{
-				mesh->vertices_[mesh->indices_[3 * i + 0]],
-				mesh->vertices_[mesh->indices_[3 * i + 1]],
-				mesh->vertices_[mesh->indices_[3 * i + 2]]
-			};
+		assert(indices.size() % 3 == 0);
+		numTriangles += indices.size() / 3;
+
+#if _DEBUG
+		for (const auto& triangle : mesh->getTriangles()) {
 			assert(!triangle.isDegenerate());
 		}
+#endif
 	}
 	collisionMesh_.triangles.reserve(numTriangles);
 }
@@ -219,13 +218,8 @@ void MeshCollider::update() {
 
 	const auto& modelMat = getEntity().getModelMatrix();
 	collisionMesh_.triangles.clear();
-	for (auto mesh : getModel()->getMeshes()) {
-		for (size_t i = 0; i < mesh->numIndices_ / 3; ++i) {
-			const geometry::Triangle triangle{
-				mesh->vertices_[mesh->indices_[3 * i + 0]],
-				mesh->vertices_[mesh->indices_[3 * i + 1]],
-				mesh->vertices_[mesh->indices_[3 * i + 2]]
-			};
+	for (const auto mesh : getModel()->getMeshes()) {
+		for (const auto& triangle : mesh->getTriangles()) {
 			collisionMesh_.triangles.emplace_back(triangle.transform(modelMat));
 		}
 	}

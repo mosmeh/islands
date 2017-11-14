@@ -10,40 +10,38 @@ namespace islands {
 
 Mesh::Mesh(const aiMesh* mesh, const aiMaterial* material) :
 	Resource(mesh->mName.C_Str()),
-	numVertices_(mesh->mNumVertices),
-	vertices_(std::make_unique<glm::vec3[]>(mesh->mNumVertices)),
-	normals_(std::make_unique<glm::vec3[]>(mesh->mNumVertices)),
-	indices_(std::make_unique<GLuint[]>(3 * mesh->mNumFaces)),
+	vertices_(mesh->mNumVertices),
+	normals_(mesh->mNumVertices),
 	hasUV_(mesh->HasTextureCoords(0)) {
 
 	assert(mesh->HasNormals());
 
 	if (hasUV_) {
-		uvs_ = std::make_unique<glm::vec2[]>(numVertices_);
+		uvs_ = std::vector<glm::vec2>(mesh->mNumVertices);
 	}
 
-	for (size_t i = 0; i < numVertices_; ++i) {
-		const auto pos = mesh->mVertices[i];
-		vertices_[i] = {pos.x, pos.y, pos.z};
+	for (size_t i = 0; i < mesh->mNumVertices; ++i) {
+		const auto& pos = mesh->mVertices[i];
+		vertices_.at(i) = {pos.x, pos.y, pos.z};
 
-		const auto normal = mesh->mNormals[i];
-		normals_[i] = {normal.x, normal.y, normal.z};
+		const auto& normal = mesh->mNormals[i];
+		normals_.at(i) = {normal.x, normal.y, normal.z};
 
 		if (hasUV_) {
-			const auto uvw = mesh->mTextureCoords[0][i];
-			uvs_[i] = {uvw.x, uvw.y};
+			const auto& uvw = mesh->mTextureCoords[0][i];
+			uvs_.at(i) = {uvw.x, uvw.y};
 		}
 	}
 
-	size_t idx = 0;
+	indices_.reserve(3 * mesh->mNumFaces);
 	FOREACH (face, mesh->mFaces, mesh->mNumFaces) {
 		if (face->mNumIndices == 3) {
 			FOREACH(index, face->mIndices, face->mNumIndices) {
-				indices_[idx++] = *index;
+				indices_.emplace_back(*index);
 			}
 		}
 	}
-	numIndices_ = idx;
+	indices_.shrink_to_fit();
 
 	aiString materialName;
 	material->Get(AI_MATKEY_NAME, materialName);
@@ -69,7 +67,7 @@ void Mesh::draw() {
 	upload();
 
 	vertexArray_.bind();
-	glDrawElements(GL_TRIANGLES, numIndices_, GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES, indices_.size(), GL_UNSIGNED_INT, nullptr);
 }
 
 bool Mesh::hasUV() const {
@@ -80,38 +78,59 @@ std::shared_ptr<Material> Mesh::getMaterial() const {
 	return material_;
 }
 
+const std::vector<glm::vec3>& Mesh::getVertices() const {
+	return vertices_;
+}
+
+const std::vector<GLuint>& Mesh::getIndices() const {
+	return indices_;
+}
+
+std::vector<geometry::Triangle> Mesh::getTriangles() const {
+	std::vector<geometry::Triangle> triangles;
+	triangles.reserve(indices_.size());
+	for (size_t i = 0; i < indices_.size() / 3; ++i) {
+		triangles.emplace_back(geometry::Triangle{
+			vertices_.at(indices_.at(3 * i + 0)),
+			vertices_.at(indices_.at(3 * i + 1)),
+			vertices_.at(indices_.at(3 * i + 2))
+		});
+	}
+	return triangles;
+}
+
 void Mesh::uploadImpl() {
 	vertexArray_.bind();
 
 	glGenBuffers(1, &vertexBuffer_);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
-	glBufferData(GL_ARRAY_BUFFER, numVertices_ * sizeof(glm::vec3),
-		vertices_.get(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(glm::vec3),
+		vertices_.data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(Location::POSITION);
 	glVertexAttribPointer(Location::POSITION, glm::vec3::length(), GL_FLOAT, GL_FALSE, 0, nullptr);
 
 	glGenBuffers(1, &normalBuffer_);
 	glBindBuffer(GL_ARRAY_BUFFER, normalBuffer_);
-	glBufferData(GL_ARRAY_BUFFER, numVertices_ * sizeof(glm::vec3),
-		normals_.get(), GL_STATIC_DRAW);
-	normals_.reset();
+	glBufferData(GL_ARRAY_BUFFER, normals_.size() * sizeof(glm::vec3),
+		normals_.data(), GL_STATIC_DRAW);
+	normals_.clear();
 	glEnableVertexAttribArray(Location::NORMAL);
 	glVertexAttribPointer(Location::NORMAL, glm::vec3::length(), GL_FLOAT, GL_FALSE, 0, nullptr);
 
 	if (hasUV_) {
 		glGenBuffers(1, &uvBuffer_);
 		glBindBuffer(GL_ARRAY_BUFFER, uvBuffer_);
-		glBufferData(GL_ARRAY_BUFFER, numVertices_ * sizeof(glm::vec2),
-			uvs_.get(), GL_STATIC_DRAW);
-		uvs_.reset();
+		glBufferData(GL_ARRAY_BUFFER, uvs_.size() * sizeof(glm::vec2),
+			uvs_.data(), GL_STATIC_DRAW);
+		uvs_.clear();
 		glEnableVertexAttribArray(Location::UV);
 		glVertexAttribPointer(Location::UV, glm::vec2::length(), GL_FLOAT, GL_FALSE, 0, nullptr);
 	}
 
 	glGenBuffers(1, &indexBuffer_);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer_);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices_ * sizeof(GLuint),
-		indices_.get(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(GLuint),
+		indices_.data(), GL_STATIC_DRAW);
 }
 
 glm::mat4 aiMatrix4ToGlmMat4(const aiMatrix4x4& mat) {
@@ -142,11 +161,11 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 	getMaterial()->setProgram(ResourceSystem::getInstance().createOrGet<Program>(
 		"SkinningProgram", "skinning.vert", "default.frag"));
 
-	assert(numVertices_ > 0);
-	boneData_ = std::make_unique<BoneDataPerVertex[]>(numVertices_);
+	assert(getVertices().size() > 0);
+	boneData_ = std::vector<BoneDataPerVertex>(getVertices().size());
 
 	std::unordered_map<std::string, std::shared_ptr<Bone>> nameToBone;
-	const auto numAddedBones = std::make_unique<size_t[]>(numVertices_);
+	std::vector<size_t> numAddedBones(getVertices().size());
 	for (size_t i = 0; i < mesh->mNumBones; ++i) {
 		const auto bone = mesh->mBones[i];
 
@@ -156,11 +175,11 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 		nameToBone.emplace(bone->mName.C_Str(), b);
 
 		FOREACH (weight, bone->mWeights, bone->mNumWeights) {
-			auto& num = numAddedBones[weight->mVertexId];
+			auto& num = numAddedBones.at(weight->mVertexId);
 			assert(num < NUM_BONES_PER_VERTEX);
 
-			boneData_[weight->mVertexId].boneIDs[num] = i;
-			boneData_[weight->mVertexId].weights[num] = weight->mWeight;
+			boneData_.at(weight->mVertexId).boneIDs[num] = i;
+			boneData_.at(weight->mVertexId).weights[num] = weight->mWeight;
 			++num;
 		}
 	}
@@ -226,9 +245,9 @@ void SkinnedMesh::uploadImpl() {
 
 	glGenBuffers(1, &boneBuffer_);
 	glBindBuffer(GL_ARRAY_BUFFER, boneBuffer_);
-	glBufferData(GL_ARRAY_BUFFER, numVertices_ * sizeof(BoneDataPerVertex),
-		boneData_.get(), GL_STATIC_DRAW);
-	boneData_.reset();
+	glBufferData(GL_ARRAY_BUFFER, boneData_.size() * sizeof(BoneDataPerVertex),
+		boneData_.data(), GL_STATIC_DRAW);
+	boneData_.clear();
 
 	glEnableVertexAttribArray(SkinningLocation::BONE);
 	glVertexAttribIPointer(SkinningLocation::BONE, NUM_BONES_PER_VERTEX, GL_UNSIGNED_INT,

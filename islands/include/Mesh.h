@@ -3,13 +3,11 @@
 #include "Resource.h"
 #include "Material.h"
 #include "GLObjects.h"
+#include "Geometry.h"
 
 namespace islands {
 
 class Mesh : public Resource {
-	friend class Model;
-	friend class MeshCollider;
-
 public:
 	Mesh(const aiMesh* mesh, const aiMaterial* material);
 	Mesh(const Mesh&) = delete;
@@ -24,9 +22,11 @@ public:
 	bool hasUV() const;
 	std::shared_ptr<Material> getMaterial() const;
 
-protected:
-	const size_t numVertices_;
+	const std::vector<glm::vec3>& getVertices() const;
+	const std::vector<GLuint>& getIndices() const;
+	std::vector<geometry::Triangle> getTriangles() const;
 
+protected:
 	void uploadImpl() override;
 
 private:
@@ -38,10 +38,9 @@ private:
 
 	VertexArray vertexArray_;
 	GLuint vertexBuffer_, indexBuffer_, normalBuffer_, uvBuffer_;
-	std::unique_ptr<glm::vec3[]> vertices_, normals_;
-	std::unique_ptr<glm::vec2[]> uvs_;
-	std::unique_ptr<GLuint[]> indices_;
-	size_t numIndices_;
+	std::vector<glm::vec3> vertices_, normals_;
+	std::vector<glm::vec2> uvs_;
+	std::vector<GLuint> indices_;
 	const bool hasUV_;
 	std::shared_ptr<Material> material_;
 };
@@ -108,7 +107,7 @@ private:
 	std::vector<std::shared_ptr<Bone>> bones_;
 
 	GLuint boneBuffer_;
-	std::unique_ptr<BoneDataPerVertex[]> boneData_;
+	std::vector<BoneDataPerVertex> boneData_;
 
 	void uploadImpl() override;
 

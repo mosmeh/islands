@@ -60,8 +60,7 @@ void Model::loadImpl() {
 		}
 		meshes_.emplace_back(mesh);
 
-		for (size_t iVert = 0; iVert < mesh->numVertices_; ++iVert) {
-			const auto& vert = mesh->vertices_[iVert];
+		for (const auto& vert : mesh->getVertices()) {
 			localAABB_.min = glm::min(localAABB_.min, vert);
 			localAABB_.max = glm::max(localAABB_.max, vert);
 		}
