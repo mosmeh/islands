@@ -91,26 +91,22 @@ float Window::getDeltaTime() const {
 }
 
 void Window::saveScreenShot(const char* filename) const {
-	constexpr int numComponents = 3;
+	static constexpr int numComponents = 3;
 
 	SLOG << "Screen shot: Saving to " << filename << std::endl;
 
 	const auto size = numComponents * width_ * height_;
+	const auto stride = numComponents * width_;
 
-	// TODO: 次を調べる
-	// 画面サイズが2のべき乗でないときうまく動かない
-	// size だけ確保するとアクセス違反を起こす
-	const auto pixels = std::make_unique<char[]>(4 * width_ * height_);
-	glReadPixels(0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, pixels.get());
+	std::vector<char> pixels(4 * width_ * height_);
+	glReadPixels(0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
 	for (int y = 0; y < height_ / 2; ++y) {
-		// swap_ranges を使うと unsafe だと怒られる
-		for (int x = 0; x < width_ * numComponents; ++x) {
-			std::swap(pixels[x + y * width_ * numComponents],
-				pixels[x + (height_ - y - 1) * width_ * numComponents]);
+		for (int x = 0; x < stride; ++x) {
+			std::swap(pixels.at(x + y * stride), pixels.at(x + (height_ - y - 1) * stride));
 		}
 	}
 
-	stbi_write_png(filename, width_, height_, numComponents, pixels.get(), 0);
+	stbi_write_png(filename, width_, height_, numComponents, pixels.data(), 0);
 }
 
 }
