@@ -26,12 +26,14 @@ public:
 
 	void setReceiveGravity(bool receive);
 	bool getReceiveGravity() const;
+	void setGhost(bool isGhost);
+	bool isGhost() const;
 
 private:
 	std::shared_ptr<Collider> collider_;
 	float mass_;
 	glm::vec3 velocity_;
-	bool receiveGravity_;
+	bool receiveGravity_, isGhost_;
 };
 
 }

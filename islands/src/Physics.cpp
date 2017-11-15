@@ -48,14 +48,14 @@ void update(const Chunk& chunk) {
 	}
 
 	for (const auto body : bodies) {
-		if (body->hasCollider()) {
+		if (body->hasCollider() && !body->isGhost()) {
 			bool frictionCollide = false;
 			const auto collider = body->getCollider();
 			for (const auto c : colliders) {
 				if (&c->getEntity() == &collider->getEntity()) {
 					continue;
 				}
-				if (!c->isGhost() && collider->intersects(c) ) {
+				if (!c->isGhost() && collider->intersects(c)) {
 					body->moveBy(c->getSinkingCorrector(collider));
 
 					if (c->getEntity().getSelfMask() != Entity::Mask::CollisionWall) {

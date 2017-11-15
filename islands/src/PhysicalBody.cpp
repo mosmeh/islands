@@ -8,7 +8,8 @@ PhysicalBody::PhysicalBody(std::shared_ptr<Collider> collider = nullptr) :
 	mass_(1.f),
 	velocity_(0.f),
 	collider_(collider),
-	receiveGravity_(true) {}
+	receiveGravity_(true),
+	isGhost_(false) {}
 
 void PhysicalBody::update() {}
 
@@ -55,6 +56,14 @@ void PhysicalBody::setReceiveGravity(bool receive) {
 
 bool PhysicalBody::getReceiveGravity() const {
 	return receiveGravity_;
+}
+
+void PhysicalBody::setGhost(bool isGhost) {
+	isGhost_ = isGhost;
+}
+
+bool PhysicalBody::isGhost() const {
+	return isGhost_;
 }
 
 }
