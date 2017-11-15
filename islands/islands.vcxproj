@@ -291,6 +291,7 @@
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\Sound.h" />
     <ClInclude Include="include\Sprite.h" />
+    <ClInclude Include="include\StateMachine.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\System.h" />
     <ClInclude Include="include\Texture.h" />
