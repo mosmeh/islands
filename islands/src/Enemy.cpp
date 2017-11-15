@@ -6,10 +6,7 @@
 #include "Sound.h"
 
 namespace islands {
-
-Slime::Slime() :
-	status_(State::Moving),
-	stateChangedAt_(-HUGE_VAL) {}
+namespace enemy {
 
 void Slime::start() {
 	getEntity().setSelfMask(Entity::Mask::Enemy);
@@ -25,83 +22,69 @@ void Slime::start() {
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model_);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
-		if (status_ != State::Dead) {
-			const auto& entity = opponent->getEntity();
-			if (entity.getSelfMask() & Entity::Mask::Player) {
-				entity.getFirstComponent<Health>()->takeDamage(1);
-			}
-			if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-				getEntity().createComponent<DamageEffect>();
-			}
+		const auto& entity = opponent->getEntity();
+		if (entity.getSelfMask() & Entity::Mask::Player) {
+			entity.getFirstComponent<Health>()->takeDamage(1);
+		}
+		if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
+			getEntity().createComponent<DamageEffect>();
 		}
 	});
 
 	body_ = getEntity().createComponent<PhysicalBody>(collider);
 	health_ = getEntity().createComponent<Health>(3);
 
-	playerEntity_ = getChunk().getEntityByName("Player");
+	machine_.changeState<Moving>();
 }
 
 void Slime::update() {
+	machine_.update(*this);
+}
+
+void Slime::Moving::update(Slime& parent) {
 	static constexpr float SPEED = 2.f;
 	static constexpr double MOVE_DURATION_FACTOR = 5.0;
-	static constexpr double CHANGE_DIR_DURATION = 1.0;
 
-	if (status_ != State::Dead && health_->isDead()) {
-		status_ = State::Dead;
-		if (getEntity().hasComponent<DamageEffect>()) {
-			getEntity().getFirstComponent<DamageEffect>()->destroy();
-		}
-		getEntity().createComponent<ScatterEffect>([this] {
-			getEntity().destroy();
-		});
-		ResourceSystem::getInstance().get<Sound>("EnemyDieSound")->createInstance()->play();
-		return;
-	}
-
-	const auto delta = glfwGetTime() - stateChangedAt_;
-	switch (status_) {
-	case State::Moving: {
-		if (delta > glm::two_pi<double>() / MOVE_DURATION_FACTOR) {
-			const auto& playerPos = playerEntity_->getPosition();
-			direction_ = glm::normalize(playerPos - getEntity().getPosition());
-			direction_.z = 0.f;
-
-			if (glm::dot(direction_, glm::vec3(0, 1.f, 0)) < 1.f - glm::epsilon<float>()) {
-				targetQuat_ = glm::rotation(glm::vec3(0, -1.f, 0), direction_);
-			} else {
-				targetQuat_ = glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1.f));
-			}
-
-			drawer_->stopAnimation();
-
-			stateChangedAt_ = glfwGetTime();
-			initPos_ = getEntity().getPosition();
-			status_ = State::ChangingDirection;
-		} else {
-			const auto factor = static_cast<float>(std::max(0.0, (1.0 - std::cos(MOVE_DURATION_FACTOR * delta)) / 2.0));
-			body_->setVelocity(SPEED * factor * direction_);
-			drawer_->enableAnimation("", false, 3.0);
-		}
-		break;
-	}
-	case State::ChangingDirection:
-		if (delta < CHANGE_DIR_DURATION) {
-			const auto factor = static_cast<float>(delta / CHANGE_DIR_DURATION / glm::two_pi<double>());
-			getEntity().setQuaternion(glm::slerp(getEntity().getQuaternion(), targetQuat_, factor));
-			const auto d = std::fmod(delta, CHANGE_DIR_DURATION / 2);
-			getEntity().setPosition(initPos_ - glm::vec3(0, 0, 10.f * d * (d - CHANGE_DIR_DURATION / 2)));
-		} else {
-			stateChangedAt_ = glfwGetTime();
-			status_ = State::Moving;
-		}
-		break;
+	if (parent.health_->isDead()) {
+		changeState<Dead<Slime>>();
+	} else if (getElapsed() > glm::two_pi<double>() / MOVE_DURATION_FACTOR) {
+		changeState<Turning>();
+	} else {
+		const auto factor = static_cast<float>(std::max(0.0, (1.0 - std::cos(MOVE_DURATION_FACTOR * getElapsed())) / 2.0));
+		parent.body_->setVelocity(SPEED * factor * parent.direction_);
+		parent.drawer_->enableAnimation("", false, 3.0);
 	}
 }
 
-BigSlime::BigSlime() :
-	status_(State::Pausing),
-	stateChangedAt_(-HUGE_VAL) {}
+void Slime::Turning::start(Slime& parent) {
+	const auto& playerPos = parent.getChunk().getEntityByName("Player")->getPosition();
+	parent.direction_ = glm::normalize(playerPos - parent.getEntity().getPosition());
+	parent.direction_.z = 0.f;
+
+	if (glm::dot(parent.direction_, glm::vec3(0, 1.f, 0)) < 1.f - glm::epsilon<float>()) {
+		targetQuat_ = glm::rotation(glm::vec3(0, -1.f, 0), parent.direction_);
+	} else {
+		targetQuat_ = glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1.f));
+	}
+	initPos_ = parent.getEntity().getPosition();
+
+	parent.drawer_->stopAnimation();
+}
+
+void Slime::Turning::update(Slime& parent) {
+	static constexpr double CHANGE_DIR_DURATION = 1.0;
+
+	if (parent.health_->isDead()) {
+		changeState<Dead<Slime>>();
+	} else if (getElapsed() < CHANGE_DIR_DURATION) {
+		const auto factor = static_cast<float>(getElapsed() / CHANGE_DIR_DURATION / glm::two_pi<double>());
+		parent.getEntity().setQuaternion(glm::slerp(parent.getEntity().getQuaternion(), targetQuat_, factor));
+		const auto d = std::fmod(getElapsed(), CHANGE_DIR_DURATION / 2);
+		parent.getEntity().setPosition(initPos_ - glm::vec3(0, 0, 10.f * d * (d - CHANGE_DIR_DURATION / 2)));
+	} else {
+		changeState<Moving>();
+	}
+}
 
 void BigSlime::start() {
 	getEntity().setScale(0.8f * glm::one<glm::vec3>());
@@ -118,69 +101,56 @@ void BigSlime::start() {
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model_, 1.3f);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
-		if (status_ != State::Dead) {
-			const auto& entity = opponent->getEntity();
-			if (entity.getSelfMask() & Entity::Mask::Player) {
-				entity.getFirstComponent<Health>()->takeDamage(1);
-			}
-			if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-				getEntity().createComponent<DamageEffect>();
-			}
+		const auto& entity = opponent->getEntity();
+		if (entity.getSelfMask() & Entity::Mask::Player) {
+			entity.getFirstComponent<Health>()->takeDamage(1);
+		}
+		if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
+			getEntity().createComponent<DamageEffect>();
 		}
 	});
 
 	body_ = getEntity().createComponent<PhysicalBody>(collider);
 	health_ = getEntity().createComponent<Health>(5);
 
-	playerEntity_ = getChunk().getEntityByName("Player");
-
+	machine_.changeState<Pausing>();
 	drawer_->enableAnimation("", true, 1.0);
 }
 
 void BigSlime::update() {
-	if (status_ != State::Dead && health_->isDead()) {
-		status_ = State::Dead;
-		if (getEntity().hasComponent<DamageEffect>()) {
-			getEntity().getFirstComponent<DamageEffect>()->destroy();
-		}
-		getEntity().createComponent<ScatterEffect>([this] {
-			getEntity().destroy();
-		});
-		ResourceSystem::getInstance().get<Sound>("EnemyDieSound")->createInstance()->play();
-		return;
-	}
+	machine_.update(*this);
+}
 
-	const auto delta = glfwGetTime() - stateChangedAt_;
-	switch (status_) {
-	case State::Pausing:
-		if (delta > 0.5) {
-			drawer_->enableAnimation("", true, 1.0);
-
-			const auto diff = playerEntity_->getPosition().xy() - getEntity().getPosition().xy();
-			const auto dir = glm::vec3(glm::normalize(diff), 0);
-			getEntity().setQuaternion(geometry::directionToQuaternion(dir, {0, -1.f, 0}));
-			static constexpr auto SPEED = 5.f;
-			body_->setVelocity(SPEED * dir + glm::vec3(0, 0, 15.f));
-
-			status_ = State::Jumping;
-			stateChangedAt_ = glfwGetTime();
-		}
-		break;
-	case State::Jumping:
-		if (std::abs(body_->getVelocity().z) < glm::epsilon<float>()) {
-			ResourceSystem::getInstance().createOrGet<Sound>("SlimeJumpSound", "slime_jump.ogg")->createInstance()->play();
-			drawer_->stopAnimation();
-
-			status_ = State::Pausing;
-			stateChangedAt_ = glfwGetTime();
-		}
-		break;
+void BigSlime::Pausing::update(BigSlime& parent) {
+	if (parent.health_->isDead()) {
+		changeState<Dead<BigSlime>>();
+	} else if (getElapsed() > 0.5) {
+		changeState<Jumping>();
 	}
 }
 
-Rabbit::Rabbit() :
-	status_(State::Pausing),
-	stateChangedAt_(-HUGE_VAL) {}
+void BigSlime::Jumping::start(BigSlime& parent) {
+	static constexpr auto SPEED = 5.f;
+
+	parent.drawer_->enableAnimation("", true, 1.0);
+
+	auto& entity = parent.getEntity();
+	const auto& playerPos = parent.getChunk().getEntityByName("Player")->getPosition().xy();
+	const auto diff = playerPos - entity.getPosition().xy();
+	const auto dir = glm::vec3(glm::normalize(diff), 0);
+	entity.setQuaternion(geometry::directionToQuaternion(dir, {0, -1.f, 0}));
+	parent.body_->setVelocity(SPEED * dir + glm::vec3(0, 0, 15.f));
+}
+
+void BigSlime::Jumping::update(BigSlime& parent) {
+	if (parent.health_->isDead()) {
+		changeState<Dead<BigSlime>>();
+	} else if (std::abs(parent.body_->getVelocity().z) < glm::epsilon<float>()) {
+		ResourceSystem::getInstance().createOrGet<Sound>("SlimeJumpSound", "slime_jump.ogg")->createInstance()->play();
+		parent.drawer_->stopAnimation();
+		changeState<Pausing>();
+	}
+}
 
 void Rabbit::start() {
 	getEntity().setSelfMask(Entity::Mask::Enemy);
@@ -196,102 +166,105 @@ void Rabbit::start() {
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model_);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
-		if (status_ != State::Dead) {
-			const auto& entity = opponent->getEntity();
-			if (entity.getSelfMask() & Entity::Mask::Player) {
-				entity.getFirstComponent<Health>()->takeDamage(1);
-			}
-			if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-				getEntity().createComponent<DamageEffect>();
-			}
+		const auto& entity = opponent->getEntity();
+		if (entity.getSelfMask() & Entity::Mask::Player) {
+			entity.getFirstComponent<Health>()->takeDamage(1);
+		}
+		if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
+			getEntity().createComponent<DamageEffect>();
 		}
 	});
 
 	body_ = getEntity().createComponent<PhysicalBody>(collider);
 	health_ = getEntity().createComponent<Health>(3);
 
-	playerEntity_ = getChunk().getEntityByName("Player");
+	machine_.changeState<Pausing>();
 }
 
 void Rabbit::update() {
-	if (status_ != State::Dead && health_->isDead()) {
-		status_ = State::Dead;
-		if (getEntity().hasComponent<DamageEffect>()) {
-			getEntity().getFirstComponent<DamageEffect>()->destroy();
-		}
-		getEntity().createComponent<ScatterEffect>([this] {
-			getEntity().destroy();
-		});
-		ResourceSystem::getInstance().get<Sound>("EnemyDieSound")->createInstance()->play();
-		return;
-	}
+	machine_.update(*this);
+}
 
-	static constexpr auto JUMP_ANIM_START_TIME = 190;
+void Rabbit::Jumping::start(Rabbit& parent) {
+	const auto& pos = parent.getEntity().getPosition();
+	const auto& playerPos = parent.getChunk().getEntityByName("Player")->getPosition();
 
-	const auto delta = glfwGetTime() - stateChangedAt_;
-	switch (status_) {
-	case State::Jumping: {
-		if (!drawer_->isPlayingAnimation()) {
-			status_ = State::Pausing;
-			stateChangedAt_ = glfwGetTime();
-		} else {
-			static constexpr auto SPEED = 5.f;
-			body_->setVelocity(SPEED * direction_);
-		}
-		break;
-	}
-	case State::Pausing: {
-		static constexpr auto PAUSE_DURATION = 0.4;
-		if (delta > PAUSE_DURATION) {
-			static constexpr auto ATTACK_RADIUS = 5.f;
-			if (glm::distance(getEntity().getPosition(), playerEntity_->getPosition()) < ATTACK_RADIUS) {
-				status_ = State::PreAttack;
-				drawer_->enableAnimation("", false, 6.0);
-			} else {
-				status_ = State::Jumping;
-				drawer_->enableAnimation("", false, 3.0, JUMP_ANIM_START_TIME);
-				direction_ = glm::normalize(
-					glm::vec3((playerEntity_->getPosition() - getEntity().getPosition()).xy(), 0));
-				getEntity().setQuaternion(geometry::directionToQuaternion(direction_, {0, -1.f, 0}));
-			}
-			stateChangedAt_ = glfwGetTime();
-		}
-		break;
-	}
-	case State::PreAttack:
-		if (drawer_->getCurrentAnimationFrame() >= 40) {
-			status_ = State::Attacking;
-			attackEntity_ = getChunk().createEntity(
-				NameGenerator::generate("RabbitAttack"));
-			attackEntity_->setSelfMask(Entity::Mask::EnemyAttack);
-			attackEntity_->setFilterMask(Entity::Mask::Player);
-			const auto right = glm::cross(direction_, glm::vec3(0, 0, 1.f));
-			attackEntity_->setPosition(getEntity().getPosition()
-				+ 2.f * glm::normalize(direction_ + right));
-			const auto collider = attackEntity_->createComponent<SphereCollider>(3.f);
-			collider->setGhost(true);
-			collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
-				attackEntity_->destroy();
-				opponent->getEntity().getFirstComponent<Health>()->takeDamage(1);
-			});
-			ResourceSystem::getInstance().createOrGet<Sound>("RabbitAttackSound", "rabbit_attack.ogg")->createInstance()->play();
-		}
-		break;
-	case State::Attacking:
-		if (drawer_->getCurrentAnimationFrame() >= JUMP_ANIM_START_TIME) {
-			attackEntity_->destroy();
-			drawer_->stopAnimation();
+	parent.drawer_->enableAnimation("", false, 3.0, JUMP_ANIM_START_TIME);
+	parent.direction_ = glm::normalize(glm::vec3((playerPos - pos).xy(), 0));
+	parent.getEntity().setQuaternion(geometry::directionToQuaternion(parent.direction_, {0, -1.f, 0}));
+}
 
-			status_ = State::Pausing;
-			stateChangedAt_ = glfwGetTime();
-		}
-		break;
+void Rabbit::Jumping::update(Rabbit& parent) {
+	if (parent.health_->isDead()) {
+		changeState<Dead<Rabbit>>();
+	} else if (parent.drawer_->isPlayingAnimation()) {
+		static constexpr auto SPEED = 5.f;
+		parent.body_->setVelocity(SPEED * parent.direction_);
+	} else {
+		changeState<Pausing>();
 	}
 }
 
-Crab::Crab() :
-	status_(State::Pausing),
-	stateChangedAt_(-HUGE_VAL) {}
+void Rabbit::Pausing::start(Rabbit& parent) {
+	parent.drawer_->stopAnimation();
+}
+
+void Rabbit::Pausing::update(Rabbit& parent) {
+	static constexpr auto PAUSE_DURATION = 0.4;
+
+	if (parent.health_->isDead()) {
+		changeState<Dead<Rabbit>>();
+	} else if (getElapsed() > PAUSE_DURATION) {
+		static constexpr auto ATTACK_RADIUS = 5.f;
+
+		const auto& pos = parent.getEntity().getPosition();
+		const auto& playerPos = parent.getChunk().getEntityByName("Player")->getPosition();
+
+		if (glm::distance(pos, playerPos) < ATTACK_RADIUS) {
+			changeState<PreAttack>();
+		} else {
+			changeState<Jumping>();
+		}
+	}
+}
+
+void Rabbit::PreAttack::start(Rabbit& parent) {
+	parent.drawer_->enableAnimation("", false, 6.0);
+}
+
+void Rabbit::PreAttack::update(Rabbit& parent) {
+	if (parent.health_->isDead()) {
+		changeState<Dead<Rabbit>>();
+	} else if (parent.drawer_->getCurrentAnimationFrame() >= 40) {
+		changeState<Attacking>();
+	}
+}
+
+void Rabbit::Attacking::start(Rabbit& parent) {
+	attackEntity_ = parent.getChunk().createEntity(
+		NameGenerator::generate("RabbitAttack"));
+	attackEntity_->setSelfMask(Entity::Mask::EnemyAttack);
+	attackEntity_->setFilterMask(Entity::Mask::Player);
+	const auto right = glm::cross(parent.direction_, glm::vec3(0, 0, 1.f));
+	attackEntity_->setPosition(parent.getEntity().getPosition()
+		+ 2.f * glm::normalize(parent.direction_ + right));
+	const auto collider = attackEntity_->createComponent<SphereCollider>(3.f);
+	collider->setGhost(true);
+	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
+		opponent->getEntity().getFirstComponent<Health>()->takeDamage(1);
+		attackEntity_->destroy();
+	});
+	ResourceSystem::getInstance().createOrGet<Sound>("RabbitAttackSound", "rabbit_attack.ogg")->createInstance()->play();
+}
+
+void Rabbit::Attacking::update(Rabbit& parent) {
+	if (parent.health_->isDead()) {
+		changeState<Dead<Rabbit>>();
+	} else if (parent.drawer_->getCurrentAnimationFrame() >= JUMP_ANIM_START_TIME) {
+		attackEntity_->destroy();
+		changeState<Pausing>();
+	}
+}
 
 void Crab::start() {
 	getEntity().setSelfMask(Entity::Mask::Enemy);
@@ -307,105 +280,107 @@ void Crab::start() {
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model_);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
-		if (status_ != State::Dead) {
-			const auto& entity = opponent->getEntity();
-			if (entity.getSelfMask() & Entity::Mask::Player) {
-				entity.getFirstComponent<Health>()->takeDamage(1);
-			}
-			if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-				getEntity().createComponent<DamageEffect>();
-			}
+		const auto& entity = opponent->getEntity();
+		if (entity.getSelfMask() & Entity::Mask::Player) {
+			entity.getFirstComponent<Health>()->takeDamage(1);
+		}
+		if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
+			getEntity().createComponent<DamageEffect>();
 		}
 	});
 
 	body_ = getEntity().createComponent<PhysicalBody>(collider);
-
 	health_ = getEntity().createComponent<Health>(3);
 
-	playerEntity_ = getChunk().getEntityByName("Player");
+	machine_.changeState<Pausing>();
 }
 
 void Crab::update() {
-	if (status_ != State::Dead && health_->isDead()) {
-		status_ = State::Dead;
-		if (getEntity().hasComponent<DamageEffect>()) {
-			getEntity().getFirstComponent<DamageEffect>()->destroy();
-		}
-		getEntity().createComponent<ScatterEffect>([this] {
-			getEntity().destroy();
-		});
-		ResourceSystem::getInstance().get<Sound>("EnemyDieSound")->createInstance()->play();
-		return;
-	}
+	machine_.update(*this);
+}
 
-	static const auto ATTACK_ANIM_START = 50;
-	const auto delta = glfwGetTime() - stateChangedAt_;
-	switch (status_) {
-	case State::Pausing: {
-		drawer_->stopAnimation();
-		static constexpr auto PAUSE_DURATION = 0.2;
-		if (delta > PAUSE_DURATION) {
-			static constexpr auto ATTACK_RADIUS = 5.f;
-			if (glm::distance(getEntity().getPosition(), playerEntity_->getPosition()) < ATTACK_RADIUS) {
-				status_ = State::PreAttack;
-				drawer_->enableAnimation("", false, 1.0, ATTACK_ANIM_START);
-				getEntity().setQuaternion(geometry::directionToQuaternion(direction_, {0, -1.f, 0}));
-			} else {
-				status_ = State::Moving;
-				drawer_->enableAnimation("", false, 3.0);
-				direction_ = glm::normalize(
-					glm::vec3((playerEntity_->getPosition() - getEntity().getPosition()).xy(), 0));
-				getEntity().setQuaternion(geometry::directionToQuaternion(direction_, {1.f, 0, 0}));
-			}
-			stateChangedAt_ = glfwGetTime();
-		}
-		break;
-	}
-	case State::Moving: {
-		if (drawer_->getCurrentAnimationFrame() >= ATTACK_ANIM_START) {
-			status_ = State::Pausing;
-			stateChangedAt_ = glfwGetTime();
+void Crab::Pausing::start(Crab& parent) {
+	parent.drawer_->stopAnimation();
+}
+
+void Crab::Pausing::update(Crab& parent) {
+	static constexpr auto PAUSE_DURATION = 0.2;
+
+	if (parent.health_->isDead()) {
+		changeState<Dead<Crab>>();
+	} else if (getElapsed() > PAUSE_DURATION) {
+		static constexpr auto ATTACK_RADIUS = 5.f;
+
+		const auto& pos = parent.getEntity().getPosition();
+		const auto& playerPos = parent.getChunk().getEntityByName("Player")->getPosition();
+		if (glm::distance(pos, playerPos) < ATTACK_RADIUS) {
+			changeState<PreAttack>();
 		} else {
-			static constexpr auto SPEED = 3.f;
-			const auto factor = static_cast<float>(std::max(0.0, (1.0 - std::cos(glm::two_pi<double>() * delta * 24.0 * SPEED / ATTACK_ANIM_START)) / 2.0));
-			body_->setVelocity(SPEED * factor * direction_);
+			changeState<Moving>();
 		}
-		break;
-	}
-	case State::PreAttack:
-		if (drawer_->getCurrentAnimationFrame() >= 60) {
-			attackEntity_ = getChunk().createEntity(
-				NameGenerator::generate("CrabAttack"));
-			attackEntity_->setSelfMask(Entity::Mask::EnemyAttack);
-			attackEntity_->setFilterMask(Entity::Mask::Player);
-			attackEntity_->setPosition(getEntity().getPosition() + 2.f * direction_);
-			const auto collider = attackEntity_->createComponent<SphereCollider>(3.f);
-			collider->setGhost(true);
-			collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
-				attackEntity_->destroy();
-				opponent->getEntity().getFirstComponent<Health>()->takeDamage(1);
-			});
-
-			status_ = State::Attacking;
-			stateChangedAt_ = glfwGetTime();
-		}
-		break;
-	case State::Attacking:
-		if (drawer_->getCurrentAnimationFrame() >= 75) {
-			attackEntity_->destroy();
-			drawer_->stopAnimation();
-
-			status_ = State::Pausing;
-			stateChangedAt_ = glfwGetTime();
-		}
-		break;
 	}
 }
 
-Dragon::Dragon() :
-	status_(State::Hovering),
-	stateChangedAt_(glfwGetTime()) {
+void Crab::Moving::start(Crab& parent) {
+	parent.drawer_->enableAnimation("", false, 3.0);
 
+	const auto& pos = parent.getEntity().getPosition();
+	const auto& playerPos = parent.getChunk().getEntityByName("Player")->getPosition();
+
+	parent.direction_ = glm::normalize(
+		glm::vec3((playerPos - pos).xy(), 0));
+	parent.getEntity().setQuaternion(geometry::directionToQuaternion(parent.direction_, {1.f, 0, 0}));
+}
+
+void Crab::Moving::update(Crab& parent) {
+	if (parent.health_->isDead()) {
+		changeState<Dead<Crab>>();
+	} else if (parent.drawer_->getCurrentAnimationFrame() >= ATTACK_ANIM_START) {
+		changeState<Pausing>();
+	} else {
+		static constexpr auto SPEED = 3.f;
+		const auto factor = static_cast<float>(std::max(0.0, (1.0 - std::cos(glm::two_pi<double>() * getElapsed() * 24.0 * SPEED / ATTACK_ANIM_START)) / 2.0));
+		parent.body_->setVelocity(SPEED * factor * parent.direction_);
+	}
+}
+
+void Crab::PreAttack::start(Crab& parent) {
+	parent.drawer_->enableAnimation("", false, 1.0, ATTACK_ANIM_START);
+	parent.getEntity().setQuaternion(geometry::directionToQuaternion(parent.direction_, {0, -1.f, 0}));
+}
+
+void Crab::PreAttack::update(Crab& parent) {
+	if (parent.health_->isDead()) {
+		changeState<Dead<Crab>>();
+	} else if (parent.drawer_->getCurrentAnimationFrame() >= 60) {
+		changeState<Attacking>();
+	}
+}
+
+void Crab::Attacking::start(Crab& parent) {
+	attackEntity_ = parent.getChunk().createEntity(
+		NameGenerator::generate("CrabAttack"));
+	attackEntity_->setSelfMask(Entity::Mask::EnemyAttack);
+	attackEntity_->setFilterMask(Entity::Mask::Player);
+	attackEntity_->setPosition(parent.getEntity().getPosition() + 2.f * parent.direction_);
+	const auto collider = attackEntity_->createComponent<SphereCollider>(3.f);
+	collider->setGhost(true);
+	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
+		attackEntity_->destroy();
+		opponent->getEntity().getFirstComponent<Health>()->takeDamage(1);
+	});
+}
+
+void Crab::Attacking::update(Crab& parent) {
+	if (parent.health_->isDead()) {
+		changeState<Dead<Crab>>();
+	} else if (parent.drawer_->getCurrentAnimationFrame() >= 75) {
+		attackEntity_->destroy();
+		changeState<Pausing>();
+	}
+}
+
+Dragon::Dragon() {
 	std::random_device randomDevice;
 	engine_ = std::mt19937(randomDevice());
 }
@@ -425,14 +400,12 @@ void Dragon::start() {
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model_);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
-		if (status_ != State::Dead) {
-			const auto& entity = opponent->getEntity();
-			if (entity.getSelfMask() & Entity::Mask::Player) {
-				entity.getFirstComponent<Health>()->takeDamage(1);
-			}
-			if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-				getEntity().createComponent<DamageEffect>();
-			}
+		const auto& entity = opponent->getEntity();
+		if (entity.getSelfMask() & Entity::Mask::Player) {
+			entity.getFirstComponent<Health>()->takeDamage(1);
+		}
+		if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
+			getEntity().createComponent<DamageEffect>();
 		}
 	});
 
@@ -441,178 +414,215 @@ void Dragon::start() {
 
 	health_ = getEntity().createComponent<Health>(15);
 
-	playerEntity_ = getChunk().getEntityByName("Player");
-
 	drawer_->enableAnimation("", true, 1.0);
+	machine_.changeState<Hovering>();
 }
 
 void Dragon::update() {
-	if (status_ != State::Dead && health_->isDead()) {
-		status_ = State::Dead;
-		if (getEntity().hasComponent<DamageEffect>()) {
-			getEntity().getFirstComponent<DamageEffect>()->destroy();
-		}
-		getEntity().createComponent<ScatterEffect>([this] {
-			getEntity().destroy();
-			SceneManager::getInstance().changeScene<GameClearScene>(false);
-		});
-		ResourceSystem::getInstance().get<Sound>("EnemyDieSound")->createInstance()->play();
-		return;
-	}
+	machine_.update(*this);
+}
 
-	static const float HILL_HEIGHT = 8.f;
-	static const float INIT_HEIGHT = 10.f;
+void Dragon::Hovering::start(Dragon& parent) {
+	parent.body_->setVelocity(glm::zero<glm::vec3>());
+	parent.lookAtPlayer();
+}
 
-	const auto animSpeed = (health_->get() > 5) ? 1.0 : 0.7;
+void Dragon::Hovering::update(Dragon& parent) {
+	parent.loopHoveringAnimation();
 
-	const auto& playerPos = playerEntity_->getPosition();
-	const double playerIsOnHill = playerPos.z > HILL_HEIGHT;
-	const auto& pos = getEntity().getPosition();
-
-	switch (status_) {
-	case State::Hovering:
-	case State::Moving:
-	case State::Ascending:
-	case State::Descending:
-		if (drawer_->getCurrentAnimationFrame() >= 30) {
-			drawer_->stopAnimation();
-			drawer_->enableAnimation("", false, animSpeed);
-		}
-		break;
-	}
-
-	const auto delta = glfwGetTime() - stateChangedAt_;
-	switch (status_) {
-	case State::Hovering:
-		if (delta > 2.0) {
-			std::bernoulli_distribution bernoulli;
-			if (bernoulli(engine_)) {
-				static const auto MARGIN = 5.f;
-				static const auto OFFSET = 10.f;
-
-				const auto& aabb = getChunk().getGlobalAABB();
-				glm::vec2 targetPos;
-				if (std::bernoulli_distribution()(engine_)) {
-					std::uniform_real_distribution<float> dist(aabb.min.x + MARGIN, aabb.max.x - MARGIN);
-					targetPos = {dist(engine_), aabb.max.y + OFFSET};
-				} else {
-					std::uniform_real_distribution<float> dist(aabb.min.y + MARGIN, aabb.max.y - MARGIN);
-					targetPos = {aabb.max.x + OFFSET, dist(engine_)};
-				}
-
-				static constexpr auto SPEED = 10.f;
-
-				direction_ = glm::vec3(glm::normalize(targetPos - pos.xy()), 0);
-				body_->setVelocity(SPEED * direction_);
-				getEntity().setQuaternion(geometry::directionToQuaternion(direction_, {0, -1.f, 0}));
-				targetDelta_ = glm::distance(targetPos, pos.xy()) / SPEED;
-
-				status_ = State::Moving;
-			} else {
-				body_->setVelocity(glm::vec3(0, 0, -1));
-				targetDelta_ = std::abs(pos.z - HILL_HEIGHT);
-
-				status_ = State::Descending;
-			}
-			stateChangedAt_ = glfwGetTime();
+	if (parent.health_->isDead()) {
+		changeState<Dead>();
+	} else if (getElapsed() > 2.0) {
+		if (std::bernoulli_distribution()(parent.engine_)) {
+			changeState<Moving>();
 		} else {
-			lookAtPlayer();
+			changeState<Descending>();
 		}
-		break;
-	case State::Moving:
-		if (delta >= targetDelta_) {
-			body_->setVelocity(glm::zero<glm::vec3>());
-			lookAtPlayer();
-
-			status_ = State::PreFire;
-			stateChangedAt_ = glfwGetTime();
-		}
-		break;
-	case State::PreFire:
-		if (drawer_->getCurrentAnimationFrame() > 50) {
-			attackEntity_ = getChunk().createEntity(
-				NameGenerator::generate("DragonFire"));
-			attackEntity_->setSelfMask(Entity::Mask::EnemyAttack);
-			attackEntity_->setFilterMask(Entity::Mask::Player | Entity::Mask::StageObject);
-			const auto origin = pos + glm::vec3(8.f * direction_.xy(), -1.f);
-			attackEntity_->setPosition(origin);
-
-			constexpr auto BALL_MODEL = "fire_ball.obj";
-			attackEntity_->createComponent<ModelDrawer>(
-				ResourceSystem::getInstance().createOrGet<Model>(BALL_MODEL, BALL_MODEL));
-
-			const auto collider = attackEntity_->createComponent<SphereCollider>(1.f);
-			collider->setGhost(true);
-			collider->registerCallback([this] (std::shared_ptr<Collider> opponent) {
-				const auto& entity = opponent->getEntity();
-				if (entity.getSelfMask() & Entity::Mask::Player) {
-					entity.getFirstComponent<Health>()->takeDamage(1);
-				}
-
-				attackEntity_->destroy();
-			});
-
-			const auto body = attackEntity_->createComponent<PhysicalBody>(collider);
-			body->setReceiveGravity(false);
-			const auto theta = std::atan2(std::abs(playerPos.z - origin.z), glm::distance(playerPos.xy(), origin.xy()));
-			const auto velocity = direction_ - glm::vec3(0, 0, std::tan(theta));
-			body->setVelocity(15.f * velocity);
-			attackEntity_->setQuaternion(geometry::directionToQuaternion(glm::normalize(velocity), {0, -1.f, 0}));
-
-			ResourceSystem::getInstance().createOrGet<Sound>(
-				"DragonFireSound", "dragon_fire.ogg")->createInstance()->play();
-
-			status_ = State::PostFire;
-			stateChangedAt_ = glfwGetTime();
-		}
-		break;
-	case State::PostFire:
-		if (drawer_->getCurrentAnimationFrame() > 60) {
-			status_ = State::Hovering;
-			stateChangedAt_ = glfwGetTime();
-		}
-		break;
-	case State::Descending:
-		if (delta >= targetDelta_) {
-			body_->setVelocity(glm::zero<glm::vec3>());
-			lookAtPlayer();
-			static constexpr auto GLIDE_FRAME = 35;
-			drawer_->enableAnimation("", false, 0.1, GLIDE_FRAME);
-
-			static constexpr float TACKLE_SPEED = 25.f;
-			body_->setVelocity(TACKLE_SPEED * direction_);
-			targetDelta_ = 2.0f * glm::distance(playerPos, pos) / TACKLE_SPEED;
-
-			status_ = State::Tackling;
-			stateChangedAt_ = glfwGetTime();
-		}
-		break;
-	case State::Tackling:
-		drawer_->stopAnimation();
-		if (delta >= targetDelta_) {
-			body_->setVelocity(glm::vec3(0, 0, 1.f));
-			drawer_->enableAnimation("", false, animSpeed);
-			targetDelta_ = glm::abs(pos.z - INIT_HEIGHT);
-
-			status_ = State::Ascending;
-			stateChangedAt_ = glfwGetTime();
-		}
-		break;
-	case State::Ascending:
-		if (delta >= targetDelta_) {
-			body_->setVelocity(glm::zero<glm::vec3>());
-			lookAtPlayer();
-
-			status_ = State::Hovering;
-			stateChangedAt_ = glfwGetTime();
-		}
-		break;
+	} else {
+		parent.lookAtPlayer();
 	}
 }
 
+void Dragon::Moving::start(Dragon& parent) {
+	static const auto MARGIN = 5.f;
+	static const auto OFFSET = 10.f;
+
+	const auto& aabb = parent.getChunk().getGlobalAABB();
+	glm::vec2 targetPos;
+	if (std::bernoulli_distribution()(parent.engine_)) {
+		std::uniform_real_distribution<float> dist(aabb.min.x + MARGIN, aabb.max.x - MARGIN);
+		targetPos = {dist(parent.engine_), aabb.max.y + OFFSET};
+	} else {
+		std::uniform_real_distribution<float> dist(aabb.min.y + MARGIN, aabb.max.y - MARGIN);
+		targetPos = {aabb.max.x + OFFSET, dist(parent.engine_)};
+	}
+
+	static constexpr auto SPEED = 10.f;
+
+	const auto& pos = parent.getEntity().getPosition();
+
+	parent.direction_ = glm::vec3(glm::normalize(targetPos - pos.xy()), 0);
+	parent.body_->setVelocity(SPEED * parent.direction_);
+	parent.getEntity().setQuaternion(geometry::directionToQuaternion(parent.direction_, {0, -1.f, 0}));
+	targetDelta_ = glm::distance(targetPos, pos.xy()) / SPEED;
+}
+
+void Dragon::Moving::update(Dragon& parent) {
+	parent.loopHoveringAnimation();
+
+	if (parent.health_->isDead()) {
+		changeState<Dead>();
+	} else if (getElapsed() >= targetDelta_) {
+		changeState<PreFire>();
+	}
+}
+
+void Dragon::PreFire::start(Dragon& parent) {
+	parent.body_->setVelocity(glm::zero<glm::vec3>());
+	parent.lookAtPlayer();
+}
+
+void Dragon::PreFire::update(Dragon& parent) {
+	if (parent.health_->isDead()) {
+		changeState<Dead>();
+	} else if (parent.drawer_->getCurrentAnimationFrame() > 50) {
+		changeState<PostFire>();
+	}
+}
+
+void Dragon::PostFire::start(Dragon& parent) {
+	const auto& pos = parent.getEntity().getPosition();
+	const auto& playerPos = parent.getChunk().getEntityByName("Player")->getPosition();
+
+	const auto attackEntity = parent.getChunk().createEntity(
+		NameGenerator::generate("DragonFire"));
+	attackEntity->setSelfMask(Entity::Mask::EnemyAttack);
+	attackEntity->setFilterMask(Entity::Mask::Player | Entity::Mask::StageObject);
+	const auto origin = pos + glm::vec3(8.f * parent.direction_.xy(), -1.f);
+	attackEntity->setPosition(origin);
+
+	constexpr auto BALL_MODEL = "fire_ball.obj";
+	attackEntity->createComponent<ModelDrawer>(
+		ResourceSystem::getInstance().createOrGet<Model>(BALL_MODEL, BALL_MODEL));
+
+	const auto collider = attackEntity->createComponent<SphereCollider>(1.f);
+	collider->setGhost(true);
+	collider->registerCallback([this, attackEntity](std::shared_ptr<Collider> opponent) {
+		const auto& entity = opponent->getEntity();
+		if (entity.getSelfMask() & Entity::Mask::Player) {
+			entity.getFirstComponent<Health>()->takeDamage(1);
+		}
+
+		attackEntity->destroy();
+	});
+
+	const auto body = attackEntity->createComponent<PhysicalBody>(collider);
+	body->setReceiveGravity(false);
+	const auto theta = std::atan2(std::abs(playerPos.z - origin.z), glm::distance(playerPos.xy(), origin.xy()));
+	const auto velocity = parent.direction_ - glm::vec3(0, 0, std::tan(theta));
+	body->setVelocity(15.f * velocity);
+	attackEntity->setQuaternion(geometry::directionToQuaternion(glm::normalize(velocity), {0, -1.f, 0}));
+
+	ResourceSystem::getInstance().createOrGet<Sound>(
+		"DragonFireSound", "dragon_fire.ogg")->createInstance()->play();
+}
+
+void Dragon::PostFire::update(Dragon& parent) {
+	if (parent.health_->isDead()) {
+		changeState<Dead>();
+	} else if (parent.drawer_->getCurrentAnimationFrame() > 60) {
+		changeState<Hovering>();
+	}
+}
+
+void Dragon::Descending::start(Dragon& parent) {
+	static const float HILL_HEIGHT = 8.f;
+
+	parent.body_->setVelocity(glm::vec3(0, 0, -1));
+	targetDelta_ = std::abs(parent.getEntity().getPosition().z - HILL_HEIGHT);
+}
+
+void Dragon::Descending::update(Dragon& parent) {
+	parent.loopHoveringAnimation();
+
+	if (parent.health_->isDead()) {
+		changeState<Dead>();
+	} else if (getElapsed() >= targetDelta_) {
+		changeState<Tackling>();
+	}
+}
+
+void Dragon::Tackling::start(Dragon& parent) {
+	parent.body_->setVelocity(glm::zero<glm::vec3>());
+	parent.lookAtPlayer();
+	static constexpr auto GLIDE_FRAME = 35;
+	parent.drawer_->enableAnimation("", false, 0.1, GLIDE_FRAME);
+
+	static constexpr float TACKLE_SPEED = 25.f;
+	parent.body_->setVelocity(TACKLE_SPEED * parent.direction_);
+
+	const auto& pos = parent.getEntity().getPosition();
+	const auto& playerPos = parent.getChunk().getEntityByName("Player")->getPosition();
+	targetDelta_ = 2.0f * glm::distance(playerPos, pos) / TACKLE_SPEED;
+}
+
+void Dragon::Tackling::update(Dragon& parent) {
+	parent.drawer_->stopAnimation();
+
+	if (parent.health_->isDead()) {
+		changeState<Dead>();
+	} else if (getElapsed() >= targetDelta_) {
+		changeState<Ascending>();
+	}
+}
+
+void Dragon::Ascending::start(Dragon& parent) {
+	parent.body_->setVelocity(glm::vec3(0, 0, 1.f));
+
+	const auto animSpeed = (parent.health_->get() > 5) ? 1.0 : 0.7;
+	parent.drawer_->enableAnimation("", false, animSpeed);
+
+	static const float INIT_HEIGHT = 10.f;
+	targetDelta_ = glm::abs(parent.getEntity().getPosition().z - INIT_HEIGHT);
+}
+
+void Dragon::Ascending::update(Dragon& parent) {
+	if (parent.health_->isDead()) {
+		changeState<Dead>();
+	} else if (getElapsed() >= targetDelta_) {
+		changeState<Hovering>();
+	}
+}
+
+void Dragon::Dead::start(Dragon& parent) {
+	auto& entity = parent.getEntity();
+	if (entity.hasComponent<Collider>()) {
+		entity.getFirstComponent<Collider>()->clearCallbacks();
+	}
+	if (entity.hasComponent<DamageEffect>()) {
+		entity.getFirstComponent<DamageEffect>()->destroy();
+	}
+	entity.createComponent<ScatterEffect>([&entity] {
+		entity.destroy();
+		SceneManager::getInstance().changeScene<GameClearScene>(false);
+	});
+	ResourceSystem::getInstance().get<Sound>("EnemyDieSound")->createInstance()->play();
+}
+
 void Dragon::lookAtPlayer() {
-	direction_ = glm::vec3(glm::normalize(playerEntity_->getPosition().xy() - getEntity().getPosition().xy()), 0);
+	const auto& pos = getEntity().getPosition();
+	const auto& playerPos = getChunk().getEntityByName("Player")->getPosition();
+	direction_ = glm::vec3(glm::normalize(playerPos.xy() - pos.xy()), 0);
 	getEntity().setQuaternion(geometry::directionToQuaternion(direction_, {0, -1.f, 0}));
+}
+
+void Dragon::loopHoveringAnimation() {
+	if (!drawer_->isPlayingAnimation() || drawer_->getCurrentAnimationFrame() >= 30) {
+		drawer_->stopAnimation();
+
+		const auto animSpeed = (health_->get() > 5) ? 1.0 : 0.7;
+		drawer_->enableAnimation("", false, animSpeed);
+	}
 }
 
 TotemPoll::TotemPoll() : activated_(false) {}
@@ -643,4 +653,5 @@ void TotemPoll::update() {
 	}
 }
 
+}
 }
