@@ -560,6 +560,7 @@ void Dragon::Tackling::start(Dragon& parent) {
 
 	static constexpr float TACKLE_SPEED = 25.f;
 	parent.body_->setVelocity(TACKLE_SPEED * parent.direction_);
+	parent.body_->setGhost(true);
 
 	const auto& pos = parent.getEntity().getPosition();
 	const auto& playerPos = parent.getChunk().getEntityByName("Player")->getPosition();
@@ -577,6 +578,7 @@ void Dragon::Tackling::update(Dragon& parent) {
 }
 
 void Dragon::Ascending::start(Dragon& parent) {
+	parent.body_->setGhost(false);
 	parent.body_->setVelocity(glm::vec3(0, 0, 1.f));
 
 	const auto animSpeed = (parent.health_->get() > 5) ? 1.0 : 0.7;
