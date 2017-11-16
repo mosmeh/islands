@@ -184,7 +184,7 @@ void Input::Gamepad::update() {
 
 				const auto dir = glm::vec2(
 					state_.axes[GLFW_GAMEPAD_AXIS_LEFT_X],
-					(isDualShock4() ? 1 : -1) * state_.axes[GLFW_GAMEPAD_AXIS_LEFT_Y]);
+					state_.axes[GLFW_GAMEPAD_AXIS_LEFT_Y]);
 				if (glm::length2(dir) > DEADZONE_RADIUS_SQUARED) {
 					direction_ = glm::normalize(dir);
 				} else {
