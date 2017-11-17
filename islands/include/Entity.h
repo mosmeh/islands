@@ -74,7 +74,7 @@ private:
 	glm::vec3 position_, scale_;
 	glm::quat quaternion_;
 	glm::mat4 modelMatrix_;
-	std::vector<std::shared_ptr<Component>> components_;
+	std::list<std::shared_ptr<Component>> components_;
 	MaskType selfMask_, filterMask_;
 	bool destroyed_;
 

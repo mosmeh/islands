@@ -50,7 +50,7 @@ std::shared_ptr<Entity> Chunk::createEntity(const std::string& name) {
 	return entity;
 }
 
-const std::vector<std::shared_ptr<Entity>>& Chunk::getEntities() const {
+const std::list<std::shared_ptr<Entity>>& Chunk::getEntities() const {
 	return entities_;
 }
 
@@ -70,8 +70,8 @@ void Chunk::update() {
 	load();
 	
 	cleanEntities();
-	for (size_t i = 0; i < entities_.size(); ++i) {
-		entities_.at(i)->update();
+	for (const auto e : entities_) {
+		e->update();
 	}
 	cleanEntities();
 

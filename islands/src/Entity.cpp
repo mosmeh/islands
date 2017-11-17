@@ -62,8 +62,8 @@ glm::mat4 Entity::calculateMVPMatrix() const {
 
 void Entity::update() {
 	cleanComponents();
-	for (size_t i = 0; i < components_.size(); ++i) {
-		components_.at(i)->startAndUpdate();
+	for (const auto c : components_) {
+		c->startAndUpdate();
 	}
 	cleanComponents();
 }

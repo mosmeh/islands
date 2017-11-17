@@ -21,7 +21,7 @@ public:
 	void draw();
 
 	std::shared_ptr<Entity> createEntity(const std::string& name);
-	const std::vector<std::shared_ptr<Entity>>& getEntities() const;
+	const std::list<std::shared_ptr<Entity>>& getEntities() const;
 	std::shared_ptr<Entity> getEntityByName(const std::string& name) const;
 
 	const geometry::AABB& getGlobalAABB() const;
@@ -33,7 +33,7 @@ private:
 	float cameraOffset_;
 	std::shared_ptr<Sound> bgm_;
 	geometry::AABB aabb_;
-	std::vector<std::shared_ptr<Entity>> entities_;
+	std::list<std::shared_ptr<Entity>> entities_;
 
 	void loadImpl() override;
 	void cleanEntities();

@@ -15,6 +15,7 @@
 #include <queue>
 #include <unordered_map>
 #include <set>
+#include <list>
 #include <memory>
 #include <functional>
 #include <random>
