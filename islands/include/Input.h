@@ -86,7 +86,7 @@ private:
 	Keyboard keyboard_;
 	Gamepad gamepad_;
 	glm::vec2 direction_;
-	std::set<int> pressedKeys_;
+	std::unordered_set<int> pressedKeys_;
 
 	Input();
 };
