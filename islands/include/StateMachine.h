@@ -46,6 +46,8 @@ public:
 	void update(T& parent) {
 		if (current_) {
 			current_->startAndUpdate(parent);
+		} else {
+			throw std::exception("not initialized with state");
 		}
 	}
 
