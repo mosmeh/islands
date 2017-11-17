@@ -6,6 +6,7 @@
 #include "Physics.h"
 #include "Player.h"
 #include "Enemy.h"
+#include "SpecialObjects.h"
 #include "AssetArchive.h"
 
 glm::vec3 toVec3(const picojson::value& v) {
@@ -214,8 +215,17 @@ void Chunk::loadImpl() {
 				entity->createComponent<enemy::Crab>();
 			} else if (type == "dragon") {
 				entity->createComponent<enemy::Dragon>();
-			} else if (type == "totem_poll") {
-				entity->createComponent<enemy::TotemPoll>();
+			} else {
+				throw std::exception("not implemented");
+			}
+		}
+
+		if (prop.find("special") != prop.end()) {
+			const auto& specialProp = prop.at("special").get<picojson::object>();
+			
+			const auto& type = specialProp.at("type").get<std::string>();
+			if (type == "totem_poll") {
+				entity->createComponent<specialobj::TotemPoll>();
 			} else {
 				throw std::exception("not implemented");
 			}

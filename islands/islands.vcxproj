@@ -209,6 +209,7 @@
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Sound.cpp" />
+    <ClCompile Include="src\SpecialObjects.cpp" />
     <ClCompile Include="src\Sprite.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -290,6 +291,7 @@
     <ClInclude Include="include\Camera.h" />
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\Sound.h" />
+    <ClInclude Include="include\SpecialObjects.h" />
     <ClInclude Include="include\Sprite.h" />
     <ClInclude Include="include\StateMachine.h" />
     <ClInclude Include="include\stdafx.h" />
