@@ -27,7 +27,6 @@ private:
 	Window();
 	
 	void updateFramebufferSize(int width, int height);
-	static void framebufferSizeCallback(GLFWwindow*, int, int);
 };
 
 }

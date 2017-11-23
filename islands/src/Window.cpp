@@ -27,7 +27,9 @@ Window::Window() :
 	glViewport(0, 0, width_, height_);
 
 	glfwSetWindowAspectRatio(window_, 16, 9);
-	glfwSetFramebufferSizeCallback(window_, framebufferSizeCallback);
+	glfwSetFramebufferSizeCallback(window_, [](GLFWwindow*, int width, int height) {
+		getInstance().updateFramebufferSize(width, height);
+	});
 
 	sys::disableIME(window_);
 }
@@ -40,10 +42,6 @@ void Window::updateFramebufferSize(int width, int height) {
 	for (const auto callback : fbResizeCallbacks_) {
 		callback(width, height);
 	}
-}
-
-void Window::framebufferSizeCallback(GLFWwindow*, int width, int height) {
-	Window::getInstance().updateFramebufferSize(width, height);
 }
 
 Window& Window::getInstance() {
