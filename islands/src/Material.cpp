@@ -11,18 +11,12 @@ Material::Material(const std::string& name, const aiMaterial* material) :
 
 	aiColor3D diffuse;
 	if (material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse) == AI_SUCCESS) {
-		diffuseColor_.r = diffuse.r;
-		diffuseColor_.g = diffuse.g;
-		diffuseColor_.b = diffuse.b;
-	} else {
-		diffuseColor_.rgb = glm::vec3(1.f, 0, 1.f);
+		diffuseColor_.rgb = {diffuse.r, diffuse.g, diffuse.b};
 	}
 
 	ai_real opacity;
 	if (material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
 		diffuseColor_.a = opacity;
-	} else {
-		diffuseColor_.a = 1.f;
 	}
 
 }
