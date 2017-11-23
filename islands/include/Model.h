@@ -33,8 +33,10 @@ public:
 	ModelDrawer(std::shared_ptr<Model> model);
 	virtual ~ModelDrawer() = default;
 
+	void start() override;
 	void update() override;
 	void draw() override;
+	bool isOpaque() const override;
 
 	std::shared_ptr<Model> getModel() const;
 
@@ -49,7 +51,7 @@ public:
 
 protected:
 	std::shared_ptr<Model> model_;
-	bool visible_, cullFaceEnabled_;
+	bool opaque_, visible_, cullFaceEnabled_;
 	std::shared_ptr<Texture2D> lightmap_;
 
 	struct Animation {

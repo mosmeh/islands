@@ -6,11 +6,25 @@ namespace islands {
 Material::Material(const std::string& name, const aiMaterial* material) :
 	Resource(name),
 	program_(ResourceSystem::getInstance().createOrGet<Program>(
-		"DefaultProgram", "default.vert", "default.frag")) {
+		"DefaultProgram", "default.vert", "default.frag")),
+	diffuseColor_(1.f, 0, 1.f, 1.f) {
 
-	aiColor4D diffuse;
-	aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
-	diffuseColor_ = {diffuse.r, diffuse.g, diffuse.b, diffuse.a};
+	aiColor3D diffuse;
+	if (material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse) == AI_SUCCESS) {
+		diffuseColor_.r = diffuse.r;
+		diffuseColor_.g = diffuse.g;
+		diffuseColor_.b = diffuse.b;
+	} else {
+		diffuseColor_.rgb = glm::vec3(1.f, 0, 1.f);
+	}
+
+	ai_real opacity;
+	if (material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
+		diffuseColor_.a = opacity;
+	} else {
+		diffuseColor_.a = 1.f;
+	}
+
 }
 
 bool Material::isLoaded() const {
@@ -35,7 +49,7 @@ const glm::vec4& Material::getDiffuseColor() const {
 
 void Material::setLightmapTexture(std::shared_ptr<Texture2D> texture) {
 	lightmap_ = texture;
-	program_ = 	ResourceSystem::getInstance().createOrGet<Program>(
+	program_ = ResourceSystem::getInstance().createOrGet<Program>(
 		"TextureProgram", "default.vert", "texture.frag");
 }
 

@@ -96,8 +96,12 @@ void Chunk::draw() {
 	upload();
 
 	Camera::getInstance().setOffset(cameraOffset_);
+
 	for (const auto entity : entities_) {
-		entity->draw();
+		entity->drawOpaque();
+	}
+	for (const auto entity : entities_) {
+		entity->drawTransparent();
 	}
 }
 

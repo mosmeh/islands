@@ -19,6 +19,7 @@ void Slime::start() {
 	static constexpr auto MESH_FILENAME = "slime.dae";
 	model_ = ResourceSystem::getInstance().createOrGet<Model>(MESH_FILENAME, MESH_FILENAME);
 	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
+	drawer_->setCullFaceEnabled(false);
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model_);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
@@ -98,6 +99,7 @@ void BigSlime::start() {
 	static constexpr auto MESH_FILENAME = "big_slime.dae";
 	model_ = ResourceSystem::getInstance().createOrGet<Model>(MESH_FILENAME, MESH_FILENAME);
 	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
+	drawer_->setCullFaceEnabled(false);
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model_, 1.3f);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {

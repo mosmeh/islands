@@ -69,6 +69,8 @@ public:
 		draw();
 	}
 
+	virtual bool isOpaque() const = 0;
+
 protected:
 	virtual void update() {}
 	virtual void draw() = 0;

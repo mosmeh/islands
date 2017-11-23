@@ -14,6 +14,7 @@ public:
 	void start() override;
 	void update() override;
 	void draw() override;
+	bool isOpaque() const override;
 
 private:
 	const double duration_;
@@ -32,6 +33,7 @@ public:
 	void start() override;
 	void update() override;
 	void draw() override;
+	bool isOpaque() const override;
 
 private:
 	const FinishCallback callback_;

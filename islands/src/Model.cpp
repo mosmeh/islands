@@ -70,8 +70,18 @@ void Model::loadImpl() {
 
 ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
 	model_(model),
+	opaque_(true),
 	visible_(true),
 	cullFaceEnabled_(true) {}
+
+void ModelDrawer::start() {
+	for (const auto mesh : model_->getMeshes()) {
+		if (mesh->getMaterial()->getDiffuseColor().a < 1.f) {
+			opaque_ = false;
+			return;
+		}
+	}
+}
 
 void ModelDrawer::update() {
 	const auto elapsedTime = static_cast<float>(glfwGetTime() - anim_.startTime)
@@ -97,14 +107,14 @@ void ModelDrawer::update() {
 
 void ModelDrawer::draw() {
 	if (visible_) {
-		if (cullFaceEnabled_) {
-			glEnable(GL_CULL_FACE);
-		} else {
+		if (!cullFaceEnabled_) {
 			glDisable(GL_CULL_FACE);
+		}
+		if (!opaque_) {
+			glEnable(GL_BLEND);
 		}
 
 		const auto MVP = getEntity().calculateMVPMatrix();
-		std::stringstream ss;
 		for (const auto mesh : model_->getMeshes()) {
 			const auto material = mesh->getMaterial();
 			material->use();
@@ -120,7 +130,14 @@ void ModelDrawer::draw() {
 		if (!cullFaceEnabled_) {
 			glEnable(GL_CULL_FACE);
 		}
+		if (!opaque_) {
+			glDisable(GL_BLEND);
+		}
 	}
+}
+
+bool ModelDrawer::isOpaque() const {
+	return opaque_;
 }
 
 std::shared_ptr<Model> ModelDrawer::getModel() const {

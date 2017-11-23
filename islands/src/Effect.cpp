@@ -39,6 +39,10 @@ void DamageEffect::draw() {
 	}
 }
 
+bool DamageEffect::isOpaque() const {
+	return true;
+}
+
 ScatterEffect::ScatterEffect(const FinishCallback& callback) :
 	callback_(callback),
 	program_(ResourceSystem::getInstance().createOrGet<Program>(
@@ -79,6 +83,10 @@ void ScatterEffect::draw() {
 
 	glEnable(GL_CULL_FACE);
     glDisable(GL_BLEND);
+}
+
+bool ScatterEffect::isOpaque() const {
+	return false;
 }
 
 }

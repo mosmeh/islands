@@ -40,7 +40,8 @@ public:
 	glm::mat4 calculateMVPMatrix() const;
 
 	void update();
-	void draw() const;
+	void drawOpaque() const;
+	void drawTransparent() const;
 
 	Chunk& getChunk() const;
 

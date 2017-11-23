@@ -68,10 +68,22 @@ void Entity::update() {
 	cleanComponents();
 }
 
-void Entity::draw() const {
+void Entity::drawOpaque() const {
 	for (const auto c : components_) {
 		if (const auto drawable = std::dynamic_pointer_cast<Drawable>(c)) {
-			drawable->startAndDraw();
+			if (drawable->isOpaque()) {
+				drawable->startAndDraw();
+			}
+		}
+	}
+}
+
+void Entity::drawTransparent() const {
+	for (const auto c : components_) {
+		if (const auto drawable = std::dynamic_pointer_cast<Drawable>(c)) {
+			if (!drawable->isOpaque()) {
+				drawable->startAndDraw();
+			}
 		}
 	}
 }
