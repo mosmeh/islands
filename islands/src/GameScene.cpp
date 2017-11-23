@@ -72,7 +72,6 @@ GameScene::GameScene() :
 
 		const auto chunk = std::make_shared<Chunk>(filename, filename);
 		chunk->update();
-		chunk->update();
 		chunks_.emplace(coord, chunk);
 	}
 
