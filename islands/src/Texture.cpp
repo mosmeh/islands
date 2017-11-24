@@ -36,29 +36,48 @@ void Texture2D::loadImpl() {
 	static const std::string TEXTURE_DIR = "texture";
 
 	stbi_set_flip_vertically_on_load(TRUE);
-	int numComponents;
 
 #ifdef ENABLE_ASSET_ARCHIVE
 	const auto filePath = TEXTURE_DIR + '/' + filename_;
 
 	auto rawData = AssetArchive::getInstance().readFile(filePath);
-	data_ = stbi_load_from_memory(reinterpret_cast<stbi_uc*>(rawData.data()), rawData.size(),
-		&width_, &height_, &numComponents, STBI_rgb_alpha);
+	const auto buffer = reinterpret_cast<stbi_uc*>(rawData.data());
+	stbi_info_from_memory(buffer, rawData.size(), &width_, &height_, &channels_);
+	data_ = stbi_load_from_memory(buffer, rawData.size(),
+		&width_, &height_, &channels_, channels_);
 #else
 	const auto filePath = TEXTURE_DIR + sys::getFilePathSeparator() + filename_;
-	data_ = stbi_load(filePath.c_str(), &width_, &height_, &numComponents, STBI_rgb_alpha);
+	stbi_info(filePath.c_str(), &width_, &height_, &channels_);
+	data_ = stbi_load(filePath.c_str(), &width_, &height_, &channels_, channels_);
 #endif
 	if (!data_) {
 		SLOG << "stbi: " << stbi_failure_reason() << std::endl;
 		std::exit(EXIT_FAILURE);
 	}
-	assert(numComponents == 4);
 }
 
 void Texture2D::uploadImpl() {
 	glGenTextures(1, &id_);
 	glBindTexture(GL_TEXTURE_2D, id_);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width_, height_, 0, GL_RGBA, GL_UNSIGNED_BYTE, data_);
+
+	auto format = GL_RGBA;
+	switch (channels_) {
+	case 1:
+		format = GL_RED;
+		break;
+	case 2:
+		format = GL_RG;
+		break;
+	case 3:
+		format = GL_RGB;
+		break;
+	case 4:
+		format = GL_RGBA;
+		break;
+	default:
+		throw std::exception("not supported");
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width_, height_, 0, format, GL_UNSIGNED_BYTE, data_);
 
 	stbi_image_free(data_);
 	data_ = nullptr;

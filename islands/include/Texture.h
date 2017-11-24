@@ -18,7 +18,7 @@ public:
 
 private:
 	const std::string filename_;
-	int width_, height_;
+	int width_, height_, channels_;
 	unsigned char* data_;
 	GLuint id_;
 
