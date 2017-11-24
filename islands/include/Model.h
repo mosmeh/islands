@@ -41,7 +41,7 @@ public:
 	std::shared_ptr<Model> getModel() const;
 
 	void setVisible(bool visible);
-	void setLightmapTexture(std::shared_ptr<Texture2D> texture);
+	void setTexture(std::shared_ptr<Texture2D> texture);
 	void setCullFaceEnabled(bool enabled);
 
 	void enableAnimation(const std::string& name, bool loop = true, double tps = 24.0, size_t startFrame = 0);
@@ -52,7 +52,7 @@ public:
 protected:
 	std::shared_ptr<Model> model_;
 	bool opaque_, visible_, cullFaceEnabled_;
-	std::shared_ptr<Texture2D> lightmap_;
+	std::shared_ptr<Texture2D> texture_;
 
 	struct Animation {
 		std::string name;

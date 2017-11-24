@@ -1,6 +1,7 @@
 #include "Model.h"
 #include "Entity.h"
 #include "Camera.h"
+#include "ResourceSystem.h"
 #include "AssetArchive.h"
 #include "Log.h"
 #include "NameGenerator.h"
@@ -94,8 +95,11 @@ void ModelDrawer::update() {
 	}
 
 	for (const auto mesh : model_->getMeshes()) {
-		if (visible_ && lightmap_) {
-			mesh->getMaterial()->setLightmapTexture(lightmap_);
+		if (visible_ && texture_) {
+			const auto material = mesh->getMaterial();
+			material->setTexture(texture_);
+			material->setProgram(ResourceSystem::getInstance().createOrGet<Program>(
+				"TextureProgram", "default.vert", "texture.frag"));
 		}
 		if (anim_.playing) {
 			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
@@ -148,8 +152,8 @@ void ModelDrawer::setVisible(bool visible) {
 	visible_ = visible;
 }
 
-void ModelDrawer::setLightmapTexture(std::shared_ptr<Texture2D> texture) {
-	lightmap_ = texture;
+void ModelDrawer::setTexture(std::shared_ptr<Texture2D> texture) {
+	texture_ = texture;
 }
 
 void ModelDrawer::setCullFaceEnabled(bool enabled) {

@@ -20,7 +20,7 @@ public:
 	void use() const;
 
 	const glm::vec4& getDiffuseColor() const;
-	void setLightmapTexture(std::shared_ptr<Texture2D> texture);
+	void setTexture(std::shared_ptr<Texture2D> texture);
 
 	void setProgram(std::shared_ptr<Program> program);
 	std::shared_ptr<Program> getProgram() const;
@@ -28,7 +28,7 @@ public:
 private:
 	glm::vec4 diffuseColor_;
 	std::shared_ptr<Program> program_;
-	std::shared_ptr<Texture2D> lightmap_;
+	std::shared_ptr<Texture2D> texture_;
 };
 
 }

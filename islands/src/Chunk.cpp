@@ -171,7 +171,7 @@ void Chunk::loadImpl() {
 			}
 			if (modelProp.find("lightmap") != modelProp.end()) {
 				const auto& lightmapName = modelProp.at("lightmap").get<std::string>();
-				drawer->setLightmapTexture(ResourceSystem::getInstance().createOrGet<Texture2D>(
+				drawer->setTexture(ResourceSystem::getInstance().createOrGet<Texture2D>(
 					lightmapName, lightmapName));
 			}
 		}

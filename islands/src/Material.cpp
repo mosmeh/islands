@@ -22,7 +22,7 @@ Material::Material(const std::string& name, const aiMaterial* material) :
 }
 
 bool Material::isLoaded() const {
-	if (lightmap_ && !lightmap_->isLoaded()) {
+	if (texture_ && !texture_->isLoaded()) {
 		return false;
 	}
 	return true;
@@ -31,8 +31,8 @@ bool Material::isLoaded() const {
 void Material::use() const {
 	program_->use();
 	program_->setUniform("diffuse", diffuseColor_);
-	if (lightmap_) {
-		lightmap_->bind(0);
+	if (texture_) {
+		texture_->bind(0);
 		program_->setUniform("tex", static_cast<GLuint>(0));
 	}
 }
@@ -41,8 +41,8 @@ const glm::vec4& Material::getDiffuseColor() const {
 	return diffuseColor_;
 }
 
-void Material::setLightmapTexture(std::shared_ptr<Texture2D> texture) {
-	lightmap_ = texture;
+void Material::setTexture(std::shared_ptr<Texture2D> texture) {
+	texture_ = texture;
 	program_ = ResourceSystem::getInstance().createOrGet<Program>(
 		"TextureProgram", "default.vert", "texture.frag");
 }
