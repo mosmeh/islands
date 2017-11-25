@@ -30,7 +30,7 @@ void DamageEffect::draw() {
 
 	std::stringstream ss;
 	for (const auto mesh : drawer_->getModel()->getMeshes()) {
-		program_->setUniform("diffuse", mesh->getMaterial()->getDiffuseColor());
+		mesh->getMaterial().apply(program_);
 
 		const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh);
 		assert(skinned);

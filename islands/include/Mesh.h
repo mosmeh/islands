@@ -2,6 +2,7 @@
 
 #include "Resource.h"
 #include "Material.h"
+#include "Shader.h"
 #include "GLObjects.h"
 #include "Geometry.h"
 
@@ -16,11 +17,10 @@ public:
 
 	virtual ~Mesh();
 
-	bool isLoaded() const override;
 	void draw();
 
 	bool hasUV() const;
-	std::shared_ptr<Material> getMaterial() const;
+	const Material& getMaterial() const;
 
 	const std::vector<glm::vec3>& getVertices() const;
 	const std::vector<GLuint>& getIndices() const;
@@ -42,7 +42,7 @@ private:
 	std::vector<glm::vec2> uvs_;
 	std::vector<GLuint> indices_;
 	const bool hasUV_;
-	std::shared_ptr<Material> material_;
+	Material material_;
 };
 
 class SkinnedMesh : public Mesh {

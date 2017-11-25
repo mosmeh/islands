@@ -2,6 +2,7 @@
 
 #include "Resource.h"
 #include "Component.h"
+#include "Texture.h"
 #include "Mesh.h"
 #include "Geometry.h"
 
@@ -18,11 +19,14 @@ public:
 	virtual ~Model() = default;
 
 	const std::vector<std::shared_ptr<Mesh>>& getMeshes();
+	bool isOpaque();
+	bool hasSkinnedMesh();
 	const geometry::AABB& getLocalAABB();
 
 private:
 	const std::string filename_;
 	std::vector<std::shared_ptr<Mesh>> meshes_;
+	bool opaque_, hasSkinned_;
 	geometry::AABB localAABB_;
 
 	void loadImpl() override;
@@ -33,7 +37,6 @@ public:
 	ModelDrawer(std::shared_ptr<Model> model);
 	virtual ~ModelDrawer() = default;
 
-	void start() override;
 	void update() override;
 	void draw() override;
 	bool isOpaque() const override;
@@ -44,6 +47,10 @@ public:
 	void setTexture(std::shared_ptr<Texture2D> texture);
 	void setCullFaceEnabled(bool enabled);
 
+	void setVertexShader(std::shared_ptr<Shader> shader);
+	void setGeometryShader(std::shared_ptr<Shader> shader);
+	void setFragmentShader(std::shared_ptr<Shader> shader);
+
 	void enableAnimation(const std::string& name, bool loop = true, double tps = 24.0, size_t startFrame = 0);
 	void stopAnimation();
 	bool isPlayingAnimation() const;
@@ -51,8 +58,10 @@ public:
 
 protected:
 	std::shared_ptr<Model> model_;
-	bool opaque_, visible_, cullFaceEnabled_;
+	bool visible_, cullFaceEnabled_;
 	std::shared_ptr<Texture2D> texture_;
+	std::shared_ptr<Shader> vertex_, geometry_, fragment_;
+	std::shared_ptr<Program> program_, skinningProgram_;
 
 	struct Animation {
 		std::string name;
@@ -61,6 +70,8 @@ protected:
 		double startTime;
 		size_t startFrame;
 	} anim_;
+
+	void updateProgram();
 };
 
 }

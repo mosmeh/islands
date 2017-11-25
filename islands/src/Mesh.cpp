@@ -12,7 +12,8 @@ Mesh::Mesh(const aiMesh* mesh, const aiMaterial* material) :
 	Resource(mesh->mName.C_Str()),
 	vertices_(mesh->mNumVertices),
 	normals_(mesh->mNumVertices),
-	hasUV_(mesh->HasTextureCoords(0)) {
+	hasUV_(mesh->HasTextureCoords(0)),
+	material_(material) {
 
 	assert(mesh->HasNormals());
 
@@ -42,10 +43,6 @@ Mesh::Mesh(const aiMesh* mesh, const aiMaterial* material) :
 		}
 	}
 	indices_.shrink_to_fit();
-
-	aiString materialName;
-	material->Get(AI_MATKEY_NAME, materialName);
-	material_ = std::make_shared<Material>(materialName.C_Str(), material);
 }
 
 Mesh::~Mesh() {
@@ -59,10 +56,6 @@ Mesh::~Mesh() {
 	}
 }
 
-bool Mesh::isLoaded() const {
-	return Resource::isLoaded() && material_->isLoaded();
-}
-
 void Mesh::draw() {
 	upload();
 
@@ -74,7 +67,7 @@ bool Mesh::hasUV() const {
 	return hasUV_;
 }
 
-std::shared_ptr<Material> Mesh::getMaterial() const {
+const Material& Mesh::getMaterial() const {
 	return material_;
 }
 
@@ -157,9 +150,6 @@ SkinnedMesh::SkinnedMesh(const aiMesh* mesh, const aiMaterial* material, const a
 	playingAnim_(nullptr) {
 
 	assert(mesh->HasBones());
-
-	getMaterial()->setProgram(ResourceSystem::getInstance().createOrGet<Program>(
-		"SkinningProgram", "skinning.vert", "default.frag"));
 
 	assert(getVertices().size() > 0);
 	boneData_ = std::vector<BoneDataPerVertex>(getVertices().size());

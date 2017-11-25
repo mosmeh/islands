@@ -29,10 +29,15 @@ private:
 class Program : public Resource {
 public:
 	Program(const std::string& name, const std::string& vertex, const std::string& fragment);
+	Program(const std::string& name, std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> fragment);
 	Program(const std::string& name,
 		const std::string& vertex,
 		const std::string& geometry,
 		const std::string& fragment);
+	Program(const std::string& name,
+		std::shared_ptr<Shader> vertex,
+		std::shared_ptr<Shader> geometry,
+		std::shared_ptr<Shader> fragment);
 
 	Program(const Program&) = delete;
 	Program& operator=(const Program&) = delete;
@@ -41,6 +46,7 @@ public:
 	virtual ~Program();
 
 	bool isLoaded() const override;
+
 	void use();
 	void setUniform(const char* name, GLuint value) const;
 	void setUniform(const char* name, glm::float32 value) const;

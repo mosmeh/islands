@@ -70,6 +70,13 @@ Program::Program(const std::string& name, const std::string& vertex, const std::
 	geometry_(nullptr),
 	fragment_(ResourceSystem::getInstance().createOrGet<Shader>(fragment, fragment, GL_FRAGMENT_SHADER)) {}
 
+Program::Program(const std::string& name, std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> fragment) :
+	Resource(name),
+	id_(0),
+	vertex_(vertex),
+	geometry_(nullptr),
+	fragment_(fragment) {}
+
 Program::Program(
 	const std::string& name,
 	const std::string& vertex,
@@ -80,6 +87,13 @@ Program::Program(
 	vertex_(ResourceSystem::getInstance().createOrGet<Shader>(vertex, vertex, GL_VERTEX_SHADER)),
 	geometry_(ResourceSystem::getInstance().createOrGet<Shader>(geometry, geometry, GL_GEOMETRY_SHADER)),
 	fragment_(ResourceSystem::getInstance().createOrGet<Shader>(fragment, fragment, GL_FRAGMENT_SHADER)) {}
+
+Program::Program(const std::string& name, std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> geometry, std::shared_ptr<Shader> fragment) :
+	Resource(name),
+	id_(0),
+	vertex_(vertex),
+	geometry_(geometry),
+	fragment_(fragment) {}
 
 Program::~Program() {
 	if (isUploaded()) {

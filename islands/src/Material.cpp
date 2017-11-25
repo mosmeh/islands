@@ -1,58 +1,34 @@
 #include "Material.h"
-#include "ResourceSystem.h"
 
 namespace islands {
 
-Material::Material(const std::string& name, const aiMaterial* material) :
-	Resource(name),
-	program_(ResourceSystem::getInstance().createOrGet<Program>(
-		"DefaultProgram", "default.vert", "default.frag")),
-	diffuseColor_(1.f, 0, 1.f, 1.f) {
+Material::Material(const aiMaterial* material) : diffuse_(1.f, 0, 1.f, 1.f) {
+	aiString aName;
+	material->Get(AI_MATKEY_NAME, aName);
+	name_ = aName.C_Str();
 
-	aiColor3D diffuse;
-	if (material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse) == AI_SUCCESS) {
-		diffuseColor_.rgb = {diffuse.r, diffuse.g, diffuse.b};
+	aiColor3D aDiffuse;
+	if (material->Get(AI_MATKEY_COLOR_DIFFUSE, aDiffuse) == AI_SUCCESS) {
+		diffuse_.rgb = {aDiffuse.r, aDiffuse.g, aDiffuse.b};
 	}
 
 	ai_real opacity;
 	if (material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
-		diffuseColor_.a = opacity;
-	}
-
-}
-
-bool Material::isLoaded() const {
-	if (texture_ && !texture_->isLoaded()) {
-		return false;
-	}
-	return true;
-}
-
-void Material::use() const {
-	program_->use();
-	program_->setUniform("diffuse", diffuseColor_);
-	if (texture_) {
-		texture_->bind(0);
-		program_->setUniform("tex", static_cast<GLuint>(0));
+		diffuse_.a = opacity;
 	}
 }
 
-const glm::vec4& Material::getDiffuseColor() const {
-	return diffuseColor_;
+const std::string& Material::getName() const {
+	return name_;
 }
 
-void Material::setTexture(std::shared_ptr<Texture2D> texture) {
-	texture_ = texture;
-	program_ = ResourceSystem::getInstance().createOrGet<Program>(
-		"TextureProgram", "default.vert", "texture.frag");
+const glm::vec4& Material::getDiffuse() const {
+	return diffuse_;
 }
 
-void Material::setProgram(std::shared_ptr<Program> program) {
-	program_ = program;
-}
-
-std::shared_ptr<Program> Material::getProgram() const {
-	return program_;
+void Material::apply(std::shared_ptr<Program> program) const {
+	program->use();
+	program->setUniform("diffuse", diffuse_);
 }
 
 }
