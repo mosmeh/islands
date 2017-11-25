@@ -45,6 +45,26 @@ public:
 		return status_ == State::Uploaded;
 	}
 
+protected:
+	virtual void loadImpl() {}
+	virtual void uploadImpl() {}
+
+private:
+	enum class State {
+		Unloaded,
+		Loaded,
+		Uploaded
+	};
+
+	const std::string name_;
+	State status_;
+};
+
+template <typename T>
+class SharedResource : public Resource<T> {
+public:
+	using Resource::Resource;
+
 	template <class... Args>
 	static std::shared_ptr<T> createOrGet(const std::string& name, Args&&... args) {
 		const auto iter = getInstances().find(name);
@@ -66,20 +86,7 @@ public:
 		}
 	}
 
-protected:
-	virtual void loadImpl() {}
-	virtual void uploadImpl() {}
-
 private:
-	enum class State {
-		Unloaded,
-		Loaded,
-		Uploaded
-	};
-
-	const std::string name_;
-	State status_;
-
 	static std::unordered_map<std::string, std::shared_ptr<T>>& getInstances() {
 		static std::unordered_map<std::string, std::shared_ptr<T>> instances;
 		return instances;

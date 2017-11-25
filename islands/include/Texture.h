@@ -4,7 +4,7 @@
 
 namespace islands {
 
-class Texture2D : public Resource<Texture2D> {
+class Texture2D : public SharedResource<Texture2D> {
 public:
 	Texture2D(const std::string& name, const std::string& filename);
 

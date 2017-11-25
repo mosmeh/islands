@@ -21,7 +21,7 @@ namespace islands {
 }
 
 Sound::Sound(const std::string& name, const std::string& filename) :
-	Resource(name),
+	SharedResource(name),
 	filename_(filename) {}
 
 Sound::~Sound() {

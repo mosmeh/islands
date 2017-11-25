@@ -5,7 +5,7 @@
 namespace islands {
 
 Shader::Shader(const std::string& name, const std::string& filename, GLenum type) :
-	Resource(name),
+	SharedResource(name),
 	id_(0),
 	filename_(filename),
 	type_(type) {
@@ -63,14 +63,14 @@ void Shader::uploadImpl() {
 }
 
 Program::Program(const std::string& name, const std::string& vertex, const std::string& fragment) :
-	Resource(name),
+	SharedResource(name),
 	id_(0),
 	vertex_(Shader::createOrGet(vertex, vertex, GL_VERTEX_SHADER)),
 	geometry_(nullptr),
 	fragment_(Shader::createOrGet(fragment, fragment, GL_FRAGMENT_SHADER)) {}
 
 Program::Program(const std::string& name, std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> fragment) :
-	Resource(name),
+	SharedResource(name),
 	id_(0),
 	vertex_(vertex),
 	geometry_(nullptr),
@@ -81,14 +81,14 @@ Program::Program(
 	const std::string& vertex,
 	const std::string& geometry,
 	const std::string& fragment) :
-	Resource(name),
+	SharedResource(name),
 	id_(0),
 	vertex_(Shader::createOrGet(vertex, vertex, GL_VERTEX_SHADER)),
 	geometry_(Shader::createOrGet(geometry, geometry, GL_GEOMETRY_SHADER)),
 	fragment_(Shader::createOrGet(fragment, fragment, GL_FRAGMENT_SHADER)) {}
 
 Program::Program(const std::string& name, std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> geometry, std::shared_ptr<Shader> fragment) :
-	Resource(name),
+	SharedResource(name),
 	id_(0),
 	vertex_(vertex),
 	geometry_(geometry),
@@ -104,7 +104,7 @@ bool Program::isLoaded() const {
 	if (geometry_ && !geometry_->isLoaded()) {
 		return false;
 	}
-	return Resource::isLoaded() && vertex_->isLoaded() && fragment_->isLoaded();
+	return vertex_->isLoaded() && fragment_->isLoaded();
 }
 
 void Program::use() {

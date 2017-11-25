@@ -8,7 +8,7 @@
 
 namespace islands {
 
-class Model : public Resource<Model> {
+class Model : public SharedResource<Model> {
 public:
 	Model(const std::string& name, const std::string& filename);
 

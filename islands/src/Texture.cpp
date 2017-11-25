@@ -12,7 +12,7 @@
 namespace islands {
 
 Texture2D::Texture2D(const std::string& name, const std::string& filename) :
-	Resource(name),
+	SharedResource(name),
 	id_(0),
 	filename_(filename),
 	data_(nullptr) {}

@@ -7,7 +7,7 @@
 namespace islands {
 
 Model::Model(const std::string& name, const std::string& filename) :
-	Resource(name),
+	SharedResource(name),
 	filename_(filename),
 	opaque_(true),
 	hasSkinned_(false) {}
