@@ -2,7 +2,6 @@
 #include "Camera.h"
 #include "Input.h"
 #include "Chunk.h"
-#include "ResourceSystem.h"
 #include "Scene.h"
 #include "Sound.h"
 
@@ -22,7 +21,7 @@ void Player::start() {
 	);
 
 	constexpr auto PLAYER_MESH_NAME = "player.fbx";
-	model_ = ResourceSystem::getInstance().createOrGet<Model>(PLAYER_MESH_NAME, PLAYER_MESH_NAME);
+	model_ = Model::createOrGet(PLAYER_MESH_NAME, PLAYER_MESH_NAME);
 	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
 	drawer_->enableAnimation("Walk.002", false);
 	drawer_->update();
@@ -34,7 +33,7 @@ void Player::start() {
 		if (entity.getSelfMask() & (Entity::Mask::Enemy | Entity::Mask::EnemyAttack)) {
 			if (!health_->isInvincible()) {
 				getEntity().createComponent<DamageEffect>(2.0);
-				ResourceSystem::getInstance().createOrGet<Sound>("PlayerDamageSound", "player_damage.ogg")->createInstance()->play();
+				Sound::createOrGet("PlayerDamageSound", "player_damage.ogg")->createInstance()->play();
 			}
 		}
 	});

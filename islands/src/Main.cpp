@@ -1,7 +1,6 @@
 ﻿#include "Log.h"
 #include "Profiler.h"
 #include "Window.h"
-#include "ResourceSystem.h"
 #include "Input.h"
 #include "Scene.h"
 #include "Sound.h"
@@ -148,8 +147,8 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		}
 	});
 
-	ResourceSystem::getInstance().createOrGet<Sound>("DecideSound", "decide.ogg");
-	ResourceSystem::getInstance().createOrGet<Sound>("EnemyDieSound", "enemy_die.ogg");
+	Sound::createOrGet("DecideSound", "decide.ogg");
+	Sound::createOrGet("EnemyDieSound", "enemy_die.ogg");
 
 	SceneManager::getInstance().changeScene<TitleScene>();
 

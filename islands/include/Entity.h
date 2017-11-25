@@ -7,9 +7,7 @@ namespace islands {
 class Component;
 class Chunk;
 
-class Entity :
-	public Resource,
-	public std::enable_shared_from_this<Entity> {
+class Entity : public std::enable_shared_from_this<Entity> {
 public:
 	using MaskType = std::uint32_t;
 	enum Mask : MaskType {
@@ -27,7 +25,7 @@ public:
 	Entity(const std::string& name, Chunk& chunk);
 	virtual ~Entity() = default;
 
-	bool isLoaded() const override;
+	const std::string& getName() const;
 
 	void setPosition(const glm::vec3& position);
 	const glm::vec3& getPosition() const;

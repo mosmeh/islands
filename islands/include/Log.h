@@ -63,8 +63,6 @@ private:
 #define SLOG ::islands::Logger::lock(), ::islands::Logger::getInstance() << \
 	" [" << ::islands::sys::basename(__FILE__) << ":" << __LINE__ << "] "
 
-
-
 #else
 
 class Logger : public std::ostream {

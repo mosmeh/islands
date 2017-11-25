@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Mesh.h"
-#include "ResourceSystem.h"
 
 //#define PRINT_ANIMATIONS
 #define FOREACH(var, ary, num) for (auto var = ary; var < ary + num; ++var)

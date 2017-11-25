@@ -10,12 +10,10 @@ namespace islands {
 
 static const std::string LEVEL_DIR = "level";
 
-class Chunk : public Resource {
+class Chunk : public Resource<Chunk> {
 public:
 	Chunk(const std::string& name, const std::string& filename);
 	virtual ~Chunk() = default;
-
-	bool isLoaded() const override;
 
 	void update();
 	void draw();

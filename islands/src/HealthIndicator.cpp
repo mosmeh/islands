@@ -1,13 +1,10 @@
 #include "HealthIndicator.h"
-#include "ResourceSystem.h"
 
 namespace islands {
 
 HealthIndicator::HealthIndicator() :
-	filledHeart_(ResourceSystem::getInstance().createOrGet<Texture2D>(
-		"FilledHeartImage", "heart_filled.png")),
-	emptyHeart_(ResourceSystem::getInstance().createOrGet<Texture2D>(
-		"EmptyHeartImage", "heart_empty.png")) {
+	filledHeart_(Texture2D::createOrGet("FilledHeartImage", "heart_filled.png")),
+	emptyHeart_(Texture2D::createOrGet("EmptyHeartImage", "heart_empty.png")) {
 
 	filledHeart_.setSize({0.04, 0.065});
 	emptyHeart_.setSize({0.04, 0.065});

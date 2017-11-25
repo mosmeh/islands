@@ -1,6 +1,5 @@
 #include "Scene.h"
 #include "Input.h"
-#include "ResourceSystem.h"
 #include "Window.h"
 #include "Sound.h"
 #include "GameScene.h"
@@ -9,7 +8,7 @@ namespace islands {
 
 SceneManager::SceneManager() :
 	current_(nullptr),
-	blackOutProgram_(ResourceSystem::getInstance().createOrGet<Program>(
+	blackOutProgram_(Program::createOrGet(
 		"BlackOutProgram", "full_screen.vert", "black_out.frag")),
 	transition_{TransitionState::None, -HUGE_VAL} {
 
@@ -108,10 +107,9 @@ double SceneManager::Transition::getProgress() {
 }
 
 TitleScene::TitleScene() :
-	titleProgram_(ResourceSystem::getInstance().createOrGet<Program>(
+	titleProgram_(Program::createOrGet(
 		"TitleProgram", "sprite.vert", "sprite.geom", "title.frag")),
-	titleTexture_(ResourceSystem::getInstance().createOrGet<Texture2D>(
-		"TitleImage", "title.png")),
+	titleTexture_(Texture2D::createOrGet("TitleImage", "title.png")),
 	selectedItem_(0),
 	repeated_(false) {}
 
@@ -122,7 +120,7 @@ void TitleScene::update() {
 		} else {
 			SceneManager::getInstance().changeScene<CreditScene>();
 		}
-		ResourceSystem::getInstance().get<Sound>("DecideSound")->createInstance()->play();
+		Sound::get("DecideSound")->createInstance()->play();
 	} else {
 		const auto& dir = Input::getInstance().getDirection();
 		if (dir.y <= -0.8 || 0.8 <= dir.y) {
@@ -156,17 +154,15 @@ void TitleScene::draw() {
 }
 
 IntroductionScene::IntroductionScene() :
-	keyboardIntroImage_(ResourceSystem::getInstance().createOrGet<Texture2D>(
-		"KeyboardIntroImage", "intro_keyboard.png")),
-	gamepadIntroImage_(ResourceSystem::getInstance().createOrGet<Texture2D>(
-		"GamepadIntroImage", "intro_gamepad.png")),
-	dualShock4IntroImage_(ResourceSystem::getInstance().createOrGet<Texture2D>(
+	keyboardIntroImage_(Texture2D::createOrGet("KeyboardIntroImage", "intro_keyboard.png")),
+	gamepadIntroImage_(Texture2D::createOrGet("GamepadIntroImage", "intro_gamepad.png")),
+	dualShock4IntroImage_(Texture2D::createOrGet(
 		"DualShock4IntroImage", "intro_dualshock4.png")) {}
 
 void IntroductionScene::update() {
 	if (Input::getInstance().anyButtonPressed()) {
 		SceneManager::getInstance().changeScene<GameScene>();
-		ResourceSystem::getInstance().get<Sound>("DecideSound")->createInstance()->play();
+		Sound::get("DecideSound")->createInstance()->play();
 	}
 }
 
@@ -184,12 +180,12 @@ void IntroductionScene::draw() {
 }
 
 CreditScene::CreditScene() : creditImage_(
-	ResourceSystem::getInstance().createOrGet<Texture2D>("CreditImage", "credit.png")) {}
+	Texture2D::createOrGet("CreditImage", "credit.png")) {}
 
 void CreditScene::update() {
 	if (Input::getInstance().anyButtonPressed()) {
 		SceneManager::getInstance().changeScene<TitleScene>();
-		ResourceSystem::getInstance().get<Sound>("DecideSound")->createInstance()->play();
+		Sound::get("DecideSound")->createInstance()->play();
 	}
 }
 
@@ -199,10 +195,10 @@ void CreditScene::draw() {
 }
 
 GameOverScene::GameOverScene() : gameOverImage_(
-	ResourceSystem::getInstance().createOrGet<Texture2D>("GameOverImage", "game_over.png")),
+	Texture2D::createOrGet("GameOverImage", "game_over.png")),
 	startedAt_(glfwGetTime()) {
 
-	ResourceSystem::getInstance().createOrGet<Sound>("GameOverSound", "game_over.ogg")->createInstance()->play();
+	Sound::createOrGet("GameOverSound", "game_over.ogg")->createInstance()->play();
 }
 
 void GameOverScene::update() {
@@ -218,10 +214,10 @@ void GameOverScene::draw() {
 }
 
 GameClearScene::GameClearScene() : gameClearImage_(
-	ResourceSystem::getInstance().createOrGet<Texture2D>("GameClearImage", "game_clear.png")),
+	Texture2D::createOrGet("GameClearImage", "game_clear.png")),
 	startedAt_(glfwGetTime()) {
 
-	ResourceSystem::getInstance().createOrGet<Sound>("GameClearSound", "game_clear.ogg")->createInstance()->play();
+	Sound::createOrGet("GameClearSound", "game_clear.ogg")->createInstance()->play();
 }
 
 void GameClearScene::update() {

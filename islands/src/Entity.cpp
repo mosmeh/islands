@@ -5,7 +5,6 @@
 namespace islands {
 
 Entity::Entity(const std::string& name, Chunk& chunk) :
-	Resource(name),
 	name_(name),
 	chunk_(chunk),
 	position_(0),
@@ -15,14 +14,8 @@ Entity::Entity(const std::string& name, Chunk& chunk) :
 	filterMask_(0),
 	destroyed_(false) {}
 
-bool Entity::isLoaded() const {
-	for (const auto c : components_) {
-		const auto resource = std::dynamic_pointer_cast<Resource>(c);
-		if (resource && !resource->isLoaded()) {
-			return false;
-		}
-	}
-	return true;
+const std::string& Entity::getName() const {
+	return name_;
 }
 
 void Entity::setPosition(const glm::vec3& position) {

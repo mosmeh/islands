@@ -1,10 +1,9 @@
 #include "Sprite.h"
-#include "ResourceSystem.h"
 
 namespace islands {
 
 Sprite::Sprite(std::shared_ptr<Texture2D> texture) :
-	spriteProgram_(ResourceSystem::getInstance().createOrGet<Program>(
+	spriteProgram_(Program::createOrGet(
 		"SpriteProgram", "sprite.vert", "sprite.geom", "sprite.frag")),
 	texture_(texture),
 	pos_(0.f),

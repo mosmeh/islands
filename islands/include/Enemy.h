@@ -23,7 +23,7 @@ class Dead : public StateMachine<T>::State {
 		entity.createComponent<ScatterEffect>([&entity] {
 			entity.destroy();
 		});
-		ResourceSystem::getInstance().get<Sound>("EnemyDieSound")->createInstance()->play();
+		Sound::get("EnemyDieSound")->createInstance()->play();
 	}
 };
 

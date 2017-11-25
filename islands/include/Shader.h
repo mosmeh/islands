@@ -4,7 +4,7 @@
 
 namespace islands {
 
-class Shader : public Resource {
+class Shader : public Resource<Shader> {
 public:
 	Shader(const std::string& name, const std::string& filename, GLenum type);
 
@@ -26,7 +26,7 @@ private:
 	void uploadImpl() override;
 };
 
-class Program : public Resource {
+class Program : public Resource<Program> {
 public:
 	Program(const std::string& name, const std::string& vertex, const std::string& fragment);
 	Program(const std::string& name, std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> fragment);

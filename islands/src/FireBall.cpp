@@ -1,5 +1,4 @@
 #include "FireBall.h"
-#include "ResourceSystem.h"
 #include "Chunk.h"
 #include "Health.h"
 
@@ -18,7 +17,7 @@ void FireBall::start() {
 	);
 
 	constexpr auto BALL_MODEL = "fire_ball.obj";
-	const auto model = ResourceSystem::getInstance().createOrGet<Model>(BALL_MODEL, BALL_MODEL);
+	const auto model = Model::createOrGet(BALL_MODEL, BALL_MODEL);
 	getEntity().createComponent<ModelDrawer>(model);
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model, 2.f);

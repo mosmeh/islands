@@ -204,8 +204,6 @@
     <ClCompile Include="src\PhysicalBody.cpp" />
     <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\Player.cpp" />
-    <ClCompile Include="src\Resource.cpp" />
-    <ClCompile Include="src\ResourceSystem.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Sound.cpp" />
@@ -287,7 +285,6 @@
     <ClInclude Include="include\Player.h" />
     <ClInclude Include="include\Profiler.h" />
     <ClInclude Include="include\Resource.h" />
-    <ClInclude Include="include\ResourceSystem.h" />
     <ClInclude Include="include\Camera.h" />
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\Sound.h" />

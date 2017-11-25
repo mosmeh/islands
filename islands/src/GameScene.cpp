@@ -1,5 +1,4 @@
 #include "GameScene.h"
-#include "ResourceSystem.h"
 #include "PhysicalBody.h"
 #include "Health.h"
 #include "Scene.h"
@@ -40,7 +39,7 @@ GameScene::GameScene() :
 		glm::ivec3(0, -1, 0), glm::ivec3(0, 1, 0),
 		glm::ivec3(0, 0, -1), glm::ivec3(0, 0, 1)
 	},
-	backgroundProgram_(ResourceSystem::getInstance().createOrGet<Program>(
+	backgroundProgram_(Program::createOrGet(
 		"backgroundProgram", "full_screen.vert", "background.frag")),
 	currentChunk_(nullptr) {
 

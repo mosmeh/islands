@@ -1,6 +1,5 @@
 #include "SpecialObjects.h"
 #include "Chunk.h"
-#include "ResourceSystem.h"
 #include "Health.h"
 
 namespace islands {
@@ -28,8 +27,7 @@ void TotemPoll::update() {
 			health->setMaxHealth(15);
 			health->set(15);
 
-			ResourceSystem::getInstance().createOrGet<Sound>(
-				"CureSound", "cure.ogg")->createInstance()->play();
+			Sound::createOrGet("CureSound", "cure.ogg")->createInstance()->play();
 		}
 	}
 }

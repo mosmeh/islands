@@ -4,7 +4,7 @@
 
 namespace islands {
 
-class Sound : public Resource {
+class Sound : public Resource<Sound> {
 public:
 	class Instance {
 	public:

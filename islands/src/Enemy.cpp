@@ -1,5 +1,4 @@
 #include "Enemy.h"
-#include "ResourceSystem.h"
 #include "Chunk.h"
 #include "NameGenerator.h"
 #include "Scene.h"
@@ -17,7 +16,7 @@ void Slime::start() {
 	);
 
 	static constexpr auto MESH_FILENAME = "slime.dae";
-	model_ = ResourceSystem::getInstance().createOrGet<Model>(MESH_FILENAME, MESH_FILENAME);
+	model_ = Model::createOrGet(MESH_FILENAME, MESH_FILENAME);
 	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
 	drawer_->setCullFaceEnabled(false);
 
@@ -97,7 +96,7 @@ void BigSlime::start() {
 	);
 
 	static constexpr auto MESH_FILENAME = "big_slime.dae";
-	model_ = ResourceSystem::getInstance().createOrGet<Model>(MESH_FILENAME, MESH_FILENAME);
+	model_ = Model::createOrGet(MESH_FILENAME, MESH_FILENAME);
 	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
 	drawer_->setCullFaceEnabled(false);
 
@@ -148,7 +147,7 @@ void BigSlime::Jumping::update(BigSlime& parent) {
 	if (parent.health_->isDead()) {
 		changeState<Dead<BigSlime>>();
 	} else if (std::abs(parent.body_->getVelocity().z) < glm::epsilon<float>()) {
-		ResourceSystem::getInstance().createOrGet<Sound>("SlimeJumpSound", "slime_jump.ogg")->createInstance()->play();
+		Sound::createOrGet("SlimeJumpSound", "slime_jump.ogg")->createInstance()->play();
 		parent.drawer_->stopAnimation();
 		changeState<Pausing>();
 	}
@@ -163,7 +162,7 @@ void Rabbit::start() {
 	);
 
 	static constexpr auto MESH_FILENAME = "rabbit.dae";
-	model_ = ResourceSystem::getInstance().createOrGet<Model>(MESH_FILENAME, MESH_FILENAME);
+	model_ = Model::createOrGet(MESH_FILENAME, MESH_FILENAME);
 	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model_);
@@ -256,7 +255,7 @@ void Rabbit::Attacking::start(Rabbit& parent) {
 		opponent->getEntity().getFirstComponent<Health>()->takeDamage(1);
 		attackEntity_->destroy();
 	});
-	ResourceSystem::getInstance().createOrGet<Sound>("RabbitAttackSound", "rabbit_attack.ogg")->createInstance()->play();
+	Sound::createOrGet("RabbitAttackSound", "rabbit_attack.ogg")->createInstance()->play();
 }
 
 void Rabbit::Attacking::update(Rabbit& parent) {
@@ -277,7 +276,7 @@ void Crab::start() {
 	);
 
 	static constexpr auto MESH_FILENAME = "crab.dae";
-	model_ = ResourceSystem::getInstance().createOrGet<Model>(MESH_FILENAME, MESH_FILENAME);
+	model_ = Model::createOrGet(MESH_FILENAME, MESH_FILENAME);
 	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model_);
@@ -396,7 +395,7 @@ void Dragon::start() {
 	);
 
 	static constexpr auto MESH_FILENAME = "dragon.dae";
-	model_ = ResourceSystem::getInstance().createOrGet<Model>(MESH_FILENAME, MESH_FILENAME);
+	model_ = Model::createOrGet(MESH_FILENAME, MESH_FILENAME);
 	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
 	drawer_->setCullFaceEnabled(false);
 
@@ -505,7 +504,7 @@ void Dragon::PostFire::start(Dragon& parent) {
 
 	constexpr auto BALL_MODEL = "fire_ball.obj";
 	attackEntity->createComponent<ModelDrawer>(
-		ResourceSystem::getInstance().createOrGet<Model>(BALL_MODEL, BALL_MODEL));
+		Model::createOrGet(BALL_MODEL, BALL_MODEL));
 
 	const auto collider = attackEntity->createComponent<SphereCollider>(1.f);
 	collider->setGhost(true);
@@ -525,8 +524,7 @@ void Dragon::PostFire::start(Dragon& parent) {
 	body->setVelocity(15.f * velocity);
 	attackEntity->setQuaternion(geometry::directionToQuaternion(glm::normalize(velocity), {0, -1.f, 0}));
 
-	ResourceSystem::getInstance().createOrGet<Sound>(
-		"DragonFireSound", "dragon_fire.ogg")->createInstance()->play();
+	Sound::createOrGet("DragonFireSound", "dragon_fire.ogg")->createInstance()->play();
 }
 
 void Dragon::PostFire::update(Dragon& parent) {
@@ -610,7 +608,7 @@ void Dragon::Dead::start(Dragon& parent) {
 		entity.destroy();
 		SceneManager::getInstance().changeScene<GameClearScene>(false);
 	});
-	ResourceSystem::getInstance().get<Sound>("EnemyDieSound")->createInstance()->play();
+	Sound::get("EnemyDieSound")->createInstance()->play();
 }
 
 void Dragon::lookAtPlayer() {

@@ -1,13 +1,11 @@
 #include "Effect.h"
-#include "ResourceSystem.h"
 #include "Camera.h"
 
 namespace islands {
 
 DamageEffect::DamageEffect(double duration) :
 	duration_(duration),
-	program_(ResourceSystem::getInstance().createOrGet<Program>(
-		"DamageProgram", "skinning.vert", "damage.frag")) {}
+	program_(Program::createOrGet("DamageProgram", "skinning.vert", "damage.frag")) {}
 
 void DamageEffect::start() {
 	drawer_ = getEntity().getFirstComponent<ModelDrawer>();
@@ -45,7 +43,7 @@ bool DamageEffect::isOpaque() const {
 
 ScatterEffect::ScatterEffect(const FinishCallback& callback) :
 	callback_(callback),
-	program_(ResourceSystem::getInstance().createOrGet<Program>(
+	program_(Program::createOrGet(
 		"ScatterProgram", "scatter.vert", "scatter.geom", "scatter.frag")) {}
 
 void ScatterEffect::start() {

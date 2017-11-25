@@ -1,5 +1,4 @@
 #include "Shader.h"
-#include "ResourceSystem.h"
 #include "AssetArchive.h"
 #include "Log.h"
 
@@ -66,9 +65,9 @@ void Shader::uploadImpl() {
 Program::Program(const std::string& name, const std::string& vertex, const std::string& fragment) :
 	Resource(name),
 	id_(0),
-	vertex_(ResourceSystem::getInstance().createOrGet<Shader>(vertex, vertex, GL_VERTEX_SHADER)),
+	vertex_(Shader::createOrGet(vertex, vertex, GL_VERTEX_SHADER)),
 	geometry_(nullptr),
-	fragment_(ResourceSystem::getInstance().createOrGet<Shader>(fragment, fragment, GL_FRAGMENT_SHADER)) {}
+	fragment_(Shader::createOrGet(fragment, fragment, GL_FRAGMENT_SHADER)) {}
 
 Program::Program(const std::string& name, std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> fragment) :
 	Resource(name),
@@ -84,9 +83,9 @@ Program::Program(
 	const std::string& fragment) :
 	Resource(name),
 	id_(0),
-	vertex_(ResourceSystem::getInstance().createOrGet<Shader>(vertex, vertex, GL_VERTEX_SHADER)),
-	geometry_(ResourceSystem::getInstance().createOrGet<Shader>(geometry, geometry, GL_GEOMETRY_SHADER)),
-	fragment_(ResourceSystem::getInstance().createOrGet<Shader>(fragment, fragment, GL_FRAGMENT_SHADER)) {}
+	vertex_(Shader::createOrGet(vertex, vertex, GL_VERTEX_SHADER)),
+	geometry_(Shader::createOrGet(geometry, geometry, GL_GEOMETRY_SHADER)),
+	fragment_(Shader::createOrGet(fragment, fragment, GL_FRAGMENT_SHADER)) {}
 
 Program::Program(const std::string& name, std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> geometry, std::shared_ptr<Shader> fragment) :
 	Resource(name),

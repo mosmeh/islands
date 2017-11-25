@@ -1,6 +1,5 @@
 #include "Chunk.h"
 #include "System.h"
-#include "ResourceSystem.h"
 #include "Camera.h"
 #include "PhysicalBody.h"
 #include "Physics.h"
@@ -34,15 +33,6 @@ Chunk::Chunk(const std::string& name, const std::string& filename) :
 	Resource(name),
 	filename_(filename),
 	cameraOffset_(15.f) {}
-
-bool Chunk::isLoaded() const {
-	for (const auto entity : entities_) {
-		if (!entity->isLoaded()) {
-			return false;
-		}
-	}
-	return true;
-}
 
 std::shared_ptr<Entity> Chunk::createEntity(const std::string& name) {
 	const auto entity = std::make_shared<Entity>(name, *this);
@@ -137,10 +127,10 @@ void Chunk::loadImpl() {
 
 	if (json.contains("bgm")) {
 		const auto& name = json.get("bgm").get<std::string>();
-		bgm_ = ResourceSystem::getInstance().createOrGet<Sound>(name, name);
+		bgm_ = Sound::createOrGet(name, name);
 	} else {
 		static constexpr auto DEFAULT_BGM_NAME = "bgm.ogg";
-		bgm_ = ResourceSystem::getInstance().createOrGet<Sound>(DEFAULT_BGM_NAME, DEFAULT_BGM_NAME);
+		bgm_ = Sound::createOrGet(DEFAULT_BGM_NAME, DEFAULT_BGM_NAME);
 	}
 
 	for (const auto& ent : json.get("entities").get<picojson::object>()) {
@@ -163,7 +153,7 @@ void Chunk::loadImpl() {
 			const auto& modelProp = prop.at("model").get<picojson::object>();
 
 			const auto& meshName = modelProp.at("mesh").get<std::string>();
-			model = ResourceSystem::getInstance().createOrGet<Model>(meshName, meshName);
+			model = Model::createOrGet(meshName, meshName);
 			const auto drawer = entity->createComponent<ModelDrawer>(model);
 
 			if (modelProp.find("visible") != modelProp.end()) {
@@ -171,8 +161,7 @@ void Chunk::loadImpl() {
 			}
 			if (modelProp.find("lightmap") != modelProp.end()) {
 				const auto& lightmapName = modelProp.at("lightmap").get<std::string>();
-				drawer->setTexture(ResourceSystem::getInstance().createOrGet<Texture2D>(
-					lightmapName, lightmapName));
+				drawer->setTexture(Texture2D::createOrGet(lightmapName, lightmapName));
 			}
 		}
 
@@ -190,8 +179,7 @@ void Chunk::loadImpl() {
 				const auto& collisionProp = prop.at("collision").get<picojson::object>();
 				const auto& type = collisionProp.at("type").get<std::string>();
 				const auto& meshName = collisionProp.at("mesh_name").get<std::string>();
-				const auto collisionMesh = ResourceSystem::getInstance().createOrGet<Model>(
-					meshName, meshName);
+				const auto collisionMesh = Model::createOrGet(meshName, meshName);
 				if (type == "mesh") {
 					entity->createComponent<MeshCollider>(collisionMesh);
 				}  else if (type == "wall") {
