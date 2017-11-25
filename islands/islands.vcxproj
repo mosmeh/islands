@@ -191,6 +191,7 @@
     <ClCompile Include="src\FireBall.cpp" />
     <ClCompile Include="src\Health.cpp" />
     <ClCompile Include="src\HealthIndicator.cpp" />
+    <ClCompile Include="src\Resource.cpp" />
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\GameScene.cpp" />
     <ClCompile Include="src\Collision.cpp" />

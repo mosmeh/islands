@@ -8,7 +8,7 @@
 
 namespace islands {
 
-class Mesh : public Resource<Mesh> {
+class Mesh : public Resource {
 public:
 	Mesh(const aiMesh* mesh, const aiMaterial* material);
 	Mesh(const Mesh&) = delete;

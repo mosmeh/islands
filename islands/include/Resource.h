@@ -1,49 +1,19 @@
 #pragma once
 
-#include "NameGenerator.h"
-#include "Log.h"
-
 namespace islands {
 
-template <typename T>
 class Resource {
 public:
-	Resource() : Resource(NameGenerator::generate("resource")) {}
-	Resource(const std::string& name) :
-		name_(name),
-		status_(State::Unloaded) {}
+	Resource();
+	Resource(const std::string& name);
 
 	virtual ~Resource() = default;
 
-	const std::string& getName() const {
-		return name_;
-	}
-
-	void load() {
-		if (status_ == State::Unloaded) {
-			SLOG << "Loading " << getName() << std::endl;
-			loadImpl();
-			status_ = State::Loaded;
-		}
-	}
-
-	void upload() {
-		if (status_ != State::Uploaded) {
-			load();
-
-			SLOG << "Uploading " << getName() << std::endl;
-			uploadImpl();
-			status_ = State::Uploaded;
-		}
-	}
-
-	virtual bool isLoaded() const {
-		return status_ == State::Loaded || status_ == State::Uploaded;
-	}
-
-	bool isUploaded() const {
-		return status_ == State::Uploaded;
-	}
+	const std::string& getName() const;
+	void load();
+	void upload();
+	virtual bool isLoaded() const;
+	bool isUploaded() const;
 
 protected:
 	virtual void loadImpl() {}
@@ -61,7 +31,7 @@ private:
 };
 
 template <typename T>
-class SharedResource : public Resource<T> {
+class SharedResource : public Resource {
 public:
 	using Resource::Resource;
 
@@ -87,7 +57,7 @@ public:
 	}
 
 private:
-	static std::unordered_map<std::string, std::shared_ptr<T>>& getInstances() {
+	static auto& getInstances() {
 		static std::unordered_map<std::string, std::shared_ptr<T>> instances;
 		return instances;
 	}
