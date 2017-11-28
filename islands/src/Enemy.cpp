@@ -60,12 +60,8 @@ void Slime::Turning::start(Slime& parent) {
 	parent.direction_ = glm::normalize(playerPos - parent.getEntity().getPosition());
 	parent.direction_.z = 0.f;
 
-	if (glm::dot(parent.direction_, glm::vec3(0, 1.f, 0)) < 1.f - glm::epsilon<float>()) {
-		targetQuat_ = glm::rotation(glm::vec3(0, -1.f, 0), parent.direction_);
-	} else {
-		targetQuat_ = glm::angleAxis(glm::pi<float>(), glm::vec3(0, 0, 1.f));
-	}
-	initPos_ = parent.getEntity().getPosition();
+	targetQuat_ = geometry::directionToQuaternion(parent.direction_, {0, -1.f, 0});
+	jumpCount_ = 0;
 
 	parent.drawer_->stopAnimation();
 }
@@ -78,8 +74,10 @@ void Slime::Turning::update(Slime& parent) {
 	} else if (getElapsed() < CHANGE_DIR_DURATION) {
 		const auto factor = static_cast<float>(getElapsed() / CHANGE_DIR_DURATION / glm::two_pi<double>());
 		parent.getEntity().setQuaternion(glm::slerp(parent.getEntity().getQuaternion(), targetQuat_, factor));
-		const auto d = std::fmod(getElapsed(), CHANGE_DIR_DURATION / 2);
-		parent.getEntity().setPosition(initPos_ - glm::vec3(0, 0, 10.f * d * (d - CHANGE_DIR_DURATION / 2)));
+		if (jumpCount_ < 2 && std::abs(parent.body_->getVelocity().z) < glm::epsilon<float>()) {
+			parent.body_->setVelocity({0, 0, 8.f});
+			++jumpCount_;
+		}
 	} else {
 		changeState<Moving>();
 	}

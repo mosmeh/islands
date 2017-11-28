@@ -51,7 +51,7 @@ private:
 		void update(Slime& parent) override;
 
 		glm::quat targetQuat_;
-		glm::vec3 initPos_;
+		size_t jumpCount_;
 	};
 
 	std::shared_ptr<PhysicalBody> body_;
