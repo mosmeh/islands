@@ -6,7 +6,13 @@ namespace islands {
 
 class Shader : public SharedResource<Shader> {
 public:
-	Shader(const std::string& name, const std::string& filename, GLenum type);
+	enum class Type {
+		Vertex,
+		Geometry,
+		Fragment
+	};
+
+	Shader(const std::string& name, const std::string& filename, const Type& type);
 
 	Shader(const Shader&) = delete;
 	Shader& operator=(const Shader&) = delete;
@@ -18,12 +24,14 @@ public:
 
 private:
 	const std::string filename_;
-	const GLenum type_;
+	const Type type_;
 	GLuint id_;
 	std::string source_;
 
 	void loadImpl() override;
 	void uploadImpl() override;
+
+	static GLenum toGLenum(const Type& type);
 };
 
 class Program : public SharedResource<Program> {

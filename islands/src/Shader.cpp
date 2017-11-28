@@ -4,16 +4,11 @@
 
 namespace islands {
 
-Shader::Shader(const std::string& name, const std::string& filename, GLenum type) :
+Shader::Shader(const std::string& name, const std::string& filename, const Type& type) :
 	SharedResource(name),
 	id_(0),
 	filename_(filename),
-	type_(type) {
-
-	assert(type == GL_VERTEX_SHADER
-		|| type == GL_GEOMETRY_SHADER
-		|| type == GL_FRAGMENT_SHADER);
-}
+	type_(type) {}
 
 Shader::~Shader() {
 	if (isUploaded()) {
@@ -42,7 +37,7 @@ void Shader::uploadImpl() {
 	const auto str = source_.c_str();
 	const auto length = static_cast<GLint>(source_.size());
 
-	id_ = glCreateShader(type_);
+	id_ = glCreateShader(toGLenum(type_));
 	glShaderSource(id_, 1, &str, &length);
 	source_.clear();
 	glCompileShader(id_);
@@ -62,12 +57,24 @@ void Shader::uploadImpl() {
 	assert(compileStatus == GL_TRUE);
 }
 
+GLenum Shader::toGLenum(const Type& type) {
+	switch (type) {
+	case Type::Vertex:
+		return GL_VERTEX_SHADER;
+	case Type::Geometry:
+		return GL_GEOMETRY_SHADER;
+	case Type::Fragment:
+		return GL_FRAGMENT_SHADER;
+	default:
+		throw std::exception("unreachable");
+	}
+}
+
 Program::Program(const std::string& name, const std::string& vertex, const std::string& fragment) :
-	SharedResource(name),
-	id_(0),
-	vertex_(Shader::createOrGet(vertex, vertex, GL_VERTEX_SHADER)),
-	geometry_(nullptr),
-	fragment_(Shader::createOrGet(fragment, fragment, GL_FRAGMENT_SHADER)) {}
+	Program(
+		name,
+		Shader::createOrGet(vertex, vertex, Shader::Type::Vertex),
+		Shader::createOrGet(fragment, fragment, Shader::Type::Fragment)) {}
 
 Program::Program(const std::string& name, std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> fragment) :
 	SharedResource(name),
@@ -81,11 +88,11 @@ Program::Program(
 	const std::string& vertex,
 	const std::string& geometry,
 	const std::string& fragment) :
-	SharedResource(name),
-	id_(0),
-	vertex_(Shader::createOrGet(vertex, vertex, GL_VERTEX_SHADER)),
-	geometry_(Shader::createOrGet(geometry, geometry, GL_GEOMETRY_SHADER)),
-	fragment_(Shader::createOrGet(fragment, fragment, GL_FRAGMENT_SHADER)) {}
+	Program(
+		name,
+		Shader::createOrGet(vertex, vertex, Shader::Type::Vertex),
+		Shader::createOrGet(geometry, geometry, Shader::Type::Geometry),
+		Shader::createOrGet(fragment, fragment, Shader::Type::Fragment)) {}
 
 Program::Program(const std::string& name, std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> geometry, std::shared_ptr<Shader> fragment) :
 	SharedResource(name),

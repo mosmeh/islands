@@ -195,7 +195,7 @@ void ModelDrawer::updateProgram() {
 		} else {
 			name = "default.frag";
 		}
-		fragment = Shader::createOrGet(name, name, GL_FRAGMENT_SHADER);
+		fragment = Shader::createOrGet(name, name, Shader::Type::Fragment);
 	}
 
 	const auto getProgram = [&](bool skinning) {
@@ -207,7 +207,7 @@ void ModelDrawer::updateProgram() {
 			} else {
 				name = "default.vert";
 			}
-			vertex = Shader::createOrGet(name, name, GL_VERTEX_SHADER);
+			vertex = Shader::createOrGet(name, name, Shader::Type::Vertex);
 		}
 		if (geometry_) {
 			return Program::createOrGet(
