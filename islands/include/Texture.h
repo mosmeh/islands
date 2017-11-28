@@ -6,7 +6,7 @@ namespace islands {
 
 class Texture2D : public SharedResource<Texture2D> {
 public:
-	Texture2D(const std::string& name, const std::string& filename);
+	Texture2D(const std::string& filename);
 
 	Texture2D(const Texture2D&) = delete;
 	Texture2D& operator=(const Texture2D&) = delete;
@@ -17,7 +17,6 @@ public:
 	void bind(unsigned int textureUnit);
 
 private:
-	const std::string filename_;
 	int width_, height_, channels_;
 	unsigned char* data_;
 	GLuint id_;

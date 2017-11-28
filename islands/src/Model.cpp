@@ -6,9 +6,8 @@
 
 namespace islands {
 
-Model::Model(const std::string& name, const std::string& filename) :
-	SharedResource(name),
-	filename_(filename),
+Model::Model(const std::string& filename) :
+	SharedResource(filename),
 	opaque_(true),
 	hasSkinned_(false) {}
 
@@ -42,11 +41,11 @@ void Model::loadImpl() {
 	importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
 
 #ifdef ENABLE_ASSET_ARCHIVE
-	const auto filePath = MESH_DIR + '/' + filename_;
+	const auto filePath = MESH_DIR + '/' + getName();
 	auto rawData = AssetArchive::getInstance().readFile(filePath);
 	const auto scene = importer.ReadFileFromMemory(rawData.data(), rawData.size(), FLAGS);
 #else
-	const auto filePath = MESH_DIR + sys::getFilePathSeparator() + filename_;
+	const auto filePath = MESH_DIR + sys::getFilePathSeparator() + getName();
 	const auto scene = importer.ReadFile(filePath, FLAGS);
 #endif
 	if (!scene) {
@@ -189,34 +188,24 @@ void ModelDrawer::setFragmentShader(std::shared_ptr<Shader> shader) {
 void ModelDrawer::updateProgram() {
 	std::shared_ptr<Shader> fragment = fragment_;
 	if (!fragment) {
-		std::string name;
-		if (texture_) {
-			name = "texture.frag";
-		} else {
-			name = "default.frag";
-		}
-		fragment = Shader::createOrGet(name, name, Shader::Type::Fragment);
+		fragment = Shader::createOrGet(
+			texture_ ? "texture.frag" : "default.frag", Shader::Type::Fragment);
 	}
 
 	const auto getProgram = [&](bool skinning) {
 		std::shared_ptr<Shader> vertex = vertex_;
 		if (!vertex) {
-			std::string name;
-			if (skinning) {
-				name = "skinning.vert";
-			} else {
-				name = "default.vert";
-			}
-			vertex = Shader::createOrGet(name, name, Shader::Type::Vertex);
+			vertex = Shader::createOrGet(
+				skinning ? "skinning.vert" : "default.vert", Shader::Type::Vertex);
 		}
 		if (geometry_) {
 			return Program::createOrGet(
 				vertex->getName() + "//" + geometry_->getName() + "//" + fragment->getName(),
-				vertex, geometry_, fragment);
+				Program::ShaderList{vertex, geometry_, fragment});
 		} else {
 			return Program::createOrGet(
 				vertex->getName() + "//" + fragment->getName(),
-				vertex, fragment);
+				Program::ShaderList{vertex, fragment});
 		}
 	};
 

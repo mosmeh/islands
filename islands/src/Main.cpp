@@ -147,8 +147,6 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 		}
 	});
 
-	Sound::createOrGet("DecideSound", "decide.ogg");
-	Sound::createOrGet("EnemyDieSound", "enemy_die.ogg");
 
 	SceneManager::getInstance().changeScene<TitleScene>();
 

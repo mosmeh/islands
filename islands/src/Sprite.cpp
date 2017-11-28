@@ -3,8 +3,11 @@
 namespace islands {
 
 Sprite::Sprite(std::shared_ptr<Texture2D> texture) :
-	spriteProgram_(Program::createOrGet(
-		"SpriteProgram", "sprite.vert", "sprite.geom", "sprite.frag")),
+	spriteProgram_(Program::createOrGet("SpriteProgram",
+		Program::ShaderList{
+			Shader::createOrGet("sprite.vert", Shader::Type::Vertex),
+			Shader::createOrGet("sprite.geom", Shader::Type::Geometry),
+			Shader::createOrGet("sprite.frag", Shader::Type::Fragment)})),
 	texture_(texture),
 	pos_(0.f),
 	size_(1.f),

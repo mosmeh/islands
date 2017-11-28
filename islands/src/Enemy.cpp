@@ -15,8 +15,7 @@ void Slime::start() {
 		Entity::Mask::PlayerAttack
 	);
 
-	static constexpr auto MESH_FILENAME = "slime.dae";
-	model_ = Model::createOrGet(MESH_FILENAME, MESH_FILENAME);
+	model_ = Model::createOrGet("slime.dae");
 	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
 	drawer_->setCullFaceEnabled(false);
 
@@ -95,8 +94,7 @@ void BigSlime::start() {
 		Entity::Mask::PlayerAttack
 	);
 
-	static constexpr auto MESH_FILENAME = "big_slime.dae";
-	model_ = Model::createOrGet(MESH_FILENAME, MESH_FILENAME);
+	model_ = Model::createOrGet("big_slime.dae");
 	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
 	drawer_->setCullFaceEnabled(false);
 
@@ -147,7 +145,7 @@ void BigSlime::Jumping::update(BigSlime& parent) {
 	if (parent.health_->isDead()) {
 		changeState<Dead<BigSlime>>();
 	} else if (std::abs(parent.body_->getVelocity().z) < glm::epsilon<float>()) {
-		Sound::createOrGet("SlimeJumpSound", "slime_jump.ogg")->createInstance()->play();
+		Sound::createOrGet("slime_jump.ogg")->createInstance()->play();
 		parent.drawer_->stopAnimation();
 		changeState<Pausing>();
 	}
@@ -161,8 +159,7 @@ void Rabbit::start() {
 		Entity::Mask::PlayerAttack
 	);
 
-	static constexpr auto MESH_FILENAME = "rabbit.dae";
-	model_ = Model::createOrGet(MESH_FILENAME, MESH_FILENAME);
+	model_ = Model::createOrGet("rabbit.dae");
 	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model_);
@@ -255,7 +252,7 @@ void Rabbit::Attacking::start(Rabbit& parent) {
 		opponent->getEntity().getFirstComponent<Health>()->takeDamage(1);
 		attackEntity_->destroy();
 	});
-	Sound::createOrGet("RabbitAttackSound", "rabbit_attack.ogg")->createInstance()->play();
+	Sound::createOrGet("rabbit_attack.ogg")->createInstance()->play();
 }
 
 void Rabbit::Attacking::update(Rabbit& parent) {
@@ -275,8 +272,7 @@ void Crab::start() {
 		Entity::Mask::PlayerAttack
 	);
 
-	static constexpr auto MESH_FILENAME = "crab.dae";
-	model_ = Model::createOrGet(MESH_FILENAME, MESH_FILENAME);
+	model_ = Model::createOrGet("crab.dae");
 	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model_);
@@ -394,8 +390,7 @@ void Dragon::start() {
 		Entity::Mask::PlayerAttack
 	);
 
-	static constexpr auto MESH_FILENAME = "dragon.dae";
-	model_ = Model::createOrGet(MESH_FILENAME, MESH_FILENAME);
+	model_ = Model::createOrGet("dragon.dae");
 	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
 	drawer_->setCullFaceEnabled(false);
 
@@ -502,9 +497,7 @@ void Dragon::PostFire::start(Dragon& parent) {
 	const auto origin = pos + glm::vec3(8.f * parent.direction_.xy(), -1.f);
 	attackEntity->setPosition(origin);
 
-	constexpr auto BALL_MODEL = "fire_ball.obj";
-	attackEntity->createComponent<ModelDrawer>(
-		Model::createOrGet(BALL_MODEL, BALL_MODEL));
+	attackEntity->createComponent<ModelDrawer>(Model::createOrGet("fire_ball.obj"));
 
 	const auto collider = attackEntity->createComponent<SphereCollider>(1.f);
 	collider->setGhost(true);
@@ -524,7 +517,7 @@ void Dragon::PostFire::start(Dragon& parent) {
 	body->setVelocity(15.f * velocity);
 	attackEntity->setQuaternion(geometry::directionToQuaternion(glm::normalize(velocity), {0, -1.f, 0}));
 
-	Sound::createOrGet("DragonFireSound", "dragon_fire.ogg")->createInstance()->play();
+	Sound::createOrGet("dragon_fire.ogg")->createInstance()->play();
 }
 
 void Dragon::PostFire::update(Dragon& parent) {
@@ -608,7 +601,7 @@ void Dragon::Dead::start(Dragon& parent) {
 		entity.destroy();
 		SceneManager::getInstance().changeScene<GameClearScene>(false);
 	});
-	Sound::get("EnemyDieSound")->createInstance()->play();
+	Sound::get("enemy_die.ogg")->createInstance()->play();
 }
 
 void Dragon::lookAtPlayer() {

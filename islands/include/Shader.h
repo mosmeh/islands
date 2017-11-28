@@ -12,7 +12,7 @@ public:
 		Fragment
 	};
 
-	Shader(const std::string& name, const std::string& filename, const Type& type);
+	Shader(const std::string& filename, const Type& type);
 
 	Shader(const Shader&) = delete;
 	Shader& operator=(const Shader&) = delete;
@@ -23,7 +23,6 @@ public:
 	GLuint getId();
 
 private:
-	const std::string filename_;
 	const Type type_;
 	GLuint id_;
 	std::string source_;
@@ -36,16 +35,9 @@ private:
 
 class Program : public SharedResource<Program> {
 public:
-	Program(const std::string& name, const std::string& vertex, const std::string& fragment);
-	Program(const std::string& name, std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> fragment);
-	Program(const std::string& name,
-		const std::string& vertex,
-		const std::string& geometry,
-		const std::string& fragment);
-	Program(const std::string& name,
-		std::shared_ptr<Shader> vertex,
-		std::shared_ptr<Shader> geometry,
-		std::shared_ptr<Shader> fragment);
+	using ShaderList = std::initializer_list<std::shared_ptr<Shader>>;
+
+	Program(const std::string& name, ShaderList shaders);
 
 	Program(const Program&) = delete;
 	Program& operator=(const Program&) = delete;
@@ -64,7 +56,7 @@ public:
 	void setUniform(const char* name, const glm::mat4& value, bool transpose = false) const;
 
 private:
-	const std::shared_ptr<Shader> vertex_, geometry_, fragment_;
+	std::vector<std::shared_ptr<Shader>> shaders_;
 	GLuint id_;
 
 	void uploadImpl() override;

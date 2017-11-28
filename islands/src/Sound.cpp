@@ -20,9 +20,7 @@ namespace islands {
 		SLOG << "PortAudio: " << Pa_GetErrorText(err) << std::endl; \
 }
 
-Sound::Sound(const std::string& name, const std::string& filename) :
-	SharedResource(name),
-	filename_(filename) {}
+Sound::Sound(const std::string& filename) :	SharedResource(filename) {}
 
 Sound::~Sound() {
 	if (isLoaded()) {
@@ -49,12 +47,12 @@ void Sound::loadImpl() {
 	static const std::string SOUND_DIR = "sound";
 
 #ifdef ENABLE_ASSET_ARCHIVE
-	const auto filePath = SOUND_DIR + '/' + filename_;
+	const auto filePath = SOUND_DIR + '/' + getName();
 	auto rawData = AssetArchive::getInstance().readFile(filePath);
 	length_ = stb_vorbis_decode_memory(reinterpret_cast<uint8*>(rawData.data()), rawData.size(),
 		&numChannels_, &sampleRate_, &buffer_);
 #else
-	const auto filePath = SOUND_DIR + sys::getFilePathSeparator() + filename_;
+	const auto filePath = SOUND_DIR + sys::getFilePathSeparator() + getName();
 	length_ = stb_vorbis_decode_filename(filePath.c_str(), &numChannels_, &sampleRate_, &buffer_);
 #endif
 	assert(length_ > 0);

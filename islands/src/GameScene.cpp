@@ -39,9 +39,10 @@ GameScene::GameScene() :
 		glm::ivec3(0, -1, 0), glm::ivec3(0, 1, 0),
 		glm::ivec3(0, 0, -1), glm::ivec3(0, 0, 1)
 	},
-	backgroundProgram_(Program::createOrGet(
-		"backgroundProgram", "full_screen.vert", "background.frag")),
-	currentChunk_(nullptr) {
+	backgroundProgram_(Program::createOrGet("BackgroundProgram",
+		Program::ShaderList{
+			Shader::createOrGet("full_screen.vert", Shader::Type::Vertex),
+			Shader::createOrGet("background.frag", Shader::Type::Fragment)})) {
 
 	static const auto LEVEL_LIST_FILENAME = "levels.json";
 	picojson::value json;

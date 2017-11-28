@@ -5,7 +5,10 @@ namespace islands {
 
 DamageEffect::DamageEffect(double duration) :
 	duration_(duration),
-	program_(Program::createOrGet("DamageProgram", "skinning.vert", "damage.frag")) {}
+	program_(Program::createOrGet("DamageProgram",
+		Program::ShaderList{
+			Shader::createOrGet("skinning.vert", Shader::Type::Vertex),
+			Shader::createOrGet("damage.frag", Shader::Type::Fragment)})) {}
 
 void DamageEffect::start() {
 	drawer_ = getEntity().getFirstComponent<ModelDrawer>();
@@ -43,8 +46,11 @@ bool DamageEffect::isOpaque() const {
 
 ScatterEffect::ScatterEffect(const FinishCallback& callback) :
 	callback_(callback),
-	program_(Program::createOrGet(
-		"ScatterProgram", "scatter.vert", "scatter.geom", "scatter.frag")) {}
+	program_(Program::createOrGet("ScatterProgram", 
+		Program::ShaderList{
+			Shader::createOrGet("scatter.vert", Shader::Type::Vertex),
+			Shader::createOrGet("scatter.geom", Shader::Type::Geometry),
+			Shader::createOrGet("scatter.frag", Shader::Type::Fragment)})) {}
 
 void ScatterEffect::start() {
 	drawer_ = getEntity().getFirstComponent<ModelDrawer>();

@@ -20,8 +20,7 @@ void Player::start() {
 		Entity::Mask::EnemyAttack
 	);
 
-	constexpr auto PLAYER_MESH_NAME = "player.fbx";
-	model_ = Model::createOrGet(PLAYER_MESH_NAME, PLAYER_MESH_NAME);
+	model_ = Model::createOrGet("player.fbx");
 	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
 	drawer_->enableAnimation("Walk.002", false);
 	drawer_->update();
@@ -33,7 +32,7 @@ void Player::start() {
 		if (entity.getSelfMask() & (Entity::Mask::Enemy | Entity::Mask::EnemyAttack)) {
 			if (!health_->isInvincible()) {
 				getEntity().createComponent<DamageEffect>(2.0);
-				Sound::createOrGet("PlayerDamageSound", "player_damage.ogg")->createInstance()->play();
+				Sound::createOrGet("player_damage.ogg")->createInstance()->play();
 			}
 		}
 	});

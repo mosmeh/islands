@@ -3,8 +3,8 @@
 namespace islands {
 
 HealthIndicator::HealthIndicator() :
-	filledHeart_(Texture2D::createOrGet("FilledHeartImage", "heart_filled.png")),
-	emptyHeart_(Texture2D::createOrGet("EmptyHeartImage", "heart_empty.png")) {
+	filledHeart_(Texture2D::createOrGet("heart_filled.png")),
+	emptyHeart_(Texture2D::createOrGet("heart_empty.png")) {
 
 	filledHeart_.setSize({0.04, 0.065});
 	emptyHeart_.setSize({0.04, 0.065});

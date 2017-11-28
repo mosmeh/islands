@@ -11,10 +11,9 @@
 
 namespace islands {
 
-Texture2D::Texture2D(const std::string& name, const std::string& filename) :
-	SharedResource(name),
+Texture2D::Texture2D(const std::string& filename) :
+	SharedResource(filename),
 	id_(0),
-	filename_(filename),
 	data_(nullptr) {}
 
 Texture2D::~Texture2D() {
@@ -38,7 +37,7 @@ void Texture2D::loadImpl() {
 	stbi_set_flip_vertically_on_load(TRUE);
 
 #ifdef ENABLE_ASSET_ARCHIVE
-	const auto filePath = TEXTURE_DIR + '/' + filename_;
+	const auto filePath = TEXTURE_DIR + '/' + getName();
 
 	auto rawData = AssetArchive::getInstance().readFile(filePath);
 	const auto buffer = reinterpret_cast<stbi_uc*>(rawData.data());
@@ -46,7 +45,7 @@ void Texture2D::loadImpl() {
 	data_ = stbi_load_from_memory(buffer, rawData.size(),
 		&width_, &height_, &channels_, channels_);
 #else
-	const auto filePath = TEXTURE_DIR + sys::getFilePathSeparator() + filename_;
+	const auto filePath = TEXTURE_DIR + sys::getFilePathSeparator() + getName();
 	stbi_info(filePath.c_str(), &width_, &height_, &channels_);
 	data_ = stbi_load(filePath.c_str(), &width_, &height_, &channels_, channels_);
 #endif

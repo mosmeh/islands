@@ -4,10 +4,9 @@
 
 namespace islands {
 
-Shader::Shader(const std::string& name, const std::string& filename, const Type& type) :
-	SharedResource(name),
+Shader::Shader(const std::string& filename, const Type& type) :
+	SharedResource(filename),
 	id_(0),
-	filename_(filename),
 	type_(type) {}
 
 Shader::~Shader() {
@@ -24,9 +23,9 @@ GLuint Shader::getId() {
 void Shader::loadImpl() {
 	static const std::string SHADER_DIR = "shader";
 #ifdef ENABLE_ASSET_ARCHIVE
-	source_ = AssetArchive::getInstance().readTextFile(SHADER_DIR + '/' + filename_);
+	source_ = AssetArchive::getInstance().readTextFile(SHADER_DIR + '/' + getName());
 #else
-	std::ifstream ifs(SHADER_DIR + sys::getFilePathSeparator() + filename_, std::ios::in);
+	std::ifstream ifs(SHADER_DIR + sys::getFilePathSeparator() + getName(), std::ios::in);
 	std::ostringstream ss;
 	ss << ifs.rdbuf();
 	source_ = ss.str();
@@ -70,36 +69,11 @@ GLenum Shader::toGLenum(const Type& type) {
 	}
 }
 
-Program::Program(const std::string& name, const std::string& vertex, const std::string& fragment) :
-	Program(
-		name,
-		Shader::createOrGet(vertex, vertex, Shader::Type::Vertex),
-		Shader::createOrGet(fragment, fragment, Shader::Type::Fragment)) {}
 
-Program::Program(const std::string& name, std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> fragment) :
+Program::Program(const std::string& name, ShaderList shaders) :
 	SharedResource(name),
 	id_(0),
-	vertex_(vertex),
-	geometry_(nullptr),
-	fragment_(fragment) {}
-
-Program::Program(
-	const std::string& name,
-	const std::string& vertex,
-	const std::string& geometry,
-	const std::string& fragment) :
-	Program(
-		name,
-		Shader::createOrGet(vertex, vertex, Shader::Type::Vertex),
-		Shader::createOrGet(geometry, geometry, Shader::Type::Geometry),
-		Shader::createOrGet(fragment, fragment, Shader::Type::Fragment)) {}
-
-Program::Program(const std::string& name, std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> geometry, std::shared_ptr<Shader> fragment) :
-	SharedResource(name),
-	id_(0),
-	vertex_(vertex),
-	geometry_(geometry),
-	fragment_(fragment) {}
+	shaders_(shaders) {}
 
 Program::~Program() {
 	if (isUploaded()) {
@@ -108,10 +82,12 @@ Program::~Program() {
 }
 
 bool Program::isLoaded() const {
-	if (geometry_ && !geometry_->isLoaded()) {
-		return false;
+	for (const auto shader : shaders_) {
+		if (!shader->isLoaded()) {
+			return false;
+		}
 	}
-	return vertex_->isLoaded() && fragment_->isLoaded();
+	return true;
 }
 
 void Program::use() {
@@ -151,17 +127,13 @@ void Program::setUniform(const char* name, const glm::mat4& value, bool transpos
 
 void Program::uploadImpl() {
 	id_ = glCreateProgram();
-	glAttachShader(id_, vertex_->getId());
-	if (geometry_) {
-		glAttachShader(id_, geometry_->getId());
+	for (const auto shader : shaders_) {
+		glAttachShader(id_, shader->getId());
 	}
-	glAttachShader(id_, fragment_->getId());
 	glLinkProgram(id_);
-	glDetachShader(id_, vertex_->getId());
-	if (geometry_) {
-		glDetachShader(id_, geometry_->getId());
+	for (const auto shader : shaders_) {
+		glDetachShader(id_, shader->getId());
 	}
-	glDetachShader(id_, fragment_->getId());
 
 	GLint infoLogLength;
 	glGetProgramiv(id_, GL_INFO_LOG_LENGTH, &infoLogLength);

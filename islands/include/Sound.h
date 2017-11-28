@@ -24,13 +24,12 @@ public:
 		std::thread thread_;
 	};
 
-	Sound(const std::string& name, const std::string& filename);
+	Sound(const std::string& filename);
 	virtual ~Sound();
 
 	std::shared_ptr<Instance> createInstance();
 
 private:
-	const std::string filename_;
 	short* buffer_;
 	int numChannels_, sampleRate_, length_;
 	std::vector<std::shared_ptr<Instance>> instances_;

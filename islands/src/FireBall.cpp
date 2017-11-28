@@ -16,8 +16,7 @@ void FireBall::start() {
 		Entity::Mask::Enemy
 	);
 
-	constexpr auto BALL_MODEL = "fire_ball.obj";
-	const auto model = Model::createOrGet(BALL_MODEL, BALL_MODEL);
+	const auto model = Model::createOrGet("fire_ball.obj");
 	getEntity().createComponent<ModelDrawer>(model);
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model, 2.f);

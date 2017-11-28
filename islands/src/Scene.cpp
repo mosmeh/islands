@@ -8,8 +8,10 @@ namespace islands {
 
 SceneManager::SceneManager() :
 	current_(nullptr),
-	blackOutProgram_(Program::createOrGet(
-		"BlackOutProgram", "full_screen.vert", "black_out.frag")),
+	blackOutProgram_(Program::createOrGet("BlackOutProgram", 
+		Program::ShaderList{
+			Shader::createOrGet("full_screen.vert", Shader::Type::Vertex),
+			Shader::createOrGet("black_out.frag", Shader::Type::Fragment)})),
 	transition_{TransitionState::None, -HUGE_VAL} {
 
 	blackOutProgram_->use();
@@ -107,9 +109,12 @@ double SceneManager::Transition::getProgress() {
 }
 
 TitleScene::TitleScene() :
-	titleProgram_(Program::createOrGet(
-		"TitleProgram", "sprite.vert", "sprite.geom", "title.frag")),
-	titleTexture_(Texture2D::createOrGet("TitleImage", "title.png")),
+	titleProgram_(Program::createOrGet("TitleProgram",
+		Program::ShaderList{
+			Shader::createOrGet("sprite.vert", Shader::Type::Vertex),
+			Shader::createOrGet("sprite.geom", Shader::Type::Geometry),
+			Shader::createOrGet("title.frag", Shader::Type::Fragment)})),
+	titleTexture_(Texture2D::createOrGet("title.png")),
 	selectedItem_(0),
 	repeated_(false) {}
 
@@ -120,7 +125,7 @@ void TitleScene::update() {
 		} else {
 			SceneManager::getInstance().changeScene<CreditScene>();
 		}
-		Sound::get("DecideSound")->createInstance()->play();
+		Sound::get("decide.ogg")->createInstance()->play();
 	} else {
 		const auto& dir = Input::getInstance().getDirection();
 		if (dir.y <= -0.8 || 0.8 <= dir.y) {
@@ -154,15 +159,14 @@ void TitleScene::draw() {
 }
 
 IntroductionScene::IntroductionScene() :
-	keyboardIntroImage_(Texture2D::createOrGet("KeyboardIntroImage", "intro_keyboard.png")),
-	gamepadIntroImage_(Texture2D::createOrGet("GamepadIntroImage", "intro_gamepad.png")),
-	dualShock4IntroImage_(Texture2D::createOrGet(
-		"DualShock4IntroImage", "intro_dualshock4.png")) {}
+	keyboardIntroImage_(Texture2D::createOrGet("intro_keyboard.png")),
+	gamepadIntroImage_(Texture2D::createOrGet("intro_gamepad.png")),
+	dualShock4IntroImage_(Texture2D::createOrGet("intro_dualshock4.png")) {}
 
 void IntroductionScene::update() {
 	if (Input::getInstance().anyButtonPressed()) {
 		SceneManager::getInstance().changeScene<GameScene>();
-		Sound::get("DecideSound")->createInstance()->play();
+		Sound::get("decide.ogg")->createInstance()->play();
 	}
 }
 
@@ -179,13 +183,12 @@ void IntroductionScene::draw() {
 	}
 }
 
-CreditScene::CreditScene() : creditImage_(
-	Texture2D::createOrGet("CreditImage", "credit.png")) {}
+CreditScene::CreditScene() : creditImage_(Texture2D::createOrGet("credit.png")) {}
 
 void CreditScene::update() {
 	if (Input::getInstance().anyButtonPressed()) {
 		SceneManager::getInstance().changeScene<TitleScene>();
-		Sound::get("DecideSound")->createInstance()->play();
+		Sound::get("decide.ogg")->createInstance()->play();
 	}
 }
 
@@ -194,11 +197,11 @@ void CreditScene::draw() {
 	creditImage_.draw();
 }
 
-GameOverScene::GameOverScene() : gameOverImage_(
-	Texture2D::createOrGet("GameOverImage", "game_over.png")),
+GameOverScene::GameOverScene() :
+	gameOverImage_(Texture2D::createOrGet("game_over.png")),
 	startedAt_(glfwGetTime()) {
 
-	Sound::createOrGet("GameOverSound", "game_over.ogg")->createInstance()->play();
+	Sound::createOrGet("game_over.ogg")->createInstance()->play();
 }
 
 void GameOverScene::update() {
@@ -213,11 +216,11 @@ void GameOverScene::draw() {
 	gameOverImage_.draw();
 }
 
-GameClearScene::GameClearScene() : gameClearImage_(
-	Texture2D::createOrGet("GameClearImage", "game_clear.png")),
+GameClearScene::GameClearScene() :
+	gameClearImage_(Texture2D::createOrGet("game_clear.png")),
 	startedAt_(glfwGetTime()) {
 
-	Sound::createOrGet("GameClearSound", "game_clear.ogg")->createInstance()->play();
+	Sound::createOrGet("game_clear.ogg")->createInstance()->play();
 }
 
 void GameClearScene::update() {

@@ -27,7 +27,7 @@ void TotemPoll::update() {
 			health->setMaxHealth(15);
 			health->set(15);
 
-			Sound::createOrGet("CureSound", "cure.ogg")->createInstance()->play();
+			Sound::createOrGet("cure.ogg")->createInstance()->play();
 		}
 	}
 }

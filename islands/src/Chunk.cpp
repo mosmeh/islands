@@ -125,13 +125,8 @@ void Chunk::loadImpl() {
 		}
 	}
 
-	if (json.contains("bgm")) {
-		const auto& name = json.get("bgm").get<std::string>();
-		bgm_ = Sound::createOrGet(name, name);
-	} else {
-		static constexpr auto DEFAULT_BGM_NAME = "bgm.ogg";
-		bgm_ = Sound::createOrGet(DEFAULT_BGM_NAME, DEFAULT_BGM_NAME);
-	}
+	bgm_ = Sound::createOrGet(
+		json.contains("bgm") ? json.get("bgm").get<std::string>() : "bgm.ogg");
 
 	for (const auto& ent : json.get("entities").get<picojson::object>()) {
 		const auto entity = createEntity(ent.first);
@@ -152,16 +147,27 @@ void Chunk::loadImpl() {
 		if (prop.find("model") != prop.end()) {
 			const auto& modelProp = prop.at("model").get<picojson::object>();
 
-			const auto& meshName = modelProp.at("mesh").get<std::string>();
-			model = Model::createOrGet(meshName, meshName);
+			model = Model::createOrGet(modelProp.at("mesh").get<std::string>());
 			const auto drawer = entity->createComponent<ModelDrawer>(model);
 
 			if (modelProp.find("visible") != modelProp.end()) {
 				drawer->setVisible(modelProp.at("visible").get<bool>());
 			}
 			if (modelProp.find("lightmap") != modelProp.end()) {
-				const auto& lightmapName = modelProp.at("lightmap").get<std::string>();
-				drawer->setTexture(Texture2D::createOrGet(lightmapName, lightmapName));
+				drawer->setTexture(Texture2D::createOrGet(
+					modelProp.at("lightmap").get<std::string>()));
+			}
+			if (modelProp.find("vertex") != modelProp.end()) {
+				const auto& name = modelProp.at("vertex").get<std::string>();
+				drawer->setVertexShader(Shader::createOrGet(name, Shader::Type::Vertex));
+			}
+			if (modelProp.find("geometry") != modelProp.end()) {
+				const auto& name = modelProp.at("geometry").get<std::string>();
+				drawer->setGeometryShader(Shader::createOrGet(name, Shader::Type::Geometry));
+			}
+			if (modelProp.find("fragment") != modelProp.end()) {
+				const auto& name = modelProp.at("fragment").get<std::string>();
+				drawer->setFragmentShader(Shader::createOrGet(name, Shader::Type::Fragment));
 			}
 		}
 
@@ -179,7 +185,7 @@ void Chunk::loadImpl() {
 				const auto& collisionProp = prop.at("collision").get<picojson::object>();
 				const auto& type = collisionProp.at("type").get<std::string>();
 				const auto& meshName = collisionProp.at("mesh_name").get<std::string>();
-				const auto collisionMesh = Model::createOrGet(meshName, meshName);
+				const auto collisionMesh = Model::createOrGet(meshName);
 				if (type == "mesh") {
 					entity->createComponent<MeshCollider>(collisionMesh);
 				}  else if (type == "wall") {

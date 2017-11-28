@@ -10,7 +10,7 @@ namespace islands {
 
 class Model : public SharedResource<Model> {
 public:
-	Model(const std::string& name, const std::string& filename);
+	Model(const std::string& filename);
 
 	Model(const Model&) = delete;
 	Model& operator=(const Model&) = delete;
@@ -24,7 +24,6 @@ public:
 	const geometry::AABB& getLocalAABB();
 
 private:
-	const std::string filename_;
 	std::vector<std::shared_ptr<Mesh>> meshes_;
 	bool opaque_, hasSkinned_;
 	geometry::AABB localAABB_;
