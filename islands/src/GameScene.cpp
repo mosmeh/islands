@@ -34,11 +34,6 @@ std::uint64_t cantorPair(std::uint64_t a, std::uint64_t b) {
 }
 
 GameScene::GameScene() :
-	NEIGHBOR_OFFSETS{
-		glm::ivec3(-1, 0, 0), glm::ivec3(1, 0, 0),
-		glm::ivec3(0, -1, 0), glm::ivec3(0, 1, 0),
-		glm::ivec3(0, 0, -1), glm::ivec3(0, 0, 1)
-	},
 	backgroundProgram_(Program::createOrGet("BackgroundProgram",
 		Program::ShaderList{
 			Shader::createOrGet("full_screen.vert", Shader::Type::Vertex),
@@ -80,6 +75,12 @@ GameScene::GameScene() :
 }
 
 void GameScene::update() {
+	static const std::array<glm::ivec3, 6> NEIGHBOR_OFFSETS{
+		glm::ivec3(-1, 0, 0), glm::ivec3(1, 0, 0),
+		glm::ivec3(0, -1, 0), glm::ivec3(0, 1, 0),
+		glm::ivec3(0, 0, -1), glm::ivec3(0, 0, 1)
+	};
+
 	currentChunk_->update();
 
 	const auto& playerAABB = playerEntity_->getFirstComponent<Collider>()->getGlobalAABB();

@@ -2,9 +2,9 @@
 
 namespace islands {
 
-Camera::Camera() :
-	PROJECTION(glm::perspective(glm::radians(30.f), 16.f / 9, 0.1f, 100.f)),
-	offset_(15.f) {}
+const glm::mat4 Camera::PROJECTION = glm::perspective(glm::radians(30.f), 16.f / 9, 0.1f, 100.f);
+
+Camera::Camera() : offset_(15.f) {}
 
 Camera& Camera::getInstance() {
 	static Camera instance;

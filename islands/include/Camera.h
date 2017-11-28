@@ -17,7 +17,7 @@ public:
 	const glm::mat4& getProjectionViewMatrix() const;
 
 private:
-	const glm::mat4 PROJECTION;
+	static const glm::mat4 PROJECTION;
 	glm::mat4 view_, projView_;
 	glm::vec3 targetPos_;
 	float offset_;

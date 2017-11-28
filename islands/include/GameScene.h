@@ -38,8 +38,6 @@ public:
 	void onLeave();
 
 private:
-	const std::array<glm::ivec3, 6> NEIGHBOR_OFFSETS;
-
 	std::shared_ptr<Program> backgroundProgram_;
 	HealthIndicator healthIndicator_;
 
