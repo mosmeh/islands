@@ -15,11 +15,11 @@ void Slime::start() {
 		Entity::Mask::PlayerAttack
 	);
 
-	model_ = Model::createOrGet("slime.dae");
-	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
+	const auto model = Model::createOrGet("slime.dae");
+	drawer_ = getEntity().createComponent<ModelDrawer>(model);
 	drawer_->setCullFaceEnabled(false);
 
-	const auto collider = getEntity().createComponent<SphereCollider>(model_);
+	const auto collider = getEntity().createComponent<SphereCollider>(model);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
 		const auto& entity = opponent->getEntity();
 		if (entity.getSelfMask() & Entity::Mask::Player) {
@@ -94,11 +94,11 @@ void BigSlime::start() {
 		Entity::Mask::PlayerAttack
 	);
 
-	model_ = Model::createOrGet("big_slime.dae");
-	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
+	const auto model = Model::createOrGet("big_slime.dae");
+	drawer_ = getEntity().createComponent<ModelDrawer>(model);
 	drawer_->setCullFaceEnabled(false);
 
-	const auto collider = getEntity().createComponent<SphereCollider>(model_, 1.3f);
+	const auto collider = getEntity().createComponent<SphereCollider>(model, 1.3f);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
 		const auto& entity = opponent->getEntity();
 		if (entity.getSelfMask() & Entity::Mask::Player) {
@@ -159,10 +159,10 @@ void Rabbit::start() {
 		Entity::Mask::PlayerAttack
 	);
 
-	model_ = Model::createOrGet("rabbit.dae");
-	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
+	const auto model = Model::createOrGet("rabbit.dae");
+	drawer_ = getEntity().createComponent<ModelDrawer>(model);
 
-	const auto collider = getEntity().createComponent<SphereCollider>(model_);
+	const auto collider = getEntity().createComponent<SphereCollider>(model);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
 		const auto& entity = opponent->getEntity();
 		if (entity.getSelfMask() & Entity::Mask::Player) {
@@ -272,10 +272,10 @@ void Crab::start() {
 		Entity::Mask::PlayerAttack
 	);
 
-	model_ = Model::createOrGet("crab.dae");
-	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
+	 auto model = Model::createOrGet("crab.dae");
+	drawer_ = getEntity().createComponent<ModelDrawer>(model);
 
-	const auto collider = getEntity().createComponent<SphereCollider>(model_);
+	const auto collider = getEntity().createComponent<SphereCollider>(model);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
 		const auto& entity = opponent->getEntity();
 		if (entity.getSelfMask() & Entity::Mask::Player) {
@@ -390,11 +390,11 @@ void Dragon::start() {
 		Entity::Mask::PlayerAttack
 	);
 
-	model_ = Model::createOrGet("dragon.dae");
-	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
+	const auto model = Model::createOrGet("dragon.dae");
+	drawer_ = getEntity().createComponent<ModelDrawer>(model);
 	drawer_->setCullFaceEnabled(false);
 
-	const auto collider = getEntity().createComponent<SphereCollider>(model_);
+	const auto collider = getEntity().createComponent<SphereCollider>(model);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
 		const auto& entity = opponent->getEntity();
 		if (entity.getSelfMask() & Entity::Mask::Player) {

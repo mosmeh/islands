@@ -55,7 +55,6 @@ private:
 	};
 
 	std::shared_ptr<PhysicalBody> body_;
-	std::shared_ptr<Model> model_;
 	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<Health> health_;
 	glm::vec3 direction_;
@@ -86,7 +85,6 @@ private:
 	};
 
 	std::shared_ptr<PhysicalBody> body_;
-	std::shared_ptr<Model> model_;
 	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<Health> health_;
 };
@@ -133,7 +131,6 @@ private:
 	};
 
 	std::shared_ptr<PhysicalBody> body_;
-	std::shared_ptr<Model> model_;
 	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<Health> health_;
 	glm::vec3 direction_;
@@ -181,7 +178,6 @@ private:
 	};
 
 	std::shared_ptr<PhysicalBody> body_;
-	std::shared_ptr<Model> model_;
 	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<Health> health_;
 	glm::vec3 direction_;
@@ -257,7 +253,6 @@ private:
 
 	std::mt19937 engine_;
 	std::shared_ptr<PhysicalBody> body_;
-	std::shared_ptr<Model> model_;
 	std::shared_ptr<ModelDrawer> drawer_;
 	std::shared_ptr<Health> health_;
 	glm::vec3 direction_;
