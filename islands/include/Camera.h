@@ -14,11 +14,11 @@ public:
 	void setOffset(float offset);
 	const glm::mat4& getProjectionMatrix() const;
 	const glm::mat4& getViewMatrix() const;
-	const glm::mat4& getProjectionViewMatrix() const;
+	const glm::mat4& getViewProjectionMatrix() const;
 
 private:
 	static const glm::mat4 PROJECTION;
-	glm::mat4 view_, projView_;
+	glm::mat4 view_, viewProj_;
 	glm::vec3 targetPos_;
 	float offset_;
 

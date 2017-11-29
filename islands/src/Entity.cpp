@@ -50,7 +50,7 @@ const glm::mat4& Entity::getModelMatrix() const {
 }
 
 glm::mat4 Entity::calculateMVPMatrix() const {
-	return Camera::getInstance().getProjectionViewMatrix() * modelMatrix_;
+	return Camera::getInstance().getViewProjectionMatrix() * modelMatrix_;
 }
 
 void Entity::update() {

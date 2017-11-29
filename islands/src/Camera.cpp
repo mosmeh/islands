@@ -30,14 +30,14 @@ const glm::mat4& Camera::getViewMatrix() const {
 	return view_;
 }
 
-const glm::mat4& Camera::getProjectionViewMatrix() const {
-	return projView_;
+const glm::mat4& Camera::getViewProjectionMatrix() const {
+	return viewProj_;
 }
 
 void Camera::updateProjectionViewMatrix() {
 	const auto eye = targetPos_ + offset_ * glm::vec3(-1.f, -1.f, 1.f);
 	view_ = glm::lookAt(eye, targetPos_, glm::vec3(0, 0, 1));
-	projView_ = PROJECTION * view_;
+	viewProj_ = PROJECTION * view_;
 }
 
 }

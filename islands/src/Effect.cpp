@@ -72,7 +72,7 @@ void Scatter::draw() {
 	program_->use();
 	program_->setUniform("M", getEntity().getModelMatrix());
 	program_->setUniform("MV", Camera::getInstance().getViewMatrix() * getEntity().getModelMatrix());
-	program_->setUniform("VP", Camera::getInstance().getProjectionViewMatrix());
+	program_->setUniform("VP", Camera::getInstance().getViewProjectionMatrix());
 	program_->setUniform("time", static_cast<glm::float32>(2.0 * (glfwGetTime() - startedAt_)));
 
 	glDisable(GL_CULL_FACE);
