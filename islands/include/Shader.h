@@ -56,7 +56,7 @@ public:
 	void setUniform(const char* name, const glm::mat4& value, bool transpose = false) const;
 
 private:
-	std::vector<std::shared_ptr<Shader>> shaders_;
+	const std::vector<std::shared_ptr<Shader>> shaders_;
 	GLuint id_;
 
 	void uploadImpl() override;

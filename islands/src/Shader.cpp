@@ -45,10 +45,10 @@ void Shader::uploadImpl() {
 	glGetShaderiv(id_, GL_INFO_LOG_LENGTH, &infoLogLength);
 
 	if (infoLogLength > 0) {
-		const auto infoLog = std::make_unique<GLchar[]>(infoLogLength);
-		glGetShaderInfoLog(id_, infoLogLength, nullptr, infoLog.get());
+		std::vector<GLchar> infoLog(infoLogLength);
+		glGetShaderInfoLog(id_, infoLogLength, nullptr, infoLog.data());
 
-		SLOG << "Shader: " << infoLog.get() << std::endl;
+		SLOG << "Shader: " << infoLog.data() << std::endl;
 	}
 
 	GLint compileStatus;
@@ -139,10 +139,10 @@ void Program::uploadImpl() {
 	glGetProgramiv(id_, GL_INFO_LOG_LENGTH, &infoLogLength);
 
 	if (infoLogLength > 0) {
-		const auto infoLog = std::make_unique<GLchar[]>(infoLogLength);
-		glGetProgramInfoLog(id_, infoLogLength, nullptr, infoLog.get());
+		std::vector<GLchar> infoLog(infoLogLength);
+		glGetProgramInfoLog(id_, infoLogLength, nullptr, infoLog.data());
 
-		SLOG << "Program: " << infoLog.get() << std::endl;
+		SLOG << "Program: " << infoLog.data() << std::endl;
 	}
 
 	GLint linkStatus;
