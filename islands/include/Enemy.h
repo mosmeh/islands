@@ -17,10 +17,10 @@ class Dead : public StateMachine<T>::State {
 		if (entity.hasComponent<Collider>()) {
 			entity.getFirstComponent<Collider>()->clearCallbacks();
 		}
-		if (entity.hasComponent<DamageEffect>()) {
-			entity.getFirstComponent<DamageEffect>()->destroy();
+		if (entity.hasComponent<effect::Damage>()) {
+			entity.getFirstComponent<effect::Damage>()->destroy();
 		}
-		entity.createComponent<ScatterEffect>([&entity] {
+		entity.createComponent<effect::Scatter>([&entity] {
 			entity.destroy();
 		});
 		Sound::createOrGet("enemy_die.ogg")->createInstance()->play();

@@ -2,20 +2,21 @@
 #include "Camera.h"
 
 namespace islands {
+namespace effect {
 
-DamageEffect::DamageEffect(double duration) :
+Damage::Damage(double duration) :
 	duration_(duration),
 	program_(Program::createOrGet("DamageProgram",
 		Program::ShaderList{
 			Shader::createOrGet("skinning.vert", Shader::Type::Vertex),
 			Shader::createOrGet("damage.frag", Shader::Type::Fragment)})) {}
 
-void DamageEffect::start() {
+void Damage::start() {
 	drawer_ = getEntity().getFirstComponent<ModelDrawer>();
 	startedAt_ = glfwGetTime();
 }
 
-void DamageEffect::update() {
+void Damage::update() {
 	if (glfwGetTime() - startedAt_ < duration_) {
 		drawer_->setVisible(false);
 	} else {
@@ -24,7 +25,7 @@ void DamageEffect::update() {
 	}
 }
 
-void DamageEffect::draw() {
+void Damage::draw() {
 	program_->use();
 	program_->setUniform("MVP", getEntity().calculateMVPMatrix());
 	program_->setUniform("time", static_cast<glm::float32>(glfwGetTime() - startedAt_));
@@ -40,24 +41,24 @@ void DamageEffect::draw() {
 	}
 }
 
-bool DamageEffect::isOpaque() const {
+bool Damage::isOpaque() const {
 	return true;
 }
 
-ScatterEffect::ScatterEffect(const FinishCallback& callback) :
+Scatter::Scatter(const FinishCallback& callback) :
 	callback_(callback),
-	program_(Program::createOrGet("ScatterProgram", 
+	program_(Program::createOrGet("ScatterProgram",
 		Program::ShaderList{
 			Shader::createOrGet("scatter.vert", Shader::Type::Vertex),
 			Shader::createOrGet("scatter.geom", Shader::Type::Geometry),
 			Shader::createOrGet("scatter.frag", Shader::Type::Fragment)})) {}
 
-void ScatterEffect::start() {
+void Scatter::start() {
 	drawer_ = getEntity().getFirstComponent<ModelDrawer>();
 	startedAt_ = glfwGetTime();
 }
 
-void ScatterEffect::update() {
+void Scatter::update() {
 	if (glfwGetTime() - startedAt_ <= 1.0) {
 		drawer_->setVisible(false);
 	} else {
@@ -67,7 +68,7 @@ void ScatterEffect::update() {
 	}
 }
 
-void ScatterEffect::draw() {
+void Scatter::draw() {
 	program_->use();
 	program_->setUniform("M", getEntity().getModelMatrix());
 	program_->setUniform("MV", Camera::getInstance().getViewMatrix() * getEntity().getModelMatrix());
@@ -75,7 +76,7 @@ void ScatterEffect::draw() {
 	program_->setUniform("time", static_cast<glm::float32>(2.0 * (glfwGetTime() - startedAt_)));
 
 	glDisable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
+	glEnable(GL_BLEND);
 
 	std::stringstream ss;
 	for (const auto mesh : drawer_->getModel()->getMeshes()) {
@@ -86,11 +87,12 @@ void ScatterEffect::draw() {
 	}
 
 	glEnable(GL_CULL_FACE);
-    glDisable(GL_BLEND);
+	glDisable(GL_BLEND);
 }
 
-bool ScatterEffect::isOpaque() const {
+bool Scatter::isOpaque() const {
 	return false;
 }
 
+}
 }

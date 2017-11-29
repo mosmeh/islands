@@ -5,11 +5,12 @@
 #include "Model.h"
 
 namespace islands {
+namespace effect {
 
-class DamageEffect : public Drawable {
+class Damage : public Drawable {
 public:
-	DamageEffect(double duration = 0.3);
-	virtual ~DamageEffect() = default;
+	Damage(double duration = 0.3);
+	virtual ~Damage() = default;
 
 	void start() override;
 	void update() override;
@@ -23,12 +24,12 @@ private:
 	double startedAt_;
 };
 
-class ScatterEffect : public Drawable {
+class Scatter : public Drawable {
 public:
 	using FinishCallback = std::function<void(void)>;
 
-	ScatterEffect(const FinishCallback& callback);
-	virtual ~ScatterEffect() = default;
+	Scatter(const FinishCallback& callback);
+	virtual ~Scatter() = default;
 
 	void start() override;
 	void update() override;
@@ -42,4 +43,5 @@ private:
 	double startedAt_;
 };
 
+}
 }

@@ -26,7 +26,7 @@ void Slime::start() {
 			entity.getFirstComponent<Health>()->takeDamage(1);
 		}
 		if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-			getEntity().createComponent<DamageEffect>();
+			getEntity().createComponent<effect::Damage>();
 		}
 	});
 
@@ -103,7 +103,7 @@ void BigSlime::start() {
 			entity.getFirstComponent<Health>()->takeDamage(1);
 		}
 		if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-			getEntity().createComponent<DamageEffect>();
+			getEntity().createComponent<effect::Damage>();
 		}
 	});
 
@@ -169,7 +169,7 @@ void Rabbit::start() {
 			entity.getFirstComponent<Health>()->takeDamage(1);
 		}
 		if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-			getEntity().createComponent<DamageEffect>();
+			getEntity().createComponent<effect::Damage>();
 		}
 	});
 
@@ -282,7 +282,7 @@ void Crab::start() {
 			entity.getFirstComponent<Health>()->takeDamage(1);
 		}
 		if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-			getEntity().createComponent<DamageEffect>();
+			getEntity().createComponent<effect::Damage>();
 		}
 	});
 
@@ -401,7 +401,7 @@ void Dragon::start() {
 			entity.getFirstComponent<Health>()->takeDamage(1);
 		}
 		if (entity.getSelfMask() & Entity::Mask::PlayerAttack) {
-			getEntity().createComponent<DamageEffect>();
+			getEntity().createComponent<effect::Damage>();
 		}
 	});
 
@@ -594,10 +594,10 @@ void Dragon::Dead::start(Dragon& parent) {
 	if (entity.hasComponent<Collider>()) {
 		entity.getFirstComponent<Collider>()->clearCallbacks();
 	}
-	if (entity.hasComponent<DamageEffect>()) {
-		entity.getFirstComponent<DamageEffect>()->destroy();
+	if (entity.hasComponent<effect::Damage>()) {
+		entity.getFirstComponent<effect::Damage>()->destroy();
 	}
-	entity.createComponent<ScatterEffect>([&entity] {
+	entity.createComponent<effect::Scatter>([&entity] {
 		entity.destroy();
 		SceneManager::getInstance().changeScene<GameClearScene>(false);
 	});

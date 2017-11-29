@@ -34,7 +34,7 @@ void Player::start() {
 		const auto& entity = opponent->getEntity();
 		if (entity.getSelfMask() & (Entity::Mask::Enemy | Entity::Mask::EnemyAttack)) {
 			if (!health_->isInvincible()) {
-				getEntity().createComponent<DamageEffect>(2.0);
+				getEntity().createComponent<effect::Damage>(2.0);
 				Sound::createOrGet("player_damage.ogg")->createInstance()->play();
 			}
 		}
@@ -51,10 +51,10 @@ void Player::update() {
 		return;
 	} else if (health_->isDead()) {
 		status_ = State::Dead;
-		if (getEntity().hasComponent<DamageEffect>()) {
-			getEntity().getFirstComponent<DamageEffect>()->destroy();
+		if (getEntity().hasComponent<effect::Damage>()) {
+			getEntity().getFirstComponent<effect::Damage>()->destroy();
 		}
-		getEntity().createComponent<ScatterEffect>([this] {
+		getEntity().createComponent<effect::Scatter>([this] {
 			getEntity().destroy();
 			SceneManager::getInstance().changeScene<GameOverScene>(false);
 		});
