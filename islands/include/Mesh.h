@@ -2,7 +2,6 @@
 
 #include "Resource.h"
 #include "Material.h"
-#include "Shader.h"
 #include "GLObjects.h"
 #include "Geometry.h"
 

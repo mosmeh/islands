@@ -171,7 +171,6 @@ void Chunk::loadImpl() {
 			}
 		}
 
-
 		if (prop.find("collision") != prop.end()) {
 			if (prop.at("collision").is<std::string>()) {
 				const auto& type = prop.at("collision").get<std::string>();

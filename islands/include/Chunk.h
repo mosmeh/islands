@@ -2,7 +2,6 @@
 
 #include "Resource.h"
 #include "Entity.h"
-#include "Collision.h"
 #include "Geometry.h"
 #include "Sound.h"
 

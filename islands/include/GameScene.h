@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Chunk.h"
-#include "Geometry.h"
 #include "HealthIndicator.h"
 #include "Scene.h"
 

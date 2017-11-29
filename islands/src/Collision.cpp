@@ -1,6 +1,5 @@
 #include "Collision.h"
 #include "Entity.h"
-#include "Camera.h"
 #include "Chunk.h"
 
 namespace islands {

@@ -1,5 +1,6 @@
 #include "FireBall.h"
-#include "Chunk.h"
+#include "Entity.h"
+#include "PhysicalBody.h"
 #include "Health.h"
 
 namespace islands {

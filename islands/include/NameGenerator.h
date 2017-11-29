@@ -17,6 +17,7 @@ public:
 
 private:
 	unsigned long int n_;
+
 	NameGenerator() : n_(0) {}
 };
 

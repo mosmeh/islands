@@ -3,7 +3,6 @@
 #include "Window.h"
 #include "Input.h"
 #include "Scene.h"
-#include "Sound.h"
 
 namespace islands {
 
@@ -139,7 +138,7 @@ SLOG << "glad(" << name << "): " << #code << std::endl; return;
 			if (action == GLFW_PRESS) {
 				const auto time = sys::getTime();
 				char buf[32];
-				strftime(buf, sizeof(buf), "screenshot%Y%m%d%I%M%S.png", &time);
+				std::strftime(buf, sizeof(buf), "screenshot%Y%m%d%I%M%S.png", &time);
 
 				Window::getInstance().saveScreenShot(buf);
 			}

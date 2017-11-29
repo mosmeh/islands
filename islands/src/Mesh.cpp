@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Mesh.h"
 
 //#define PRINT_ANIMATIONS

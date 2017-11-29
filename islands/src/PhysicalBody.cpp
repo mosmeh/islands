@@ -1,5 +1,4 @@
 #include "PhysicalBody.h"
-#include "Entity.h"
 #include "Window.h"
 
 namespace islands {

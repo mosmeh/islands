@@ -1,7 +1,5 @@
 #pragma once
 #include "Component.h"
-#include "Entity.h"
-#include "PhysicalBody.h"
 
 namespace islands {
 
