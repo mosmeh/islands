@@ -157,6 +157,9 @@ void Chunk::loadImpl() {
 				drawer->setTexture(Texture2D::createOrGet(
 					modelProp.at("lightmap").get<std::string>()));
 			}
+			if (modelProp.find("cull_face") != modelProp.end()) {
+				drawer->setCullFaceEnabled(modelProp.at("cull_face").get<bool>());
+			}
 			if (modelProp.find("vertex") != modelProp.end()) {
 				const auto& name = modelProp.at("vertex").get<std::string>();
 				drawer->setVertexShader(Shader::createOrGet(name, Shader::Type::Vertex));
