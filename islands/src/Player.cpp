@@ -4,6 +4,9 @@
 #include "Chunk.h"
 #include "Scene.h"
 #include "Sound.h"
+#include "FireBall.h"
+#include "Effect.h"
+#include "NameGenerator.h"
 
 namespace islands {
 
@@ -20,13 +23,13 @@ void Player::start() {
 		Entity::Mask::EnemyAttack
 	);
 
-	model_ = Model::createOrGet("player.fbx");
-	drawer_ = getEntity().createComponent<ModelDrawer>(model_);
+	const auto model = Model::createOrGet("player.fbx");
+	drawer_ = getEntity().createComponent<ModelDrawer>(model);
 	drawer_->enableAnimation("Walk.002", false);
 	drawer_->update();
 	drawer_->stopAnimation();
 
-	const auto collider = getEntity().createComponent<SphereCollider>(model_, 0.7f);
+	const auto collider = getEntity().createComponent<SphereCollider>(model, 0.7f);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
 		const auto& entity = opponent->getEntity();
 		if (entity.getSelfMask() & (Entity::Mask::Enemy | Entity::Mask::EnemyAttack)) {
@@ -99,8 +102,9 @@ void Player::update() {
 	case State::PreFire:
 		if (glfwGetTime() > attackAnimStartedAt_ + 20.0 / ATTACK_ANIM_SPEED) {
 			status_ = State::PostFire;
-			getChunk().createEntity("FireBall")->createComponent<FireBall>(
-				getEntity().getPosition(), getEntity().getQuaternion());
+			getChunk().createEntity(
+				NameGenerator::generate("FireBall"))->createComponent<FireBall>(
+					getEntity().getPosition(), getEntity().getQuaternion());
 		}
 		break;
 	case State::PostFire:
