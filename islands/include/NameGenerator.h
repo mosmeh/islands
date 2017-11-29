@@ -8,10 +8,10 @@ public:
 	NameGenerator& operator=(const NameGenerator&) = delete;
 	virtual ~NameGenerator() = default;
 
-	static std::string generate(const std::string& prefix = "n") {
+	static std::string generate(const std::string& postfix = "n") {
 		static NameGenerator instance;
 		std::stringstream ss;
-		ss << prefix << "_" << instance.n_++;
+		ss << instance.n_++ << "_" << postfix;
 		return ss.str();
 	}
 
