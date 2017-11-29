@@ -601,7 +601,7 @@ void Dragon::Dead::start(Dragon& parent) {
 		entity.destroy();
 		SceneManager::getInstance().changeScene<GameClearScene>(false);
 	});
-	Sound::get("enemy_die.ogg")->createInstance()->play();
+	Sound::createOrGet("enemy_die.ogg")->createInstance()->play();
 }
 
 void Dragon::lookAtPlayer() {

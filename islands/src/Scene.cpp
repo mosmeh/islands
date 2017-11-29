@@ -125,7 +125,7 @@ void TitleScene::update() {
 		} else {
 			SceneManager::getInstance().changeScene<CreditScene>();
 		}
-		Sound::get("decide.ogg")->createInstance()->play();
+		Sound::createOrGet("decide.ogg")->createInstance()->play();
 	} else {
 		const auto& dir = Input::getInstance().getDirection();
 		if (dir.y <= -0.8 || 0.8 <= dir.y) {
@@ -166,7 +166,7 @@ IntroductionScene::IntroductionScene() :
 void IntroductionScene::update() {
 	if (Input::getInstance().anyButtonPressed()) {
 		SceneManager::getInstance().changeScene<GameScene>();
-		Sound::get("decide.ogg")->createInstance()->play();
+		Sound::createOrGet("decide.ogg")->createInstance()->play();
 	}
 }
 
@@ -188,7 +188,7 @@ CreditScene::CreditScene() : creditImage_(Texture2D::createOrGet("credit.png")) 
 void CreditScene::update() {
 	if (Input::getInstance().anyButtonPressed()) {
 		SceneManager::getInstance().changeScene<TitleScene>();
-		Sound::get("decide.ogg")->createInstance()->play();
+		Sound::createOrGet("decide.ogg")->createInstance()->play();
 	}
 }
 
