@@ -17,7 +17,6 @@ void Slime::start() {
 
 	const auto model = Model::createOrGet("slime.dae");
 	drawer_ = getEntity().createComponent<ModelDrawer>(model);
-	drawer_->setCullFaceEnabled(false);
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
@@ -94,7 +93,6 @@ void BigSlime::start() {
 
 	const auto model = Model::createOrGet("big_slime.dae");
 	drawer_ = getEntity().createComponent<ModelDrawer>(model);
-	drawer_->setCullFaceEnabled(false);
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model, 1.3f);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
