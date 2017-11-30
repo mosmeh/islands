@@ -74,7 +74,7 @@ void Model::loadImpl() {
 			localAABB_.min = glm::min(localAABB_.min, vert);
 			localAABB_.max = glm::max(localAABB_.max, vert);
 		}
-		if (mesh->getMaterial().getDiffuse().a < 1.f) {
+		if (mesh->getMeshMaterial().getDiffuse().a < 1.f) {
 			opaque_ = false;
 		}
 	}
@@ -86,7 +86,14 @@ ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
 	visible_(true),
 	cullFaceEnabled_(true) {
 
-	updateProgram();
+	defaultMaterial_ = std::make_shared<Material>();
+	defaultMaterial_->setUniformProvider([this](std::shared_ptr<Program> program) {
+		program->use();
+		program->setUniform("MVP", getEntity().calculateMVPMatrix());
+		if (material_ && material_->getTexture()) {
+			program->setUniform("tex", static_cast<GLuint>(0));
+		}
+	});
 }
 
 void ModelDrawer::update() {
@@ -108,42 +115,42 @@ void ModelDrawer::update() {
 
 void ModelDrawer::draw() {
 	if (visible_) {
-		if (!cullFaceEnabled_) {
+		if (!cullFaceEnabled_ || !isOpaque()) {
 			glDisable(GL_CULL_FACE);
 		}
 		if (!isOpaque()) {
 			glEnable(GL_BLEND);
 		}
 
-		const auto& MVP = getEntity().calculateMVPMatrix();
-		if (texture_) {
-			texture_->bind(0);
+		const auto material = material_ ? material_ : defaultMaterial_;
+
+		if (material->getTexture()) {
+			material->getTexture()->bind(0);
 		}
 
-		const auto prepare = [&](std::shared_ptr<Program> program) {
-			program->use();
-			program->setUniform("MVP", MVP);
-			if (texture_) {
-				program->setUniform("tex", static_cast<GLuint>(0));
-			}
-		};
+		const auto setUniform = material->getUniformProvider() ?
+			material->getUniformProvider() : defaultMaterial_->getUniformProvider();
 
-		prepare(program_);
+		const auto program = material->getProgram(false);
+		setUniform(program);
+
+		std::shared_ptr<Program> skinningProgram;
 		if (model_->hasSkinnedMesh()) {
-			prepare(skinningProgram_);
-		};
+			skinningProgram = material->getProgram(true);
+			setUniform(skinningProgram);
+		}
 
 		for (const auto mesh : model_->getMeshes()) {
 			if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
-				mesh->getMaterial().apply(skinningProgram_);
-				skinned->applyBoneTransform(skinningProgram_);
+				mesh->getMeshMaterial().apply(skinningProgram);
+				skinned->applyBoneTransform(skinningProgram);
 			} else {
-				mesh->getMaterial().apply(program_);
+				mesh->getMeshMaterial().apply(program);
 			}
 			mesh->draw();
 		}
 
-		if (!cullFaceEnabled_) {
+		if (!cullFaceEnabled_ || !isOpaque()) {
 			glEnable(GL_CULL_FACE);
 		}
 		if (!isOpaque()) {
@@ -153,7 +160,16 @@ void ModelDrawer::draw() {
 }
 
 bool ModelDrawer::isOpaque() const {
-	return model_->isOpaque();
+	switch ((material_ ? material_ : defaultMaterial_)->getOpacity()) {
+	case Material::Opacity::Opaque:
+		return true;
+	case Material::Opacity::Transparent:
+		return false;
+	case Material::Opacity::InheritModel:
+		return model_->isOpaque();
+	default:
+		throw std::exception("unreachable");
+	}
 }
 
 std::shared_ptr<Model> ModelDrawer::getModel() const {
@@ -164,58 +180,12 @@ void ModelDrawer::setVisible(bool visible) {
 	visible_ = visible;
 }
 
-void ModelDrawer::setTexture(std::shared_ptr<Texture2D> texture) {
-	texture_ = texture;
-	updateProgram();
-}
-
-void ModelDrawer::setVertexShader(std::shared_ptr<Shader> shader) {
-	vertex_ = shader;
-	updateProgram();
-}
-
-void ModelDrawer::setGeometryShader(std::shared_ptr<Shader> shader) {
-	geometry_ = shader;
-	updateProgram();
-}
-
-void ModelDrawer::setFragmentShader(std::shared_ptr<Shader> shader) {
-	fragment_ = shader;
-	updateProgram();
-}
-
-void ModelDrawer::updateProgram() {
-	std::shared_ptr<Shader> fragment = fragment_;
-	if (!fragment) {
-		fragment = Shader::createOrGet(
-			texture_ ? "texture.frag" : "default.frag", Shader::Type::Fragment);
-	}
-
-	const auto getProgram = [&](bool skinning) {
-		std::shared_ptr<Shader> vertex = vertex_;
-		if (!vertex) {
-			vertex = Shader::createOrGet(
-				skinning ? "skinning.vert" : "default.vert", Shader::Type::Vertex);
-		}
-		if (geometry_) {
-			return Program::createOrGet(
-				vertex->getName() + "//" + geometry_->getName() + "//" + fragment->getName(),
-				Program::ShaderList{vertex, geometry_, fragment});
-		} else {
-			return Program::createOrGet(
-				vertex->getName() + "//" + fragment->getName(),
-				Program::ShaderList{vertex, fragment});
-		}
-	};
-
-	program_ = getProgram(false);
-	if (model_->hasSkinnedMesh()) {
-		skinningProgram_ = getProgram(true);
-	}
-}
-
 void ModelDrawer::setCullFaceEnabled(bool enabled) {
 	cullFaceEnabled_ = enabled;
+}
+
+void ModelDrawer::setMaterial(std::shared_ptr<Material> material) {
+	material_ = material;
 }
 
 void ModelDrawer::enableAnimation(const std::string& name, bool loop, double tps, size_t startFrame) {

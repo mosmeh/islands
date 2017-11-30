@@ -5,12 +5,41 @@
 
 namespace islands {
 
+MeshMaterial::MeshMaterial(const aiMaterial* material) : diffuse_(1.f, 0, 1.f, 1.f) {
+	aiString aName;
+	material->Get(AI_MATKEY_NAME, aName);
+	name_ = aName.C_Str();
+
+	aiColor3D aDiffuse;
+	if (material->Get(AI_MATKEY_COLOR_DIFFUSE, aDiffuse) == AI_SUCCESS) {
+		diffuse_.rgb = {aDiffuse.r, aDiffuse.g, aDiffuse.b};
+	}
+
+	ai_real opacity;
+	if (material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
+		diffuse_.a = opacity;
+	}
+}
+
+const std::string& MeshMaterial::getName() const {
+	return name_;
+}
+
+const glm::vec4& MeshMaterial::getDiffuse() const {
+	return diffuse_;
+}
+
+void MeshMaterial::apply(std::shared_ptr<Program> program) const {
+	program->use();
+	program->setUniform("diffuse", diffuse_);
+}
+
 Mesh::Mesh(const aiMesh* mesh, const aiMaterial* material) :
 	Resource(mesh->mName.C_Str()),
 	vertices_(mesh->mNumVertices),
 	normals_(mesh->mNumVertices),
 	hasUV_(mesh->HasTextureCoords(0)),
-	material_(material) {
+	meshMaterial_(material) {
 
 	assert(mesh->HasNormals());
 
@@ -64,8 +93,8 @@ bool Mesh::hasUV() const {
 	return hasUV_;
 }
 
-const Material& Mesh::getMaterial() const {
-	return material_;
+const MeshMaterial& Mesh::getMeshMaterial() const {
+	return meshMaterial_;
 }
 
 const std::vector<glm::vec3>& Mesh::getVertices() const {

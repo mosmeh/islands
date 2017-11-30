@@ -7,6 +7,19 @@
 
 namespace islands {
 
+struct MeshMaterial {
+	MeshMaterial(const aiMaterial* material);
+	virtual ~MeshMaterial() = default;
+
+	const std::string& getName() const;
+	const glm::vec4& getDiffuse() const;
+	void apply(std::shared_ptr<Program> program) const;
+
+private:
+	std::string name_;
+	glm::vec4 diffuse_;
+};
+
 class Mesh : public Resource {
 public:
 	Mesh(const aiMesh* mesh, const aiMaterial* material);
@@ -19,7 +32,7 @@ public:
 	void draw();
 
 	bool hasUV() const;
-	const Material& getMaterial() const;
+	const MeshMaterial& getMeshMaterial() const;
 
 	const std::vector<glm::vec3>& getVertices() const;
 	const std::vector<GLuint>& getIndices() const;
@@ -41,7 +54,7 @@ private:
 	std::vector<glm::vec2> uvs_;
 	std::vector<GLuint> indices_;
 	const bool hasUV_;
-	Material material_;
+	MeshMaterial meshMaterial_;
 };
 
 class SkinnedMesh : public Mesh {

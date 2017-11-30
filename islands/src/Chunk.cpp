@@ -154,23 +154,13 @@ void Chunk::loadImpl() {
 				drawer->setVisible(modelProp.at("visible").get<bool>());
 			}
 			if (modelProp.find("lightmap") != modelProp.end()) {
-				drawer->setTexture(Texture2D::createOrGet(
+				const auto material = std::make_shared<Material>();
+				material->setTexture(Texture2D::createOrGet(
 					modelProp.at("lightmap").get<std::string>()));
+				drawer->setMaterial(material);
 			}
 			if (modelProp.find("cull_face") != modelProp.end()) {
 				drawer->setCullFaceEnabled(modelProp.at("cull_face").get<bool>());
-			}
-			if (modelProp.find("vertex") != modelProp.end()) {
-				const auto& name = modelProp.at("vertex").get<std::string>();
-				drawer->setVertexShader(Shader::createOrGet(name, Shader::Type::Vertex));
-			}
-			if (modelProp.find("geometry") != modelProp.end()) {
-				const auto& name = modelProp.at("geometry").get<std::string>();
-				drawer->setGeometryShader(Shader::createOrGet(name, Shader::Type::Geometry));
-			}
-			if (modelProp.find("fragment") != modelProp.end()) {
-				const auto& name = modelProp.at("fragment").get<std::string>();
-				drawer->setFragmentShader(Shader::createOrGet(name, Shader::Type::Fragment));
 			}
 		}
 

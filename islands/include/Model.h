@@ -43,12 +43,8 @@ public:
 	std::shared_ptr<Model> getModel() const;
 
 	void setVisible(bool visible);
-	void setTexture(std::shared_ptr<Texture2D> texture);
 	void setCullFaceEnabled(bool enabled);
-
-	void setVertexShader(std::shared_ptr<Shader> shader);
-	void setGeometryShader(std::shared_ptr<Shader> shader);
-	void setFragmentShader(std::shared_ptr<Shader> shader);
+	void setMaterial(std::shared_ptr<Material> material);
 
 	void enableAnimation(const std::string& name, bool loop = true, double tps = 24.0, size_t startFrame = 0);
 	void stopAnimation();
@@ -58,9 +54,7 @@ public:
 protected:
 	std::shared_ptr<Model> model_;
 	bool visible_, cullFaceEnabled_;
-	std::shared_ptr<Texture2D> texture_;
-	std::shared_ptr<Shader> vertex_, geometry_, fragment_;
-	std::shared_ptr<Program> program_, skinningProgram_;
+	std::shared_ptr<Material> material_, defaultMaterial_;
 
 	struct Animation {
 		std::string name;
@@ -69,8 +63,6 @@ protected:
 		double startTime;
 		size_t startFrame;
 	} anim_;
-
-	void updateProgram();
 };
 
 }

@@ -2,33 +2,66 @@
 
 namespace islands {
 
-Material::Material(const aiMaterial* material) : diffuse_(1.f, 0, 1.f, 1.f) {
-	aiString aName;
-	material->Get(AI_MATKEY_NAME, aName);
-	name_ = aName.C_Str();
+Material::Material() : opacity_(Opacity::InheritModel) {}
 
-	aiColor3D aDiffuse;
-	if (material->Get(AI_MATKEY_COLOR_DIFFUSE, aDiffuse) == AI_SUCCESS) {
-		diffuse_.rgb = {aDiffuse.r, aDiffuse.g, aDiffuse.b};
+void Material::setVertexShader(std::shared_ptr<Shader> shader) {
+	vertex_ = shader;
+}
+
+void Material::setGeometryShader(std::shared_ptr<Shader> shader) {
+	geometry_ = shader;
+}
+
+void Material::setFragmentShader(std::shared_ptr<Shader> shader) {
+	fragment_ = shader;
+}
+
+void Material::setUniformProvider(const UniformProvider& provider) {
+	uniformProvider_ = provider;
+}
+
+const Material::UniformProvider& Material::getUniformProvider() const {
+	return uniformProvider_;
+}
+
+std::shared_ptr<Program> Material::getProgram(bool skinning) const {
+	std::shared_ptr<Shader> vertex = vertex_;
+	if (!vertex) {
+		vertex = Shader::createOrGet(
+			skinning ? "skinning.vert" : "default.vert", Shader::Type::Vertex);
 	}
 
-	ai_real opacity;
-	if (material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
-		diffuse_.a = opacity;
+	std::shared_ptr<Shader> fragment = fragment_;
+	if (!fragment) {
+		fragment = Shader::createOrGet(
+			texture_ ? "texture.frag" : "default.frag", Shader::Type::Fragment);
+	}
+
+	if (geometry_) {
+		return Program::createOrGet(
+			vertex->getName() + "//" + geometry_->getName() + "//" + fragment->getName(),
+			Program::ShaderList{vertex, geometry_, fragment});
+	} else {
+		return Program::createOrGet(
+			vertex->getName() + "//" + fragment->getName(),
+			Program::ShaderList{vertex, fragment});
 	}
 }
 
-const std::string& Material::getName() const {
-	return name_;
+void Material::setTexture(std::shared_ptr<Texture2D> texture) {
+	texture_ = texture;
 }
 
-const glm::vec4& Material::getDiffuse() const {
-	return diffuse_;
+std::shared_ptr<Texture2D> Material::getTexture() const {
+	return texture_;
 }
 
-void Material::apply(std::shared_ptr<Program> program) const {
-	program->use();
-	program->setUniform("diffuse", diffuse_);
+void Material::setOpacity(Opacity opacity) {
+	opacity_ = opacity;
+}
+
+Material::Opacity Material::getOpacity() const {
+	return opacity_;
 }
 
 }

@@ -159,8 +159,11 @@ void Rabbit::start() {
 
 	const auto model = Model::createOrGet("rabbit.dae");
 	drawer_ = getEntity().createComponent<ModelDrawer>(model);
-	drawer_->setTexture(Texture2D::createOrGet("rabbit-ao.png"));
-	drawer_->setFragmentShader(Shader::createOrGet("ao.frag", Shader::Type::Fragment));
+
+	const auto material = std::make_shared<Material>();
+	material->setTexture(Texture2D::createOrGet("rabbit-ao.png"));
+	material->setFragmentShader(Shader::createOrGet("ao.frag", Shader::Type::Fragment));
+	drawer_->setMaterial(material);
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {

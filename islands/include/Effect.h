@@ -7,24 +7,21 @@
 namespace islands {
 namespace effect {
 
-class Damage : public Drawable {
+class Damage : public Component {
 public:
 	Damage(double duration = 0.3);
 	virtual ~Damage() = default;
 
 	void start() override;
 	void update() override;
-	void draw() override;
-	bool isOpaque() const override;
 
 private:
 	const double duration_;
 	std::shared_ptr<ModelDrawer> drawer_;
-	std::shared_ptr<Program> program_;
 	double startedAt_;
 };
 
-class Scatter : public Drawable {
+class Scatter : public Component {
 public:
 	using FinishCallback = std::function<void(void)>;
 
@@ -33,13 +30,10 @@ public:
 
 	void start() override;
 	void update() override;
-	void draw() override;
-	bool isOpaque() const override;
 
 private:
 	const FinishCallback callback_;
 	std::shared_ptr<ModelDrawer> drawer_;
-	std::shared_ptr<Program> program_;
 	double startedAt_;
 };
 
