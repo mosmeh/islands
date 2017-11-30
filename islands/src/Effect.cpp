@@ -58,9 +58,21 @@ void Scatter::update() {
 	}
 }
 
+void Sea::start() {
+	drawer_ = getEntity().getFirstComponent<ModelDrawer>();
 
+	const auto material = std::make_shared<Material>();
+	material->setVertexShader(Shader::createOrGet("sea.vert", Shader::Type::Vertex));
+	material->setUniformProvider([this](std::shared_ptr<Program> program) {
+		program->use();
+		program->setUniform("M", getEntity().getModelMatrix());
+		program->setUniform("VP", Camera::getInstance().getViewProjectionMatrix());
+		program->setUniform("time", static_cast<glm::float32>(glfwGetTime()));
+	});
+	drawer_->setMaterial(material);
 }
 
+void Sea::update() {}
 
 }
 }

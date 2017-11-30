@@ -220,6 +220,18 @@ void Chunk::loadImpl() {
 				throw std::exception("not implemented");
 			}
 		}
+
+		if (prop.find("effect") != prop.end()) {
+			const auto& effects = prop.at("effect").get<picojson::array>();
+			for (const auto& e : effects) {
+				const auto& type = e.get<std::string>();
+				if (type == "sea") {
+					entity->createComponent<effect::Sea>();
+				} else {
+					throw std::exception("not implemented");
+				}
+			}
+		}
 	}
 }
 

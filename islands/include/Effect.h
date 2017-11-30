@@ -37,5 +37,17 @@ private:
 	double startedAt_;
 };
 
+class Sea : public Component {
+public:
+	Sea() = default;
+	virtual ~Sea() = default;
+
+	void start() override;
+	void update() override;
+
+private:
+	std::shared_ptr<ModelDrawer> drawer_;
+};
+
 }
 }
