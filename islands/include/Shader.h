@@ -48,18 +48,31 @@ public:
 	bool isLoaded() const override;
 
 	void use();
-	void setUniform(const char* name, GLuint value) const;
-	void setUniform(const char* name, glm::float32 value) const;
-	void setUniform(const char* name, const glm::fvec2& value) const;
-	void setUniform(const char* name, const glm::fvec3& value) const;
-	void setUniform(const char* name, const glm::fvec4& value) const;
-	void setUniform(const char* name, const glm::mat4& value, bool transpose = false) const;
+
+	template <typename T>
+	bool setUniform(const char* name, T&& value) const {
+		assert(isUploaded());
+		const auto location = glGetUniformLocation(id_, name);
+		if (location == -1) {
+			return false;
+		}
+
+		setUniformImpl(location, std::forward<T>(value));
+		return true;
+	}
 
 private:
 	const std::vector<std::shared_ptr<Shader>> shaders_;
 	GLuint id_;
 
 	void uploadImpl() override;
+
+	void setUniformImpl(GLint location, GLuint value) const;
+	void setUniformImpl(GLint location, glm::float32 value) const;
+	void setUniformImpl(GLint location, const glm::fvec2& value) const;
+	void setUniformImpl(GLint location, const glm::fvec3& value) const;
+	void setUniformImpl(GLint location, const glm::fvec4& value) const;
+	void setUniformImpl(GLint location, const glm::mat4& value) const;
 };
 
 }

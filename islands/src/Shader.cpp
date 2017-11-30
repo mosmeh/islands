@@ -95,36 +95,6 @@ void Program::use() {
 	glUseProgram(id_);
 }
 
-void Program::setUniform(const char* name, GLuint value) const {
-	assert(isUploaded());
-	glUniform1i(glGetUniformLocation(id_, name), value);
-}
-
-void Program::setUniform(const char* name, glm::float32 value) const {
-	assert(isUploaded());
-	glUniform1f(glGetUniformLocation(id_, name), value);
-}
-
-void Program::setUniform(const char* name, const glm::fvec2& value) const {
-	assert(isUploaded());
-	glUniform2fv(glGetUniformLocation(id_, name), 1, glm::value_ptr(value));
-}
-
-void Program::setUniform(const char* name, const glm::fvec3& value) const {
-	assert(isUploaded());
-	glUniform3fv(glGetUniformLocation(id_, name), 1, glm::value_ptr(value));
-}
-
-void Program::setUniform(const char* name, const glm::fvec4& value) const {
-	assert(isUploaded());
-	glUniform4fv(glGetUniformLocation(id_, name), 1, glm::value_ptr(value));
-}
-
-void Program::setUniform(const char* name, const glm::mat4& value, bool transpose) const {
-	assert(isUploaded());
-	glUniformMatrix4fv(glGetUniformLocation(id_, name), 1, transpose, glm::value_ptr(value));
-}
-
 void Program::uploadImpl() {
 	id_ = glCreateProgram();
 	for (const auto shader : shaders_) {
@@ -148,6 +118,30 @@ void Program::uploadImpl() {
 	GLint linkStatus;
 	glGetProgramiv(id_, GL_LINK_STATUS, &linkStatus);
 	assert(linkStatus == GL_TRUE);
+}
+
+void Program::setUniformImpl(GLint location, GLuint value) const {
+	glUniform1i(location, value);
+}
+
+void Program::setUniformImpl(GLint location, glm::float32 value) const {
+	glUniform1f(location, value);
+}
+
+void Program::setUniformImpl(GLint location, const glm::fvec2& value) const {
+	glUniform2fv(location, 1, glm::value_ptr(value));
+}
+
+void Program::setUniformImpl(GLint location, const glm::fvec3& value) const {
+	glUniform3fv(location, 1, glm::value_ptr(value));
+}
+
+void Program::setUniformImpl(GLint location, const glm::fvec4& value) const {
+	glUniform4fv(location, 1, glm::value_ptr(value));
+}
+
+void Program::setUniformImpl(GLint location, const glm::mat4& value) const {
+	glUniformMatrix4fv(location, 1, FALSE, glm::value_ptr(value));
 }
 
 }
