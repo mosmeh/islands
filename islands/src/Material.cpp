@@ -16,12 +16,12 @@ void Material::setFragmentShader(std::shared_ptr<Shader> shader) {
 	fragment_ = shader;
 }
 
-void Material::setUniformProvider(const UniformProvider& provider) {
-	uniformProvider_ = provider;
+void Material::setUpdateUniformCallback(const UpdateUniformCallback& callback) {
+	updateUniformCallback_ = callback;
 }
 
-const Material::UniformProvider& Material::getUniformProvider() const {
-	return uniformProvider_;
+const Material::UpdateUniformCallback& Material::getUpdateUniformCallback() const {
+	return updateUniformCallback_;
 }
 
 std::shared_ptr<Program> Material::getProgram(bool skinning) const {

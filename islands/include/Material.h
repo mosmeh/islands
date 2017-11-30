@@ -8,7 +8,7 @@ namespace islands {
 
 class Material {
 public:
-	using UniformProvider = std::function<void(std::shared_ptr<Program>)>;
+	using UpdateUniformCallback = std::function<void(std::shared_ptr<Program>)>;
 	enum class Opacity {
 		Opaque,
 		Transparent,
@@ -23,8 +23,8 @@ public:
 	void setFragmentShader(std::shared_ptr<Shader> shader);
 	std::shared_ptr<Program> getProgram(bool skinning) const;
 
-	void setUniformProvider(const UniformProvider& provider);
-	const UniformProvider& getUniformProvider() const;
+	void setUpdateUniformCallback(const UpdateUniformCallback& callback);
+	const UpdateUniformCallback& getUpdateUniformCallback() const;
 
 	void setTexture(std::shared_ptr<Texture2D> texture);
 	std::shared_ptr<Texture2D> getTexture() const;
@@ -34,7 +34,7 @@ public:
 
 private:
 	std::shared_ptr<Shader> vertex_, geometry_, fragment_;
-	UniformProvider uniformProvider_;
+	UpdateUniformCallback updateUniformCallback_;
 	std::shared_ptr<Texture2D> texture_;
 	Opacity opacity_;
 };

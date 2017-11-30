@@ -87,7 +87,7 @@ ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
 	cullFaceEnabled_(true) {
 
 	defaultMaterial_ = std::make_shared<Material>();
-	defaultMaterial_->setUniformProvider([this](std::shared_ptr<Program> program) {
+	defaultMaterial_->setUpdateUniformCallback([this](std::shared_ptr<Program> program) {
 		program->use();
 		program->setUniform("MVP", getEntity().calculateMVPMatrix());
 		if (material_ && material_->getTexture()) {
@@ -128,16 +128,16 @@ void ModelDrawer::draw() {
 			material->getTexture()->bind(0);
 		}
 
-		const auto setUniform = material->getUniformProvider() ?
-			material->getUniformProvider() : defaultMaterial_->getUniformProvider();
+		const auto updateUniform = material->getUpdateUniformCallback() ?
+			material->getUpdateUniformCallback() : defaultMaterial_->getUpdateUniformCallback();
 
 		const auto program = material->getProgram(false);
-		setUniform(program);
+		updateUniform(program);
 
 		std::shared_ptr<Program> skinningProgram;
 		if (model_->hasSkinnedMesh()) {
 			skinningProgram = material->getProgram(true);
-			setUniform(skinningProgram);
+			updateUniform(skinningProgram);
 		}
 
 		for (const auto mesh : model_->getMeshes()) {
@@ -190,7 +190,6 @@ void ModelDrawer::setMaterial(std::shared_ptr<Material> material) {
 
 void ModelDrawer::enableAnimation(const std::string& name, bool loop, double tps, size_t startFrame) {
 	if (!anim_.playing || name != anim_.name) {
-		//anim_ = Animation{name, true, loop, 0.0, tps, glfwGetTime(), startFrame};
 		anim_.name = name;
 		anim_.playing = true;
 		anim_.loop = loop;

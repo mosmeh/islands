@@ -11,7 +11,7 @@ void Damage::start() {
 
 	const auto material = std::make_shared<Material>();
 	material->setFragmentShader(Shader::createOrGet("damage.frag", Shader::Type::Fragment));
-	material->setUniformProvider([this](std::shared_ptr<Program> program) {
+	material->setUpdateUniformCallback([this](std::shared_ptr<Program> program) {
 		program->use();
 		program->setUniform("MVP", getEntity().calculateMVPMatrix());
 		program->setUniform("time", static_cast<glm::float32>(glfwGetTime() - startedAt_));
@@ -38,7 +38,7 @@ void Scatter::start() {
 	material->setVertexShader(Shader::createOrGet("scatter.vert", Shader::Type::Vertex));
 	material->setGeometryShader(Shader::createOrGet("scatter.geom", Shader::Type::Geometry));
 	material->setFragmentShader(Shader::createOrGet("scatter.frag", Shader::Type::Fragment));
-	material->setUniformProvider([this](std::shared_ptr<Program> program) {
+	material->setUpdateUniformCallback([this](std::shared_ptr<Program> program) {
 		program->use();
 		program->setUniform("M", getEntity().getModelMatrix());
 		program->setUniform("MV", Camera::getInstance().getViewMatrix() * getEntity().getModelMatrix());
@@ -63,7 +63,7 @@ void Sea::start() {
 
 	const auto material = std::make_shared<Material>();
 	material->setVertexShader(Shader::createOrGet("sea.vert", Shader::Type::Vertex));
-	material->setUniformProvider([this](std::shared_ptr<Program> program) {
+	material->setUpdateUniformCallback([this](std::shared_ptr<Program> program) {
 		program->use();
 		program->setUniform("M", getEntity().getModelMatrix());
 		program->setUniform("VP", Camera::getInstance().getViewProjectionMatrix());
