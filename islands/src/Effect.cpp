@@ -34,7 +34,7 @@ void Scatter::start() {
 	drawer_ = getEntity().getFirstComponent<ModelDrawer>();
 
 	const auto material = std::make_shared<Material>();
-	material->setOpacity(Material::Opacity::Transparent);
+	material->setOpaqueness(Material::Opaqueness::Transparent);
 	material->setVertexShader(Shader::createOrGet("scatter.vert", Shader::Type::Vertex));
 	material->setGeometryShader(Shader::createOrGet("scatter.geom", Shader::Type::Geometry));
 	material->setFragmentShader(Shader::createOrGet("scatter.frag", Shader::Type::Fragment));

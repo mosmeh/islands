@@ -9,7 +9,7 @@ namespace islands {
 class Material {
 public:
 	using UpdateUniformCallback = std::function<void(std::shared_ptr<Program>)>;
-	enum class Opacity {
+	enum class Opaqueness {
 		Opaque,
 		Transparent,
 		InheritModel
@@ -29,14 +29,14 @@ public:
 	void setTexture(std::shared_ptr<Texture2D> texture);
 	std::shared_ptr<Texture2D> getTexture() const;
 
-	void setOpacity(Opacity opacity);
-	Opacity getOpacity() const;
+	void setOpaqueness(Opaqueness opaqueness);
+	Opaqueness getOpaqueness() const;
 
 private:
 	std::shared_ptr<Shader> vertex_, geometry_, fragment_;
 	UpdateUniformCallback updateUniformCallback_;
 	std::shared_ptr<Texture2D> texture_;
-	Opacity opacity_;
+	Opaqueness opaqueness_;
 };
 
 }

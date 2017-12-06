@@ -2,7 +2,7 @@
 
 namespace islands {
 
-Material::Material() : opacity_(Opacity::InheritModel) {}
+Material::Material() : opaqueness_(Opaqueness::InheritModel) {}
 
 void Material::setVertexShader(std::shared_ptr<Shader> shader) {
 	vertex_ = shader;
@@ -56,12 +56,12 @@ std::shared_ptr<Texture2D> Material::getTexture() const {
 	return texture_;
 }
 
-void Material::setOpacity(Opacity opacity) {
-	opacity_ = opacity;
+void Material::setOpaqueness(Opaqueness opaqueness) {
+	opaqueness_ = opaqueness;
 }
 
-Material::Opacity Material::getOpacity() const {
-	return opacity_;
+Material::Opaqueness Material::getOpaqueness() const {
+	return opaqueness_;
 }
 
 }

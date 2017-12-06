@@ -160,12 +160,12 @@ void ModelDrawer::draw() {
 }
 
 bool ModelDrawer::isOpaque() const {
-	switch ((material_ ? material_ : defaultMaterial_)->getOpacity()) {
-	case Material::Opacity::Opaque:
+	switch ((material_ ? material_ : defaultMaterial_)->getOpaqueness()) {
+	case Material::Opaqueness::Opaque:
 		return true;
-	case Material::Opacity::Transparent:
+	case Material::Opaqueness::Transparent:
 		return false;
-	case Material::Opacity::InheritModel:
+	case Material::Opaqueness::InheritModel:
 		return model_->isOpaque();
 	default:
 		throw std::exception("unreachable");
