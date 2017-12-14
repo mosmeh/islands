@@ -165,7 +165,7 @@ IntroductionScene::IntroductionScene() :
 
 void IntroductionScene::update() {
 	if (Input::getInstance().anyButtonPressed()) {
-		SceneManager::getInstance().changeScene<GameScene>();
+		SceneManager::getInstance().changeScene<GameScene>(true, "forest.json");
 		Sound::createOrGet("decide.ogg")->createInstance()->play();
 	}
 }

@@ -33,20 +33,19 @@ std::uint64_t cantorPair(std::uint64_t a, std::uint64_t b) {
 
 }
 
-GameScene::GameScene() :
+GameScene::GameScene(const std::string& levelFilename) :
 	backgroundProgram_(Program::createOrGet("BackgroundProgram",
 		Program::ShaderList{
 			Shader::createOrGet("full_screen.vert", Shader::Type::Vertex),
 			Shader::createOrGet("background.frag", Shader::Type::Fragment)})) {
 
-	static const auto LEVEL_LIST_FILENAME = "levels.json";
 	picojson::value json;
 	{
 #ifdef ENABLE_ASSET_ARCHIVE
-		const auto filePath = LEVEL_DIR + '/' + LEVEL_LIST_FILENAME;
+		const auto filePath = LEVEL_DIR + '/' + levelFilename;
 		picojson::parse(json, AssetArchive::getInstance().readTextFile(filePath));
 #else
-		const auto filePath = LEVEL_DIR + sys::getFilePathSeparator() + LEVEL_LIST_FILENAME;
+		const auto filePath = LEVEL_DIR + sys::getFilePathSeparator() + levelFilename;
 		std::ifstream ifs(filePath);
 		ifs >> json;
 #endif

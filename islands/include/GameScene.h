@@ -29,7 +29,7 @@ namespace islands {
 
 class GameScene : public Scene {
 public:
-	GameScene();
+	GameScene(const std::string& levelFilename);
 	virtual ~GameScene() = default;
 
 	void update();
