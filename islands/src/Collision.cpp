@@ -34,29 +34,29 @@ void Collider::update() {
 	}
 }
 
-glm::vec3 Collider::getSinkingCorrector(std::shared_ptr<Collider> collider) const {
+glm::vec3 Collider::getSinkageCorrector(std::shared_ptr<Collider> collider) const {
 	const auto normal = glm::normalize(getNormal(collider->getEntity().getPosition()));
 	if (glm::any(glm::isnan(normal))) {
 		return glm::zero<glm::vec3>();
 	}
 
-	float sinking;
+	float sinkage;
 	if (const auto a = std::dynamic_pointer_cast<AABBCollider>(collider)) {
-		sinking = getSinking(a);
+		sinkage = getSinkage(a);
 	} else if (const auto s = std::dynamic_pointer_cast<SphereCollider>(collider)) {
-		sinking = getSinking(s);
+		sinkage = getSinkage(s);
 	} else if (const auto p = std::dynamic_pointer_cast<PlaneCollider>(collider)) {
-		sinking = getSinking(p);
+		sinkage = getSinkage(p);
 	} else if (const auto m = std::dynamic_pointer_cast<MeshCollider>(collider)) {
-		sinking = getSinking(m);
+		sinkage = getSinkage(m);
 	} else {
 		throw std::exception("unreachable");
 	}
-	if (std::isnan(sinking)) {
+	if (std::isnan(sinkage)) {
 		return glm::zero<glm::vec3>();
 	}
 
-	return sinking * normal;
+	return sinkage * normal;
 }
 
 bool Collider::intersects(std::shared_ptr<Collider> collider) const {
@@ -138,16 +138,16 @@ bool SphereCollider::intersectsImpl(std::shared_ptr<SphereCollider> collider) co
 	return geometry::intersect(globalSphere_, collider->getGlobalSphere());
 }
 
-float SphereCollider::getSinking(std::shared_ptr<SphereCollider> collider) const {
-	return geometry::getSinking(globalSphere_, collider->getGlobalSphere());
+float SphereCollider::getSinkage(std::shared_ptr<SphereCollider> collider) const {
+	return geometry::getSinkage(globalSphere_, collider->getGlobalSphere());
 }
 
 bool SphereCollider::intersectsImpl(std::shared_ptr<PlaneCollider> collider) const {
 	return geometry::intersect(globalSphere_, collider->getGlobalPlane());
 }
 
-float SphereCollider::getSinking(std::shared_ptr<PlaneCollider> collider) const {
-	return geometry::getSinking(globalSphere_, collider->getGlobalPlane());
+float SphereCollider::getSinkage(std::shared_ptr<PlaneCollider> collider) const {
+	return geometry::getSinkage(globalSphere_, collider->getGlobalPlane());
 }
 
 bool SphereCollider::intersectsImpl(std::shared_ptr<MeshCollider> collider) const {
@@ -187,8 +187,8 @@ void PlaneCollider::setOffset(float offset) {
 	offset_ = offset;
 }
 
-float PlaneCollider::getSinking(std::shared_ptr<SphereCollider> collider) const {
-	return geometry::getSinking(collider->getGlobalSphere(), globalPlane_);
+float PlaneCollider::getSinkage(std::shared_ptr<SphereCollider> collider) const {
+	return geometry::getSinkage(collider->getGlobalSphere(), globalPlane_);
 }
 
 FloorCollider::FloorCollider(std::shared_ptr<Model> model) :
@@ -244,10 +244,10 @@ geometry::CollisionMesh& MeshCollider::getCollisionMesh() const {
 	return collisionMesh_;
 }
 
-float MeshCollider::getSinking(std::shared_ptr<SphereCollider> collider) const {
+float MeshCollider::getSinkage(std::shared_ptr<SphereCollider> collider) const {
 	float sum = 0.f;
 	for (const auto& triangle : collisionMesh_.collisionTriangles) {
-		sum += geometry::getSinking(triangle, collider->getGlobalSphere());
+		sum += geometry::getSinkage(triangle, collider->getGlobalSphere());
 	}
 	return sum / static_cast<float>(collisionMesh_.collisionTriangles.size());
 }

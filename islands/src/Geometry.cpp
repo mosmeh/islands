@@ -148,19 +148,19 @@ bool intersect(CollisionMesh& mesh, const Sphere& sphere) {
 	return intersected;
 }
 
-float getSinking(const Triangle& triangle, const Sphere& sphere) {
+float getSinkage(const Triangle& triangle, const Sphere& sphere) {
 	assert(!triangle.isDegenerate());
 	assert(sphere.radius >= 0.f);
 	const auto dist = glm::dot(triangle.getNormal(), sphere.center - triangle.getCenter());
 	return sphere.radius - dist;
 }
 
-float getSinking(const Sphere& a, const Sphere& b) {
+float getSinkage(const Sphere& a, const Sphere& b) {
 	assert(a.radius >= 0.f && b.radius >= 0.f);
 	return a.radius + b.radius - glm::distance(a.center, b.center);
 }
 
-float getSinking(const Sphere& sphere, const Plane& plane) {
+float getSinkage(const Sphere& sphere, const Plane& plane) {
 	assert(sphere.radius >= 0.f);
 	const auto a = glm::length(plane.normal) * sphere.radius - plane.d;
 	return a - glm::dot(plane.normal, sphere.center);

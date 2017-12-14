@@ -56,7 +56,7 @@ void update(const Chunk& chunk) {
 					continue;
 				}
 				if (!c->isGhost() && collider->intersects(c)) {
-					body->moveBy(c->getSinkingCorrector(collider));
+					body->moveBy(c->getSinkageCorrector(collider));
 
 					if (c->getEntity().getSelfMask() != Entity::Mask::CollisionWall) {
 						frictionCollide = true;

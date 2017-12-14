@@ -30,7 +30,7 @@ public:
 	virtual void update() override;
 	virtual glm::vec3 getNormal(const glm::vec3& refPos) const = 0;
 
-	glm::vec3 getSinkingCorrector(std::shared_ptr<Collider> collider) const;
+	glm::vec3 getSinkageCorrector(std::shared_ptr<Collider> collider) const;
 	bool intersects(std::shared_ptr<Collider>) const;
 
 protected:
@@ -51,16 +51,16 @@ protected:
 		throw std::exception("not implemented");
 	}
 
-	virtual float getSinking(std::shared_ptr<AABBCollider>) const {
+	virtual float getSinkage(std::shared_ptr<AABBCollider>) const {
 		throw std::exception("not implemented");
 	}
-	virtual float getSinking(std::shared_ptr<SphereCollider>) const {
+	virtual float getSinkage(std::shared_ptr<SphereCollider>) const {
 		throw std::exception("not implemented");
 	}
-	virtual float getSinking(std::shared_ptr<PlaneCollider>) const {
+	virtual float getSinkage(std::shared_ptr<PlaneCollider>) const {
 		throw std::exception("not implemented");
 	}
-	virtual float getSinking(std::shared_ptr<MeshCollider>) const {
+	virtual float getSinkage(std::shared_ptr<MeshCollider>) const {
 		throw std::exception("not implemented");
 	}
 
@@ -101,8 +101,8 @@ private:
 	bool intersectsImpl(std::shared_ptr<SphereCollider>) const override;
 	bool intersectsImpl(std::shared_ptr<PlaneCollider>) const override;
 	bool intersectsImpl(std::shared_ptr<MeshCollider>) const override;
-	float getSinking(std::shared_ptr<SphereCollider>) const override;
-	float getSinking(std::shared_ptr<PlaneCollider>) const override;
+	float getSinkage(std::shared_ptr<SphereCollider>) const override;
+	float getSinkage(std::shared_ptr<PlaneCollider>) const override;
 };
 
 class PlaneCollider : public Collider {
@@ -121,7 +121,7 @@ protected:
 
 private:
 	bool intersectsImpl(std::shared_ptr<SphereCollider>) const override;
-	float getSinking(std::shared_ptr<SphereCollider>) const override;
+	float getSinkage(std::shared_ptr<SphereCollider>) const override;
 };
 
 class FloorCollider : public PlaneCollider {
@@ -145,7 +145,7 @@ private:
 	mutable geometry::CollisionMesh collisionMesh_;
 
 	bool intersectsImpl(std::shared_ptr<SphereCollider>) const override;
-	float getSinking(std::shared_ptr<SphereCollider>) const override;
+	float getSinkage(std::shared_ptr<SphereCollider>) const override;
 };
 
 }

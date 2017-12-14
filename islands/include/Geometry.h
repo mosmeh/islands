@@ -44,9 +44,9 @@ bool intersect(const Sphere& a, const Sphere& b);
 bool intersect(const Sphere& sphere, const Plane& plane);
 bool intersect(CollisionMesh& mesh, const Sphere& sphere);
 
-float getSinking(const Triangle& triangle, const Sphere& sphere);
-float getSinking(const Sphere& a, const Sphere& b);
-float getSinking(const Sphere& sphere, const Plane& plane);
+float getSinkage(const Triangle& triangle, const Sphere& sphere);
+float getSinkage(const Sphere& a, const Sphere& b);
+float getSinkage(const Sphere& sphere, const Plane& plane);
 
 glm::quat directionToQuaternion(const glm::vec3& dir, const glm::vec3& front);
 
