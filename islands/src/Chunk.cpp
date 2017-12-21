@@ -29,9 +29,8 @@ glm::quat toQuat(const picojson::value& v) {
 
 namespace islands {
 
-Chunk::Chunk(const std::string& name, const std::string& filename) :
-	Resource(name),
-	filename_(filename),
+Chunk::Chunk(const std::string& filename) :
+	Resource(filename),
 	cameraOffset_(15.f) {}
 
 std::shared_ptr<Entity> Chunk::createEntity(const std::string& name) {
@@ -107,10 +106,10 @@ void Chunk::loadImpl() {
 	picojson::value json;
 	{
 #ifdef ENABLE_ASSET_ARCHIVE
-		const auto filePath = LEVEL_DIR + '/' + filename_;
+		const auto filePath = LEVEL_DIR + '/' + getName();
 		picojson::parse(json, AssetArchive::getInstance().readTextFile(filePath));
 #else
-		const auto filePath = LEVEL_DIR + sys::getFilePathSeparator() + filename_;
+		const auto filePath = LEVEL_DIR + sys::getFilePathSeparator() + getName();
 		std::ifstream ifs(filePath);
 		ifs >> json;
 #endif

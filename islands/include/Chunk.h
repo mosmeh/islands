@@ -11,7 +11,7 @@ static const std::string LEVEL_DIR = "level";
 
 class Chunk : public Resource {
 public:
-	Chunk(const std::string& name, const std::string& filename);
+	Chunk(const std::string& filename);
 	virtual ~Chunk() = default;
 
 	void update();
@@ -26,7 +26,6 @@ public:
 	std::shared_ptr<Sound> getBGM() const;
 
 private:
-	const std::string filename_;
 	float cameraOffset_;
 	std::shared_ptr<Sound> bgm_;
 	geometry::AABB aabb_;

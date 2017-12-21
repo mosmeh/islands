@@ -64,7 +64,7 @@ GameScene::GameScene(const std::string& levelFilename) :
 
 		const auto& filename = obj.at("filename").get<std::string>();
 
-		const auto chunk = std::make_shared<Chunk>(filename, filename);
+		const auto chunk = std::make_shared<Chunk>(filename);
 		chunk->update();
 		chunks_.emplace(coord, chunk);
 	}
