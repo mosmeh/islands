@@ -51,7 +51,7 @@ GameScene::GameScene(const std::string& levelFilename) :
 #endif
 	}
 
-	for (const auto& item : json.get<picojson::array>()) {
+	for (const auto& item : json.get("chunks").get<picojson::array>()) {
 		const auto& obj = item.get<picojson::object>();
 
 		const auto& coordArray = obj.at("coord").get<picojson::array>();
@@ -70,7 +70,13 @@ GameScene::GameScene(const std::string& levelFilename) :
 	}
 
 	jumpTo(glm::ivec3(0));
-	playerEntity_->setPosition({0.f, 0.f, 1.f});
+
+	const auto& initPosArray = json.get("init_pos").get<picojson::array>();
+	playerEntity_->setPosition({
+		initPosArray.at(0).get<double>(),
+		initPosArray.at(1).get<double>(),
+		initPosArray.at(2).get<double>()
+	});
 }
 
 void GameScene::update() {
