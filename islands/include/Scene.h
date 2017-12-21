@@ -99,6 +99,20 @@ private:
 	Sprite keyboardIntroImage_, gamepadIntroImage_, dualShock4IntroImage_;
 };
 
+class LevelSelectionScene : public Scene {
+public:
+	LevelSelectionScene();
+	virtual ~LevelSelectionScene() = default;
+
+	void update() override;
+	void draw() override;
+
+private:
+	Sprite forestImage_, seaImage_;
+	size_t selectedItem_;
+	bool repeated_;
+};
+
 class CreditScene : public Scene {
 public:
 	CreditScene();

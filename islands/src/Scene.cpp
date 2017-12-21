@@ -121,7 +121,7 @@ TitleScene::TitleScene() :
 void TitleScene::update() {
 	if (Input::getInstance().anyButtonExceptArrowPressed()) {
 		if (selectedItem_ == 0) {
-			SceneManager::getInstance().changeScene<IntroductionScene>();
+			SceneManager::getInstance().changeScene<LevelSelectionScene>();
 		} else {
 			SceneManager::getInstance().changeScene<CreditScene>();
 		}
@@ -180,6 +180,50 @@ void IntroductionScene::draw() {
 		}
 	} else {
 		keyboardIntroImage_.draw();
+	}
+}
+
+LevelSelectionScene::LevelSelectionScene() :
+	forestImage_(Texture2D::createOrGet("select_forest.png")),
+	seaImage_(Texture2D::createOrGet("select_sea.png")),
+	selectedItem_(0),
+	repeated_(false) {}
+
+void LevelSelectionScene::update() {
+	if (Input::getInstance().anyButtonExceptArrowPressed()) {
+		static bool introShowed = false;
+		if (introShowed) {
+			SceneManager::getInstance().changeScene<GameScene>(
+				true, selectedItem_ == 0 ? "forest.json" : "sea.json");
+		} else {
+			introShowed = true;
+			SceneManager::getInstance().changeScene<IntroductionScene>();
+		}
+		Sound::createOrGet("decide.ogg")->createInstance()->play();
+	} else {
+		const auto& dir = Input::getInstance().getDirection();
+		if (dir.y <= -0.8 || 0.8 <= dir.y) {
+			if (!repeated_) {
+				selectedItem_ = 1 - selectedItem_;
+				repeated_ = true;
+			}
+		} else {
+			repeated_ = false;
+		}
+	}
+}
+
+void LevelSelectionScene::draw() {
+	glClear(GL_COLOR_BUFFER_BIT);
+	switch (selectedItem_) {
+	case 0:
+		forestImage_.draw();
+		break;
+	case 1:
+		seaImage_.draw();
+		break;
+	default:
+		throw std::exception("unreachable");
 	}
 }
 
