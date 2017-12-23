@@ -23,6 +23,7 @@ public:
 	void clearCallbacks();
 	void notifyCollision(std::shared_ptr<Collider> opponent) const;
 	bool hasModel() const;
+	void setDynamicAABB(bool dynamic);
 	const geometry::AABB& getGlobalAABB() const;
 	void setGhost(bool isGhost);
 	bool isGhost() const;
@@ -66,6 +67,7 @@ protected:
 
 private:
 	std::shared_ptr<Model> model_;
+	bool dynamicAABB_;
 	std::vector<Callback> callbacks_;
 	bool isGhost_;
 };

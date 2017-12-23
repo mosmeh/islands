@@ -6,6 +6,7 @@ namespace islands {
 
 Collider::Collider(std::shared_ptr<Model> model) :
 	model_(model),
+	dynamicAABB_(false),
 	isGhost_(false) {}
 
 Collider::Collider() : Collider(nullptr) {}
@@ -28,9 +29,33 @@ bool Collider::hasModel() const {
 	return model_ != nullptr;
 }
 
+void Collider::setDynamicAABB(bool dynamic) {
+	dynamicAABB_ = dynamic;
+}
+
 void Collider::update() {
 	if (hasModel()) {
-		globalAABB_ = model_->getLocalAABB().transform(getEntity().getModelMatrix());
+		if (dynamicAABB_ && model_->hasSkinnedMesh()) {
+			geometry::AABB localAABB;
+			localAABB.min = glm::vec3(INFINITY);
+			localAABB.max = glm::vec3(-INFINITY);
+			for (const auto mesh : model_->getMeshes()) {
+				if (const auto skinned = std::dynamic_pointer_cast<SkinnedMesh>(mesh)) {
+					for (const auto& vert : skinned->getTransformAppliedVertices()) {
+						localAABB.min = glm::min(localAABB.min, vert);
+						localAABB.max = glm::max(localAABB.max, vert);
+					}
+				} else {
+					for (const auto& vert : mesh->getVertices()) {
+						localAABB.min = glm::min(localAABB.min, vert);
+						localAABB.max = glm::max(localAABB.max, vert);
+					}
+				}
+			}
+			globalAABB_ = localAABB.transform(getEntity().getModelMatrix());
+		} else {
+			globalAABB_ = model_->getLocalAABB().transform(getEntity().getModelMatrix());
+		}
 	}
 }
 

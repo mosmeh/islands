@@ -69,6 +69,7 @@ public:
 	double getPlayingAnimationTicks() const;
 	void updateBoneTransform(double time_s);
 	void applyBoneTransform(std::shared_ptr<Program> program) const;
+	std::vector<glm::vec3> getTransformAppliedVertices() const;
 
 private:
 	struct Bone {

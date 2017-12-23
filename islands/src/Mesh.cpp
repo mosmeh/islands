@@ -256,6 +256,21 @@ void SkinnedMesh::applyBoneTransform(std::shared_ptr<Program> program) const {
 	}
 }
 
+std::vector<glm::vec3> SkinnedMesh::getTransformAppliedVertices() const {
+	const auto& vertices = getVertices();
+	std::vector<glm::vec3> verts(vertices.size());
+	for (size_t i = 0; i < vertices.size(); ++i) {
+		const auto& boneIds = boneData_.at(i).boneIDs;
+		const auto& weights = boneData_.at(i).weights;
+		glm::mat4 transform(0);
+		for (size_t j = 0; j < NUM_BONES_PER_VERTEX; ++j) {
+			transform += bones_.at(boneIds[j])->transform * weights[j];
+		}
+		verts.at(i) = (transform * glm::vec4(vertices.at(i), 1)).xyz();
+	}
+	return verts;
+}
+
 void SkinnedMesh::uploadImpl() {
 	Mesh::uploadImpl();
 
@@ -263,7 +278,6 @@ void SkinnedMesh::uploadImpl() {
 	glBindBuffer(GL_ARRAY_BUFFER, boneBuffer_);
 	glBufferData(GL_ARRAY_BUFFER, boneData_.size() * sizeof(BoneDataPerVertex),
 		boneData_.data(), GL_STATIC_DRAW);
-	boneData_.clear();
 
 	glEnableVertexAttribArray(SkinningLocation::BONE);
 	glVertexAttribIPointer(SkinningLocation::BONE, NUM_BONES_PER_VERTEX, GL_UNSIGNED_INT,
