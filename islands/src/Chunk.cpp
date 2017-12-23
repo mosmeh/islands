@@ -203,6 +203,21 @@ void Chunk::loadImpl() {
 				entity->createComponent<enemy::Crab>();
 			} else if (type == "dragon") {
 				entity->createComponent<enemy::Dragon>();
+			} else if (type == "starfish") {
+				entity->createComponent<enemy::Starfish>();
+			} else if (type == "eel") {
+				const auto& colorStr = enemyProp.at("color").get<std::string>();
+				enemy::Eel::Color color;
+				if (colorStr == "orange") {
+					color = enemy::Eel::Color::Orange;
+				} else if (colorStr == "white") {
+					color = enemy::Eel::Color::White;
+				} else {
+					throw std::exception("not implemented");
+				}
+				entity->createComponent<enemy::Eel>(color);
+			} else if (type == "octopus") {
+				entity->createComponent<enemy::Octopus>();
 			} else {
 				throw std::exception("not implemented");
 			}

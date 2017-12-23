@@ -27,6 +27,26 @@ class Dead : public StateMachine<T>::State {
 	}
 };
 
+template <class T>
+class BossDead : public StateMachine<T>::State {
+	using State::State;
+
+	void start(T& parent) override {
+		auto& entity = parent.getEntity();
+		if (entity.hasComponent<Collider>()) {
+			entity.getFirstComponent<Collider>()->clearCallbacks();
+		}
+		if (entity.hasComponent<effect::Damage>()) {
+			entity.getFirstComponent<effect::Damage>()->destroy();
+		}
+		entity.createComponent<effect::Scatter>([&entity] {
+			entity.destroy();
+			SceneManager::getInstance().changeScene<GameClearScene>(false);
+		});
+		Sound::createOrGet("enemy_die.ogg")->createInstance()->play();
+	}
+};
+
 class Slime : public Component {
 public:
 	Slime() = default;
@@ -246,11 +266,6 @@ private:
 		double targetDelta_;
 	};
 
-	class Dead : public State {
-		using State::State;
-		void start(Dragon& parent) override;
-	};
-
 	std::mt19937 engine_;
 	std::shared_ptr<PhysicalBody> body_;
 	std::shared_ptr<ModelDrawer> drawer_;
@@ -260,6 +275,156 @@ private:
 	void lookAtPlayer();
 	void loopHoveringAnimation();
 
+};
+
+class Starfish : public Component {
+public:
+	Starfish() = default;
+	virtual ~Starfish() = default;
+
+	void start() override;
+	void update() override;
+
+private:
+	StateMachine<Starfish> machine_;
+
+	using State = StateMachine<Starfish>::State;
+
+	class Moving : public State {
+		using State::State;
+		void start(Starfish& parent) override;
+		void update(Starfish& parent) override;
+	};
+
+	class Pausing : public State {
+		using State::State;
+		void start(Starfish& parent) override;
+		void update(Starfish& parent) override;
+	};
+
+	class PreAttack : public State {
+		using State::State;
+		void start(Starfish& parent) override;
+		void update(Starfish& parent) override;
+	};
+
+	class Attacking : public State {
+		using State::State;
+		void start(Starfish& parent) override;
+		void update(Starfish& parent) override;
+
+		std::shared_ptr<Entity> attackEntity_;
+	};
+
+	std::shared_ptr<PhysicalBody> body_;
+	std::shared_ptr<ModelDrawer> drawer_;
+	std::shared_ptr<Health> health_;
+	glm::vec3 direction_;
+};
+
+class Eel : public Component {
+public:
+	enum class Color {
+		Orange, White
+	};
+
+	Eel(const Color& color);
+	virtual ~Eel() = default;
+
+	void start() override;
+	void update() override;
+
+private:
+	Color color_;
+
+	StateMachine<Eel> machine_;
+
+	using State = StateMachine<Eel>::State;
+
+	class Hiding : public State {
+		using State::State;
+		void update(Eel& parent) override;
+	};
+
+	class Ascending : public State {
+		using State::State;
+		void start(Eel& parent) override;
+		void update(Eel& parent) override;
+
+		glm::vec3 initPos_;
+	};
+
+	class Idling : public State {
+		using State::State;
+		void start(Eel& parent) override;
+		void update(Eel& parent) override;
+
+		glm::vec3 initPos_;
+	};
+
+	class PreAttack : public State {
+		using State::State;
+		void start(Eel& parent) override;
+		void update(Eel& parent) override;
+	};
+
+	class Attacking : public State {
+		using State::State;
+		void start(Eel& parent) override;
+		void update(Eel& parent) override;
+
+		std::shared_ptr<Entity> attackEntity_;
+	};
+
+	void resetToRestPose();
+
+	std::shared_ptr<ModelDrawer> drawer_;
+	std::shared_ptr<Health> health_;
+	bool attacked_;
+	glm::vec3 direction_;
+};
+
+class Octopus : public Component {
+public:
+	Octopus() = default;
+	virtual ~Octopus() = default;
+
+	void start() override;
+	void update() override;
+
+private:
+	StateMachine<Octopus> machine_;
+
+	using State = StateMachine<Octopus>::State;
+
+	class Idling : public State {
+		using State::State;
+		void start(Octopus& parent) override;
+		void update(Octopus& parent) override;
+	};
+
+	class Seeking : public State {
+		using State::State;
+		void start(Octopus& parent) override;
+		void update(Octopus& parent) override;
+
+		glm::quat targetQuat_;
+	};
+
+	class Attacking : public State {
+		using State::State;
+		void start(Octopus& parent) override;
+		void update(Octopus& parent) override;
+	};
+
+	std::shared_ptr<PhysicalBody> body_;
+	std::shared_ptr<ModelDrawer> drawer_;
+	std::shared_ptr<Health> health_;
+	std::shared_ptr<Entity> tentacleEntity_;
+	std::vector<std::shared_ptr<ModelDrawer>> tentacleDrawers_;
+
+	void enableAnimation(size_t startFrame = 0, double tps = 1.0) const;
+	void loopAnimation() const;
 };
 
 }
