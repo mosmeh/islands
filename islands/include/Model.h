@@ -44,7 +44,8 @@ public:
 
 	void setVisible(bool visible);
 	void setCullFaceEnabled(bool enabled);
-	void setMaterial(std::shared_ptr<Material> material);
+	void pushMaterial(std::shared_ptr<Material> material);
+	std::shared_ptr<Material> popMaterial();
 
 	void enableAnimation(const std::string& name, bool loop = true, double tps = 24.0, size_t startFrame = 0);
 	void stopAnimation();
@@ -54,7 +55,8 @@ public:
 protected:
 	std::shared_ptr<Model> model_;
 	bool visible_, cullFaceEnabled_;
-	std::shared_ptr<Material> material_, defaultMaterial_;
+	Material::UpdateUniformCallback defaultUpdateCallback_;
+	std::stack<std::shared_ptr<Material>> materialStack_;
 
 	struct Animation {
 		std::string name;

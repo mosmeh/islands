@@ -16,14 +16,14 @@ void Damage::start() {
 		program->setUniform("MVP", getEntity().calculateMVPMatrix());
 		program->setUniform("time", static_cast<glm::float32>(glfwGetTime() - startedAt_));
 	});
-	drawer_->setMaterial(material);
+	drawer_->pushMaterial(material);
 
 	startedAt_ = glfwGetTime();
 }
 
 void Damage::update() {
 	if (glfwGetTime() - startedAt_ > duration_) {
-		drawer_->setMaterial(nullptr);
+		drawer_->popMaterial();
 		destroy();
 	}
 }
@@ -45,14 +45,14 @@ void Scatter::start() {
 		program->setUniform("VP", Camera::getInstance().getViewProjectionMatrix());
 		program->setUniform("time", static_cast<glm::float32>(2.0 * (glfwGetTime() - startedAt_)));
 	});
-	drawer_->setMaterial(material);
+	drawer_->pushMaterial(material);
 
 	startedAt_ = glfwGetTime();
 }
 
 void Scatter::update() {
 	if (glfwGetTime() - startedAt_ > 1.0) {
-		drawer_->setMaterial(nullptr);
+		drawer_->popMaterial();
 		callback_();
 		destroy();
 	}
@@ -69,7 +69,7 @@ void Sea::start() {
 		program->setUniform("VP", Camera::getInstance().getViewProjectionMatrix());
 		program->setUniform("time", static_cast<glm::float32>(glfwGetTime()));
 	});
-	drawer_->setMaterial(material);
+	drawer_->pushMaterial(material);
 }
 
 void Sea::update() {}

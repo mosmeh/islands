@@ -155,7 +155,7 @@ void Chunk::loadImpl() {
 				const auto material = std::make_shared<Material>();
 				material->setTexture(Texture2D::createOrGet(
 					modelProp.at("lightmap").get<std::string>()));
-				drawer->setMaterial(material);
+				drawer->pushMaterial(material);
 			}
 			if (modelProp.find("cull_face") != modelProp.end()) {
 				drawer->setCullFaceEnabled(modelProp.at("cull_face").get<bool>());

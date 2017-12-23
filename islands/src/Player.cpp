@@ -29,6 +29,11 @@ void Player::start() {
 	drawer_->update();
 	drawer_->stopAnimation();
 
+	const auto material = std::make_shared<Material>();
+	material->setTexture(Texture2D::createOrGet("player-ao.png"));
+	material->setFragmentShader(Shader::createOrGet("ao.frag", Shader::Type::Fragment));
+	drawer_->pushMaterial(material);
+
 	const auto collider = getEntity().createComponent<SphereCollider>(model, 0.7f);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
 		const auto& entity = opponent->getEntity();

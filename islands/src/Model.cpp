@@ -86,14 +86,16 @@ ModelDrawer::ModelDrawer(std::shared_ptr<Model> model) :
 	visible_(true),
 	cullFaceEnabled_(true) {
 
-	defaultMaterial_ = std::make_shared<Material>();
-	defaultMaterial_->setUpdateUniformCallback([this](std::shared_ptr<Program> program) {
+	defaultUpdateCallback_ = [this](std::shared_ptr<Program> program) {
 		program->use();
 		program->setUniform("MVP", getEntity().calculateMVPMatrix());
-		if (material_ && material_->getTexture()) {
+		if (materialStack_.top()->getTexture()) {
 			program->setUniform("tex", static_cast<GLuint>(0));
 		}
-	});
+	};
+	const auto defaultMaterial = std::make_shared<Material>();
+	defaultMaterial->setUpdateUniformCallback(defaultUpdateCallback_);
+	pushMaterial(defaultMaterial);
 }
 
 void ModelDrawer::update() {
@@ -122,14 +124,14 @@ void ModelDrawer::draw() {
 			glEnable(GL_BLEND);
 		}
 
-		const auto material = material_ ? material_ : defaultMaterial_;
+		const auto material = materialStack_.top();
 
 		if (material->getTexture()) {
 			material->getTexture()->bind(0);
 		}
 
 		const auto updateUniform = material->getUpdateUniformCallback() ?
-			material->getUpdateUniformCallback() : defaultMaterial_->getUpdateUniformCallback();
+			material->getUpdateUniformCallback() : defaultUpdateCallback_;
 
 		const auto program = material->getProgram(false);
 		updateUniform(program);
@@ -160,7 +162,7 @@ void ModelDrawer::draw() {
 }
 
 bool ModelDrawer::isOpaque() const {
-	switch ((material_ ? material_ : defaultMaterial_)->getOpaqueness()) {
+	switch (materialStack_.top()->getOpaqueness()) {
 	case Material::Opaqueness::Opaque:
 		return true;
 	case Material::Opaqueness::Transparent:
@@ -184,8 +186,14 @@ void ModelDrawer::setCullFaceEnabled(bool enabled) {
 	cullFaceEnabled_ = enabled;
 }
 
-void ModelDrawer::setMaterial(std::shared_ptr<Material> material) {
-	material_ = material;
+void ModelDrawer::pushMaterial(std::shared_ptr<Material> material) {
+	materialStack_.push(material);
+}
+
+std::shared_ptr<Material> ModelDrawer::popMaterial() {
+	const auto material = materialStack_.top();
+	materialStack_.pop();
+	return material;
 }
 
 void ModelDrawer::enableAnimation(const std::string& name, bool loop, double tps, size_t startFrame) {

@@ -161,7 +161,7 @@ void Rabbit::start() {
 	const auto material = std::make_shared<Material>();
 	material->setTexture(Texture2D::createOrGet("rabbit-ao.png"));
 	material->setFragmentShader(Shader::createOrGet("ao.frag", Shader::Type::Fragment));
-	drawer_->setMaterial(material);
+	drawer_->pushMaterial(material);
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
@@ -273,8 +273,13 @@ void Crab::start() {
 		Entity::Mask::PlayerAttack
 	);
 
-	 auto model = Model::createOrGet("crab.dae");
+	const auto model = Model::createOrGet("crab.dae");
 	drawer_ = getEntity().createComponent<ModelDrawer>(model);
+
+	const auto material = std::make_shared<Material>();
+	material->setTexture(Texture2D::createOrGet("crab-ao.png"));
+	material->setFragmentShader(Shader::createOrGet("ao.frag", Shader::Type::Fragment));
+	drawer_->pushMaterial(material);
 
 	const auto collider = getEntity().createComponent<SphereCollider>(model);
 	collider->registerCallback([this](std::shared_ptr<Collider> opponent) {
