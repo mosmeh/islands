@@ -5,15 +5,16 @@
 namespace islands {
 namespace specialobj {
 
-class TotemPoll : public Component {
+class Curer : public Component {
 public:
-	TotemPoll();
-	virtual ~TotemPoll() = default;
+	Curer(float radius);
+	virtual ~Curer() = default;
 
 	void start() override;
 	void update() override;
 
 private:
+	float radius_;
 	std::shared_ptr<Entity> playerEntity_;
 	bool activated_;
 };

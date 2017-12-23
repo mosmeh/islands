@@ -213,8 +213,9 @@ void Chunk::loadImpl() {
 			const auto& specialProp = prop.at("special").get<picojson::object>();
 			
 			const auto& type = specialProp.at("type").get<std::string>();
-			if (type == "totem_poll") {
-				entity->createComponent<specialobj::TotemPoll>();
+			if (type == "curer") {
+				const auto radius = static_cast<float>(specialProp.at("radius").get<double>());
+				entity->createComponent<specialobj::Curer>(radius);
 			} else {
 				throw std::exception("not implemented");
 			}

@@ -5,9 +5,11 @@
 namespace islands {
 namespace specialobj {
 
-TotemPoll::TotemPoll() : activated_(false) {}
+Curer::Curer(float radius) :
+	radius_(radius),
+	activated_(false) {}
 
-void TotemPoll::start() {
+void Curer::start() {
 	getEntity().setSelfMask(Entity::Mask::StageObject);
 	getEntity().setFilterMask(
 		Entity::Mask::Player |
@@ -17,10 +19,9 @@ void TotemPoll::start() {
 	playerEntity_ = getChunk().getEntityByName("Player");
 }
 
-void TotemPoll::update() {
+void Curer::update() {
 	if (!activated_) {
-		static constexpr auto RADIUS = 6.f;
-		if (glm::distance(getEntity().getPosition().xy(), playerEntity_->getPosition().xy()) < RADIUS) {
+		if (glm::distance(getEntity().getPosition().xy(), playerEntity_->getPosition().xy()) < radius_) {
 			activated_ = true;
 
 			const auto health = playerEntity_->getFirstComponent<Health>();
