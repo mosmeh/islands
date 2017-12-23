@@ -124,8 +124,7 @@ void Chunk::loadImpl() {
 		}
 	}
 
-	bgm_ = Sound::createOrGet(
-		json.contains("bgm") ? json.get("bgm").get<std::string>() : "bgm.ogg");
+	bgm_ = Sound::createOrGet(json.get("bgm").get<std::string>());
 
 	for (const auto& ent : json.get("entities").get<picojson::object>()) {
 		const auto entity = createEntity(ent.first);
