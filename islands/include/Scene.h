@@ -89,13 +89,14 @@ private:
 
 class IntroductionScene : public Scene {
 public:
-	IntroductionScene();
+	IntroductionScene(const std::string& levelFilename);
 	virtual ~IntroductionScene() = default;
 	
 	void update() override;
 	void draw() override;
 
 private:
+	std::string levelFilename_;
 	Sprite keyboardIntroImage_, gamepadIntroImage_, dualShock4IntroImage_;
 };
 

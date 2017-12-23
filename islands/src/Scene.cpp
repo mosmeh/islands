@@ -158,14 +158,15 @@ void TitleScene::draw() {
 	glDisable(GL_BLEND);
 }
 
-IntroductionScene::IntroductionScene() :
+IntroductionScene::IntroductionScene(const std::string& levelFilename) :
+	levelFilename_(levelFilename),
 	keyboardIntroImage_(Texture2D::createOrGet("intro_keyboard.png")),
 	gamepadIntroImage_(Texture2D::createOrGet("intro_gamepad.png")),
 	dualShock4IntroImage_(Texture2D::createOrGet("intro_dualshock4.png")) {}
 
 void IntroductionScene::update() {
 	if (Input::getInstance().anyButtonPressed()) {
-		SceneManager::getInstance().changeScene<GameScene>(true, "forest.json");
+		SceneManager::getInstance().changeScene<GameScene>(true, levelFilename_);
 		Sound::createOrGet("decide.ogg")->createInstance()->play();
 	}
 }
@@ -192,12 +193,12 @@ LevelSelectionScene::LevelSelectionScene() :
 void LevelSelectionScene::update() {
 	if (Input::getInstance().anyButtonExceptArrowPressed()) {
 		static bool introShowed = false;
+		const auto levelFilename = selectedItem_ == 0 ? "forest.json" : "sea.json";
 		if (introShowed) {
-			SceneManager::getInstance().changeScene<GameScene>(
-				true, selectedItem_ == 0 ? "forest.json" : "sea.json");
+			SceneManager::getInstance().changeScene<GameScene>(true, levelFilename);
 		} else {
 			introShowed = true;
-			SceneManager::getInstance().changeScene<IntroductionScene>();
+			SceneManager::getInstance().changeScene<IntroductionScene>(true, levelFilename);
 		}
 		Sound::createOrGet("decide.ogg")->createInstance()->play();
 	} else {
