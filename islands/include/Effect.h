@@ -49,5 +49,31 @@ private:
 	std::shared_ptr<ModelDrawer> drawer_;
 };
 
+class SwimRing : public Component {
+public:
+	SwimRing() = default;
+	virtual ~SwimRing() = default;
+
+	void start() override;
+	void update() override;
+
+private:
+	glm::vec3 initPos_;
+	double startedAt_;
+};
+
+class Fish : public Component {
+public:
+	Fish() = default;
+	virtual ~Fish() = default;
+
+	void start() override;
+	void update() override;
+
+private:
+	glm::vec3 initPos_;
+	double startedAt_;
+};
+
 }
 }

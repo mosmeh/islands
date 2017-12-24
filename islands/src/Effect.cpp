@@ -74,5 +74,25 @@ void Sea::start() {
 
 void Sea::update() {}
 
+void SwimRing::start() {
+	initPos_ = getEntity().getPosition();
+	startedAt_ = glfwGetTime();
+}
+
+void SwimRing::update() {
+	getEntity().setPosition(initPos_ + glm::vec3(0, 0, 0.3f * std::sin(glfwGetTime() - startedAt_)));
+}
+
+void Fish::start() {
+	initPos_ = getEntity().getPosition();
+	startedAt_ = glfwGetTime();
+}
+
+void Fish::update() {
+	const auto delta = 0.5 * (glfwGetTime() - startedAt_);
+	getEntity().setQuaternion(geometry::directionToQuaternion({0, std::cos(delta), 0}, {1.f, 0, 0}));
+	getEntity().setPosition(initPos_ + glm::vec3(0, 4.f * std::sin(delta), 0));
+}
+
 }
 }

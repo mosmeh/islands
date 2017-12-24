@@ -241,6 +241,10 @@ void Chunk::loadImpl() {
 				const auto& type = e.get<std::string>();
 				if (type == "sea") {
 					entity->createComponent<effect::Sea>();
+				} else if (type == "swim_ring") {
+					entity->createComponent<effect::SwimRing>();
+				} else if (type == "fish") {
+					entity->createComponent<effect::Fish>();
 				} else {
 					throw std::exception("not implemented");
 				}
