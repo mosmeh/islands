@@ -39,6 +39,11 @@ void Player::start() {
 		const auto& entity = opponent->getEntity();
 		if (entity.getSelfMask() & (Entity::Mask::Enemy | Entity::Mask::EnemyAttack)) {
 			if (!health_->isInvincible()) {
+				if (entity.hasComponent<Health>()) {
+					if (entity.getFirstComponent<Health>()->isDead()) {
+						return;
+					}
+				}
 				getEntity().createComponent<effect::Damage>(2.0);
 				Sound::createOrGet("player_damage.ogg")->createInstance()->play();
 			}

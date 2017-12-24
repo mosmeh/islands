@@ -14,8 +14,9 @@ class Dead : public StateMachine<T>::State {
 
 	void start(T& parent) override {
 		auto& entity = parent.getEntity();
-		if (entity.hasComponent<Collider>()) {
-			entity.getFirstComponent<Collider>()->clearCallbacks();
+		for (const auto collider : entity.getComponents<Collider>()) {
+			collider->setGhost(true);
+			collider->clearCallbacks();
 		}
 		if (entity.hasComponent<effect::Damage>()) {
 			entity.getFirstComponent<effect::Damage>()->destroy();
