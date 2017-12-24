@@ -23,5 +23,5 @@ void main() {
 
     gl_Position = MVP * (boneTransform * vec4(pos, 1));
     uv = in_uv;
-    normal = (boneTransform * vec4(normal, 0)).xyz;
+    normal = (boneTransform * vec4(in_normal, 0)).xyz;
 }
