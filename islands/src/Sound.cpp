@@ -44,7 +44,7 @@ std::shared_ptr<Sound::Instance> Sound::createInstance() {
 }
 
 void Sound::loadImpl() {
-	static const std::string SOUND_DIR = "sound";
+	static const std::string SOUND_DIR = "asset/sound";
 
 #ifdef ENABLE_ASSET_ARCHIVE
 	const auto filePath = SOUND_DIR + '/' + getName();

@@ -32,7 +32,7 @@ void Texture2D::bind(unsigned int textureUnit) {
 }
 
 void Texture2D::loadImpl() {
-	static const std::string TEXTURE_DIR = "texture";
+	static const std::string TEXTURE_DIR = "asset/texture";
 
 	stbi_set_flip_vertically_on_load(TRUE);
 

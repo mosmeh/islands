@@ -248,7 +248,7 @@ islands/include/AssetArchivePassword.inc
 islands/Icon.ico
 
 islands/assets
-islands/level
-islands/mesh
-islands/texture
-islands/sound
+islands/asset/level
+islands/asset/mesh
+islands/asset/texture
+islands/asset/sound

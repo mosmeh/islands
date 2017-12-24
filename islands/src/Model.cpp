@@ -31,7 +31,7 @@ const geometry::AABB& Model::getLocalAABB() {
 }
 
 void Model::loadImpl() {
-	static const std::string MESH_DIR = "mesh";
+	static const std::string MESH_DIR = "asset/mesh";
 	static const auto FLAGS = aiProcess_GenNormals | aiProcess_ImproveCacheLocality |
 		aiProcess_JoinIdenticalVertices | aiProcess_LimitBoneWeights | aiProcess_OptimizeMeshes |
 		aiProcess_RemoveComponent |	aiProcess_Triangulate;

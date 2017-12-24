@@ -21,7 +21,7 @@ GLuint Shader::getId() {
 }
 
 void Shader::loadImpl() {
-	static const std::string SHADER_DIR = "shader";
+	static const std::string SHADER_DIR = "asset/shader";
 #ifdef ENABLE_ASSET_ARCHIVE
 	source_ = AssetArchive::getInstance().readTextFile(SHADER_DIR + '/' + getName());
 #else
